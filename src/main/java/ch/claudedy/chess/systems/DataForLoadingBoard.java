@@ -1,8 +1,8 @@
-package model.chess.systems;
+package ch.claudedy.chess.systems;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import model.chess.actions.MoveCommand;
+import ch.claudedy.chess.actions.MoveCommand;
 
 @Accessors(fluent = true)
 @Getter

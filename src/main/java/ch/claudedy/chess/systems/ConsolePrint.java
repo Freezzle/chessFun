@@ -1,7 +1,10 @@
-package model.chess.systems;
+package ch.claudedy.chess.systems;
 
-import model.chess.basis.*;
-import model.chess.utils.FenUtils;
+import ch.claudedy.chess.basis.Chess;
+import ch.claudedy.chess.basis.Piece;
+import ch.claudedy.chess.basis.Square;
+import ch.claudedy.chess.basis.Tile;
+import ch.claudedy.chess.utils.FenUtils;
 
 import java.text.DecimalFormat;
 

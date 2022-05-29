@@ -1,13 +1,12 @@
-package model.chess.basis;
+package ch.claudedy.chess.basis;
 
+import ch.claudedy.chess.actions.MoveCommand;
+import ch.claudedy.chess.feedbacks.MoveFeedBack;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import model.chess.feedbacks.MoveFeedBack;
-import model.chess.actions.MoveCommand;
-import model.chess.systems.ConsolePrint;
-import model.chess.utils.FenUtils;
+import ch.claudedy.chess.utils.FenUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,7 @@ public class Chess {
     }
 
     public MoveFeedBack makeMove(MoveCommand move) {
+        // Check if the move is authorized
         MoveFeedBack thatMoveLegal = this.isThatMoveLegal(move);
 
         if (thatMoveLegal == MoveFeedBack.AUTHORIZED) {
@@ -44,9 +44,9 @@ public class Chess {
 
             // Switch the player
             this.currentBoard.switchPlayer();
-        }
 
-        System.out.println(FenUtils.boardToFen(currentBoard()));
+            System.out.println(FenUtils.boardToFen(currentBoard()));
+        }
 
         return thatMoveLegal;
     }
@@ -56,10 +56,16 @@ public class Chess {
             return;
         }
 
+        // Get the last position
         HistoricalBoardFen previous = this.historicalBoards.get(this.historicalBoards.size() - 1);
 
+        // Replace the current board with the previous board
         currentBoard = FenUtils.fenToBoard(previous.fen());
+
+        // Replace the actual move with the previous move
         actualMove = previous.previousMove();
+
+        // Remove the last index
         this.historicalBoards.remove(this.historicalBoards.size() - 1);
 
         System.out.println(FenUtils.boardToFen(currentBoard()));
@@ -72,14 +78,18 @@ public class Chess {
             return new ArrayList<>();
         }
 
+        // Get all the moves from the piece
         List<Tile> moves = piece.getMoves(this.currentBoard, start);
+
         List<Tile> movesLegal = new ArrayList<>();
 
+        // Filter the moves to get only those who always make our king in safe mode
+        String fenBoardClone = FenUtils.boardToFen(this.currentBoard);
         moves.forEach(move -> {
-            Chess chessFake = new Chess(FenUtils.boardToFen(currentBoard), actualMove);
-            chessFake.currentBoard.movePiece(start, move);
+            Chess chessFake = new Chess(fenBoardClone, actualMove);
+            chessFake.currentBoard().movePiece(start, move);
             boolean kingChecked = this.isKingChecked(chessFake.currentBoard(), piece.color());
-            if(!kingChecked) {
+            if (!kingChecked) {
                 movesLegal.add(move);
             }
         });
@@ -112,11 +122,13 @@ public class Chess {
             return MoveFeedBack.CANT_EAT_ENEMY_KING;
         }
 
+        // The possible moves doesnt contains the given move
         List<Tile> allMoves = startSquare.piece().getMoves(currentBoard, startSquare.tile());
         if (!allMoves.contains(endSquare.tile())) {
             return MoveFeedBack.PIECE_ILLEGAL_MOVE;
         }
 
+        // Is our king is not checked when we move that piece ?
         Chess chessFake = new Chess(FenUtils.boardToFen(currentBoard), actualMove);
         chessFake.currentBoard.movePiece(move.startPosition(), move.endPosition());
         boolean kingChecked = this.isKingChecked(chessFake.currentBoard(), startSquare.piece().color());
@@ -130,23 +142,25 @@ public class Chess {
 
     private boolean isKingChecked(Board board, Color colorKing) {
 
+        // Search our king
         Tile kingTile = null;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
                 Piece piece = board.squares()[x][y].piece();
-                if(piece != null && piece.type() == PieceType.KING && piece.color() == colorKing) {
+                if (piece != null && piece.type() == PieceType.KING && piece.color() == colorKing) {
                     kingTile = board.squares()[x][y].tile();
                 }
             }
         }
 
+        // Get all enemy pieces, and see if one is hitting our king
         boolean isKingChecked = false;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
                 Piece piece = board.squares()[x][y].piece();
                 if (piece != null && piece.color() != colorKing) {
                     List<Tile> threatens = piece.getThreatens(board, board.squares()[x][y].tile());
-                    if(threatens.contains(kingTile)) {
+                    if (threatens.contains(kingTile)) {
                         isKingChecked = true;
                         break;
                     }

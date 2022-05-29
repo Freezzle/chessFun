@@ -1,12 +1,8 @@
-package model.chess.basis;
+package ch.claudedy.chess.basis;
 
 public enum Color {
     WHITE,
     BLACK;
-
-    public static Color reverse(Color color){
-        return WHITE.isSameColor(color) ? BLACK : WHITE;
-    }
 
     public boolean isSameColor(Color color) {
         return this == color;

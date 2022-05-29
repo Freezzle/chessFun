@@ -1,13 +1,13 @@
-package model.chess;
+package ch.claudedy.chess;
 
-import model.chess.actions.MoveCommand;
-import model.chess.basis.Chess;
-import model.chess.basis.Square;
-import model.chess.basis.Tile;
-import model.chess.feedbacks.MoveFeedBack;
-import model.chess.systems.DataForLoadingBoard;
-import model.chess.systems.LoaderFromFile;
-import model.chess.utils.FenUtils;
+import ch.claudedy.chess.actions.MoveCommand;
+import ch.claudedy.chess.basis.Square;
+import ch.claudedy.chess.feedbacks.MoveFeedBack;
+import ch.claudedy.chess.systems.DataForLoadingBoard;
+import ch.claudedy.chess.systems.LoaderFromFile;
+import ch.claudedy.chess.basis.Chess;
+import ch.claudedy.chess.basis.Tile;
+import ch.claudedy.chess.utils.FenUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -228,7 +228,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 tileSelected = squaresAtView.get(c.getParent().getName());
             }
 
-            if (tileSelected.color() == model.chess.basis.Color.BLACK) {
+            if (tileSelected.color() == ch.claudedy.chess.basis.Color.BLACK) {
                 chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_DARK);
             } else {
                 chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_NORMAL);
@@ -263,7 +263,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
     private void colorizeLegalMoves(List<Tile> tiles) {
         tiles.forEach(tile -> {
-            if (tile.color() == model.chess.basis.Color.BLACK) {
+            if (tile.color() == ch.claudedy.chess.basis.Color.BLACK) {
                 chessBoard.getComponent(squaresView.get(tile)).setBackground(SQUARE_YELLOW_DARK);
             } else {
                 chessBoard.getComponent(squaresView.get(tile)).setBackground(SQUARE_YELLOW_NORMAL);
@@ -271,11 +271,11 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         });
     }
 
-    private Color getColorTile(model.chess.basis.Color colorTile) {
-        return colorTile.isSameColor(model.chess.basis.Color.BLACK) ? SQUARE_BLACK : SQUARE_WHITE;
+    private Color getColorTile(ch.claudedy.chess.basis.Color colorTile) {
+        return colorTile.isSameColor(ch.claudedy.chess.basis.Color.BLACK) ? SQUARE_BLACK : SQUARE_WHITE;
     }
 
-    private Color getColorTilePosition(model.chess.basis.Color colorTile) {
-        return colorTile.isSameColor(model.chess.basis.Color.BLACK) ? BLACK_POSITION : WHITE_POSITION;
+    private Color getColorTilePosition(ch.claudedy.chess.basis.Color colorTile) {
+        return colorTile.isSameColor(ch.claudedy.chess.basis.Color.BLACK) ? BLACK_POSITION : WHITE_POSITION;
     }
 }

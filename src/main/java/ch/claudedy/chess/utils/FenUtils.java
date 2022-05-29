@@ -1,11 +1,11 @@
-package model.chess.utils;
+package ch.claudedy.chess.utils;
 
+import ch.claudedy.chess.basis.Board;
+import ch.claudedy.chess.basis.Color;
+import ch.claudedy.chess.basis.Square;
+import ch.claudedy.chess.basis.Tile;
 import lombok.Getter;
 import lombok.Setter;
-import model.chess.basis.Board;
-import model.chess.basis.Color;
-import model.chess.basis.Square;
-import model.chess.basis.Tile;
 
 import java.util.Locale;
 

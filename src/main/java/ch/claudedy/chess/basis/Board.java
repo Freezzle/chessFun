@@ -1,4 +1,4 @@
-package model.chess.basis;
+package ch.claudedy.chess.basis;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -22,10 +22,12 @@ public class Board {
     private int semiMoves;
 
     public Board() {
+        // Init the board
         this.squares = new Square[8][8];
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
+                // Empty tiles
                 this.squares[x][y] = new Square(Tile.getEnum(x, y));
             }
         }
@@ -48,15 +50,22 @@ public class Board {
 
         Piece pieceToMove = startSquare.piece();
 
-        if (pieceToMove.type() == PieceType.KING) {
+        if(pieceToMove == null) {
+            return;
+        }
+
+        // Special cases
+        if (PieceType.KING == pieceToMove.type()) {
             manageKingMove(end, pieceToMove);
-        } else if (pieceToMove.type() == PieceType.ROOK) {
+        } else if (PieceType.ROOK == pieceToMove.type()) {
             manageRookMove(startSquare, pieceToMove);
-        } else if (pieceToMove.type() == PieceType.PAWN) {
+        } else if (PieceType.PAWN == pieceToMove.type()) {
             managePawnMove(end, startSquare, endSquare, pieceToMove);
         }
 
+        // Move the piece to the destination square
         endSquare.placePiece(pieceToMove.letter());
+        // Remove the piece from the source square
         startSquare.removePiece();
     }
 
@@ -78,8 +87,10 @@ public class Board {
                 }
             }
         } else if(endSquare.tile().y() == 7 && pieceToMove.color().isWhite()) {
+            // MOVE -> Promotion for WHITE to the top of the board
             pieceToMove.promote('Q');
         } else if(endSquare.tile().y() == 0 && !pieceToMove.color().isWhite()) {
+            // MOVE -> Promotion for BLACK to the bottom of the board
             pieceToMove.promote('q');
         }
     }
@@ -87,14 +98,18 @@ public class Board {
     private void manageRookMove(Square startSquare, Piece pieceToMove) {
         if (pieceToMove.color().isWhite()) {
             if (startSquare.tile() == Tile.A1) {
+                // MOVE -> WHITE Rook Queen Side has moved from his starting position
                 this.canwQRoque = false;
             } else if (startSquare.tile() == Tile.H1) {
+                // MOVE -> WHITE Rook King Side has moved from his starting position
                 this.canwKRoque = false;
             }
         } else {
             if (startSquare.tile() == Tile.A8) {
+                // MOVE -> BLACK Rook Queen Side has moved from his starting position
                 this.canbqRoque = false;
             } else if (startSquare.tile() == Tile.H8) {
+                // MOVE -> BLACK Rook King Side has moved from his starting position
                 this.canbkRoque = false;
             }
         }
@@ -103,12 +118,12 @@ public class Board {
     private void manageKingMove(Tile end, Piece pieceToMove) {
         if (pieceToMove.color().isWhite()) {
             if (end == Tile.C1 && this.canwQRoque) {
-                // MOVE -> ROQUE WHITE QUEEN SIDE
+                // MOVE -> Roque WHITE Queen side
                 Piece rookQSide = this.get(Tile.A1).piece();
                 this.get(Tile.A1).removePiece();
                 this.get(Tile.D1).placePiece(rookQSide.letter());
             } else if (end == Tile.G1 && this.canwKRoque) {
-                // MOVE -> ROQUE WHITE KING SIDE
+                // MOVE -> Roque WHITE King side
                 Piece rookKSide = this.get(Tile.H1).piece();
                 this.get(Tile.H1).removePiece();
                 this.get(Tile.F1).placePiece(rookKSide.letter());
@@ -119,12 +134,12 @@ public class Board {
             this.canwQRoque = false;
         } else {
             if (end == Tile.C8 && this.canbqRoque) {
-                // MOVE -> ROQUE BLACK QUEEN SIDE
+                // MOVE -> Roque BLACK Queen side
                 Piece rookQSide = this.get(Tile.A8).piece();
                 this.get(Tile.A8).removePiece();
                 this.get(Tile.D8).placePiece(rookQSide.letter());
             } else if (end == Tile.G8 && this.canbkRoque) {
-                // MOVE -> ROQUE BLACK KING SIDE
+                // MOVE -> Roque BLACK King side
                 Piece rookKSide = this.get(Tile.H8).piece();
                 this.get(Tile.H8).removePiece();
                 this.get(Tile.F8).placePiece(rookKSide.letter());

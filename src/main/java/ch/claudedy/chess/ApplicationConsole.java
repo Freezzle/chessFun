@@ -1,10 +1,10 @@
-package model.chess;
+package ch.claudedy.chess;
 
-import model.chess.actions.MoveCommand;
-import model.chess.basis.Chess;
-import model.chess.basis.Tile;
-import model.chess.systems.ConsolePrint;
-import model.chess.feedbacks.MoveFeedBack;
+import ch.claudedy.chess.actions.MoveCommand;
+import ch.claudedy.chess.basis.Chess;
+import ch.claudedy.chess.basis.Tile;
+import ch.claudedy.chess.feedbacks.MoveFeedBack;
+import ch.claudedy.chess.systems.ConsolePrint;
 
 import java.io.BufferedReader;
 import java.io.IOException;

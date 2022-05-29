@@ -1,4 +1,4 @@
-package model.chess.basis;
+package ch.claudedy.chess.basis;
 
 import lombok.AccessLevel;
 import lombok.Getter;

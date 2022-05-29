@@ -1,9 +1,9 @@
-package model.chess.basis;
+package ch.claudedy.chess.basis;
 
+import ch.claudedy.chess.actions.MoveCommand;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import model.chess.actions.MoveCommand;
 
 @Accessors(fluent = true)
 @Getter

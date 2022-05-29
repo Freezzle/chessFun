@@ -1,9 +1,9 @@
-package model.chess.actions;
+package ch.claudedy.chess.actions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import model.chess.basis.Tile;
+import ch.claudedy.chess.basis.Tile;
 
 @Accessors(fluent = true)
 @Getter
