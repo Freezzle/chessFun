@@ -1,7 +1,5 @@
 package ch.claudedy.chess.basis;
 
-import ch.claudedy.chess.actions.MoveCommand;
-import ch.claudedy.chess.feedbacks.MoveFeedBack;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;

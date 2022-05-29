@@ -1,9 +1,9 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.actions.MoveCommand;
+import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.basis.Chess;
 import ch.claudedy.chess.basis.Tile;
-import ch.claudedy.chess.feedbacks.MoveFeedBack;
+import ch.claudedy.chess.basis.MoveFeedBack;
 import ch.claudedy.chess.systems.ConsolePrint;
 
 import java.io.BufferedReader;

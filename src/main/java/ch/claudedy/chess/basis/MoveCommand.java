@@ -1,4 +1,4 @@
-package ch.claudedy.chess.actions;
+package ch.claudedy.chess.basis;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

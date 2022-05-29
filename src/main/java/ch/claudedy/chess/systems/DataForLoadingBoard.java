@@ -2,7 +2,7 @@ package ch.claudedy.chess.systems;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import ch.claudedy.chess.actions.MoveCommand;
+import ch.claudedy.chess.basis.MoveCommand;
 
 @Accessors(fluent = true)
 @Getter

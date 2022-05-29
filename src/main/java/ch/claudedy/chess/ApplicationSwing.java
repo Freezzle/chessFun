@@ -1,8 +1,8 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.actions.MoveCommand;
+import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.basis.Square;
-import ch.claudedy.chess.feedbacks.MoveFeedBack;
+import ch.claudedy.chess.basis.MoveFeedBack;
 import ch.claudedy.chess.systems.DataForLoadingBoard;
 import ch.claudedy.chess.systems.LoaderFromFile;
 import ch.claudedy.chess.basis.Chess;

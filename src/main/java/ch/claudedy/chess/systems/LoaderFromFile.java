@@ -1,6 +1,6 @@
 package ch.claudedy.chess.systems;
 
-import ch.claudedy.chess.actions.MoveCommand;
+import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.basis.Tile;
 
 import java.io.BufferedReader;
