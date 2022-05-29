@@ -40,6 +40,8 @@ public class Chess {
             // Move the piece
             this.currentBoard.movePiece(move.startPosition(), move.endPosition());
 
+            // TODO: 29.05.2022 Verify if enemy king is checkmated or stalemated
+
             // Switch the player
             this.currentBoard.switchPlayer();
         }

@@ -40,6 +40,8 @@ public class Board {
     }
 
     public void movePiece(Tile start, Tile end) {
+        // Reset EnPassant
+        this.enPassant = null;
 
         Square startSquare = this.squares[start.x()][start.y()];
         Square endSquare = this.squares[end.x()][end.y()];
@@ -47,71 +49,90 @@ public class Board {
         Piece pieceToMove = startSquare.piece();
 
         if (pieceToMove.type() == PieceType.KING) {
-            if (pieceToMove.color().isWhite()) {
-                if (end == Tile.C1 && this.canwQRoque) {
-                    Piece rookQSide = this.get(Tile.A1).piece();
-                    this.get(Tile.A1).removePiece();
-                    this.get(Tile.D1).placePiece(rookQSide.letter());
-                } else if (end == Tile.G1 && this.canwKRoque) {
-                    Piece rookKSide = this.get(Tile.H1).piece();
-                    this.get(Tile.H1).removePiece();
-                    this.get(Tile.F1).placePiece(rookKSide.letter());
-                }
-                this.canwKRoque = false;
-                this.canwQRoque = false;
-            } else {
-                if (end == Tile.C8 && this.canbqRoque) {
-                    Piece rookQSide = this.get(Tile.A8).piece();
-                    this.get(Tile.A8).removePiece();
-                    this.get(Tile.D8).placePiece(rookQSide.letter());
-                } else if (end == Tile.G8 && this.canbkRoque) {
-                    Piece rookKSide = this.get(Tile.H8).piece();
-                    this.get(Tile.H8).removePiece();
-                    this.get(Tile.F8).placePiece(rookKSide.letter());
-                }
-                this.canbkRoque = false;
-                this.canbqRoque = false;
-            }
-
-            this.enPassant = null;
+            manageKingMove(end, pieceToMove);
         } else if (pieceToMove.type() == PieceType.ROOK) {
-            if (pieceToMove.color().isWhite()) {
-                if (startSquare.tile() == Tile.A1) {
-                    this.canwQRoque = false;
-                } else if (startSquare.tile() == Tile.H1) {
-                    this.canwKRoque = false;
-                }
-            } else {
-                if (startSquare.tile() == Tile.A8) {
-                    this.canbqRoque = false;
-                } else if (startSquare.tile() == Tile.H8) {
-                    this.canbkRoque = false;
-                }
-            }
-
-            this.enPassant = null;
+            manageRookMove(startSquare, pieceToMove);
         } else if (pieceToMove.type() == PieceType.PAWN) {
-            if (Math.abs(endSquare.tile().y() - startSquare.tile().y()) == 2) {
-                if (pieceToMove.color().isWhite()) {
-                    this.enPassant = Tile.getEnum(end.x(), end.y() - 1);
-                } else {
-                    this.enPassant = Tile.getEnum(end.x(), end.y() + 1);
-                }
-            } else if(this.enPassant != null) {
-                if(pieceToMove.color().isWhite() && this.enPassant == end) {
-                    // Remove pawn en passant
-                    get(Tile.getEnum(end.x(), end.y() - 1)).removePiece();
-                } else if(!pieceToMove.color().isWhite() && this.enPassant == end) {
-                    // Remove pawn en passant
-                    get(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
-                }
-                this.enPassant = null;
-            }
-        } else {
-            this.enPassant = null;
+            managePawnMove(end, startSquare, endSquare, pieceToMove);
         }
 
         endSquare.placePiece(pieceToMove.letter());
         startSquare.removePiece();
+    }
+
+    private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove) {
+        if (Math.abs(endSquare.tile().y() - startSquare.tile().y()) == 2) {
+            // MOVE -> Pawn moved 2 cases
+            if (pieceToMove.color().isWhite()) {
+                this.enPassant = Tile.getEnum(end.x(), end.y() - 1);
+            } else {
+                this.enPassant = Tile.getEnum(end.x(), end.y() + 1);
+            }
+        } else if (this.enPassant != null) {
+            // MOVE -> Pawn go to the enPassant tile
+            if (this.enPassant == end) {
+                if (pieceToMove.color().isWhite()) {
+                    get(Tile.getEnum(end.x(), end.y() - 1)).removePiece();
+                } else {
+                    get(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
+                }
+            }
+        } else if(endSquare.tile().y() == 7 && pieceToMove.color().isWhite()) {
+            pieceToMove.promote('Q');
+        } else if(endSquare.tile().y() == 0 && !pieceToMove.color().isWhite()) {
+            pieceToMove.promote('q');
+        }
+    }
+
+    private void manageRookMove(Square startSquare, Piece pieceToMove) {
+        if (pieceToMove.color().isWhite()) {
+            if (startSquare.tile() == Tile.A1) {
+                this.canwQRoque = false;
+            } else if (startSquare.tile() == Tile.H1) {
+                this.canwKRoque = false;
+            }
+        } else {
+            if (startSquare.tile() == Tile.A8) {
+                this.canbqRoque = false;
+            } else if (startSquare.tile() == Tile.H8) {
+                this.canbkRoque = false;
+            }
+        }
+    }
+
+    private void manageKingMove(Tile end, Piece pieceToMove) {
+        if (pieceToMove.color().isWhite()) {
+            if (end == Tile.C1 && this.canwQRoque) {
+                // MOVE -> ROQUE WHITE QUEEN SIDE
+                Piece rookQSide = this.get(Tile.A1).piece();
+                this.get(Tile.A1).removePiece();
+                this.get(Tile.D1).placePiece(rookQSide.letter());
+            } else if (end == Tile.G1 && this.canwKRoque) {
+                // MOVE -> ROQUE WHITE KING SIDE
+                Piece rookKSide = this.get(Tile.H1).piece();
+                this.get(Tile.H1).removePiece();
+                this.get(Tile.F1).placePiece(rookKSide.letter());
+            }
+
+            // No matter what, if the king move (castle or not), he can't do a roque anymore
+            this.canwKRoque = false;
+            this.canwQRoque = false;
+        } else {
+            if (end == Tile.C8 && this.canbqRoque) {
+                // MOVE -> ROQUE BLACK QUEEN SIDE
+                Piece rookQSide = this.get(Tile.A8).piece();
+                this.get(Tile.A8).removePiece();
+                this.get(Tile.D8).placePiece(rookQSide.letter());
+            } else if (end == Tile.G8 && this.canbkRoque) {
+                // MOVE -> ROQUE BLACK KING SIDE
+                Piece rookKSide = this.get(Tile.H8).piece();
+                this.get(Tile.H8).removePiece();
+                this.get(Tile.F8).placePiece(rookKSide.letter());
+            }
+
+            // No matter what, if the king move (castle or not), he can't do a roque anymore
+            this.canbkRoque = false;
+            this.canbqRoque = false;
+        }
     }
 }

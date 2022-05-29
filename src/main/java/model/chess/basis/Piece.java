@@ -13,11 +13,15 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 public class Piece {
-    private final Color color;
-    private final PieceType type;
-    private final Character letter;
+    private Color color;
+    private PieceType type;
+    private Character letter;
 
     public Piece(char piece) {
+        promote(piece);
+    }
+
+    public void promote(char piece) {
         this.type = PieceType.getFromAbrevTechnical(piece);
         this.color = PieceType.getColorFromCharacter(piece);
         this.letter = piece;
