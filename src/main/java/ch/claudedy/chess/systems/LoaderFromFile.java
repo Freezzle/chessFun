@@ -20,7 +20,7 @@ public class LoaderFromFile {
             MoveCommand previousMove = null;
             if(!values[1].equals("-")) {
                 String[] positions = values[1].split("-");
-                previousMove = new MoveCommand(Tile.valueOf(positions[0]), Tile.valueOf(positions[1]));
+                previousMove = new MoveCommand(Tile.valueOf(positions[0]), Tile.valueOf(positions[1]), null);
             }
 
             fileWrapper = new DataForLoadingBoard(values[0], previousMove);

@@ -1,19 +1,14 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.basis.MoveCommand;
-import ch.claudedy.chess.basis.Square;
-import ch.claudedy.chess.basis.MoveFeedBack;
+import ch.claudedy.chess.basis.*;
 import ch.claudedy.chess.systems.DataForLoadingBoard;
 import ch.claudedy.chess.systems.LoaderFromFile;
-import ch.claudedy.chess.basis.Chess;
-import ch.claudedy.chess.basis.Tile;
 import ch.claudedy.chess.utils.FenUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.Color;
+import java.awt.event.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +36,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private Map<String, Tile> piecesView = new HashMap<>();
     private Map<Tile, Integer> squaresView = new HashMap<>();
     private Map<String, Tile> squaresAtView = new HashMap<>();
+    private Character promote = null;
 
     public static void main(String[] args) {
         ApplicationSwing frame = new ApplicationSwing();
@@ -154,6 +150,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         if (from != null)
             chessBoard.getComponent(squaresView.get(from)).setBackground(getColorTile(from.color()));
 
+        promote = null;
         from = null;
         piecesView = new HashMap<>();
     }
@@ -209,15 +206,20 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 destination = squaresAtView.get(c.getParent().getName());
             }
 
-            MoveCommand moveCommand = new MoveCommand(from, destination);
-            MoveFeedBack moveFeedBack = chess.makeMove(moveCommand);
+            MoveCommand moveCommand = new MoveCommand(from, destination, 'q');
 
-            if (moveFeedBack == MoveFeedBack.AUTHORIZED) {
+            MoveFeedBack status = chess.makeMove(moveCommand);
+
+            if (status == MoveFeedBack.AUTHORIZED) {
                 this.reset();
                 this.printPreviousMove(moveCommand);
-            } else {
+            } else if(status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED) {
+                System.out.println(status);
                 this.reset();
-                System.out.println(moveFeedBack);
+                this.startGame();
+            } else {
+                System.out.println(status);
+                this.reset();
                 this.mouseClicked(e);
             }
         } else if (from == null && e.getButton() == 3) {

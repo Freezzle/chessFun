@@ -11,4 +11,5 @@ import ch.claudedy.chess.basis.Tile;
 public class MoveCommand {
     private final Tile startPosition;
     private final Tile endPosition;
+    private final Character promote;
 }

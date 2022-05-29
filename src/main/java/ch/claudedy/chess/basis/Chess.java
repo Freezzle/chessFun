@@ -36,17 +36,55 @@ public class Chess {
             this.actualMove = move;
 
             // Move the piece
-            this.currentBoard.movePiece(move.startPosition(), move.endPosition());
-
-            // TODO: 29.05.2022 Verify if enemy king is checkmated or stalemated
+            this.currentBoard.movePiece(move.startPosition(), move.endPosition(), move.promote());
 
             // Switch the player
             this.currentBoard.switchPlayer();
+
+            // Check if the enemy king is checkmated, etc..
+            thatMoveLegal = this.checkGameStatus();
 
             System.out.println(FenUtils.boardToFen(currentBoard()));
         }
 
         return thatMoveLegal;
+    }
+
+    private MoveFeedBack checkGameStatus() {
+        // King is checked
+        Tile tileKing = this.getTileKing(currentBoard, this.currentBoard.currentPlayer());
+
+        boolean cannotMove = getLegalMoves(tileKing).isEmpty();
+
+        if (!cannotMove) {
+            return MoveFeedBack.AUTHORIZED;
+        }
+
+        boolean kingChecked = this.isTileChecked(currentBoard, this.currentBoard.currentPlayer(), tileKing);
+
+        boolean aPieceCanMove = false;
+        for (int x = 0; x <= 7; x++) {
+            for (int y = 0; y <= 7; y++) {
+                Piece piece = currentBoard.squares()[x][y].piece();
+                if (piece != null && piece.color() == this.currentBoard.currentPlayer()) {
+                    List<Tile> legalMoves = this.getLegalMoves(currentBoard.squares()[x][y].tile());
+                    if (!legalMoves.isEmpty()) {
+                        aPieceCanMove = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!aPieceCanMove) {
+            if(kingChecked) {
+                return MoveFeedBack.CHECKMATED;
+            } else {
+                return MoveFeedBack.STALEMATED;
+            }
+        }
+
+        return MoveFeedBack.AUTHORIZED;
     }
 
     public void rollbackPreviousState() {
@@ -85,7 +123,7 @@ public class Chess {
         String fenBoardClone = FenUtils.boardToFen(this.currentBoard);
         moves.forEach(move -> {
             Chess chessFake = new Chess(fenBoardClone, actualMove);
-            chessFake.currentBoard().movePiece(start, move);
+            chessFake.currentBoard().movePiece(start, move, null);
             boolean kingChecked = this.isKingChecked(chessFake.currentBoard(), piece.color());
             if (!kingChecked) {
                 movesLegal.add(move);
@@ -128,7 +166,7 @@ public class Chess {
 
         // Is our king is not checked when we move that piece ?
         Chess chessFake = new Chess(FenUtils.boardToFen(currentBoard), actualMove);
-        chessFake.currentBoard.movePiece(move.startPosition(), move.endPosition());
+        chessFake.currentBoard.movePiece(move.startPosition(), move.endPosition(), move.promote());
         boolean kingChecked = this.isKingChecked(chessFake.currentBoard(), startSquare.piece().color());
 
         if (kingChecked) {
@@ -139,8 +177,11 @@ public class Chess {
     }
 
     private boolean isKingChecked(Board board, Color colorKing) {
-
         // Search our king
+        return isTileChecked(board, colorKing, getTileKing(board, colorKing));
+    }
+
+    private Tile getTileKing(Board board, Color colorKing) {
         Tile kingTile = null;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
@@ -150,22 +191,25 @@ public class Chess {
                 }
             }
         }
+        return kingTile;
+    }
 
+    private boolean isTileChecked(Board board, Color allyColor, Tile tileToCheck) {
         // Get all enemy pieces, and see if one is hitting our king
-        boolean isKingChecked = false;
+        boolean isTileChecked = false;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
                 Piece piece = board.squares()[x][y].piece();
-                if (piece != null && piece.color() != colorKing) {
+                if (piece != null && piece.color() != allyColor) {
                     List<Tile> threatens = piece.getThreatens(board, board.squares()[x][y].tile());
-                    if (threatens.contains(kingTile)) {
-                        isKingChecked = true;
+                    if (threatens.contains(tileToCheck)) {
+                        isTileChecked = true;
                         break;
                     }
                 }
             }
         }
 
-        return isKingChecked;
+        return isTileChecked;
     }
 }

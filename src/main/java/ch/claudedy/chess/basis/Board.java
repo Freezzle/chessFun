@@ -41,7 +41,7 @@ public class Board {
         this.currentPlayer = this.currentPlayer.isWhite() ? Color.BLACK : Color.WHITE;
     }
 
-    public void movePiece(Tile start, Tile end) {
+    public void movePiece(Tile start, Tile end, Character promote) {
         // Reset EnPassant
         this.enPassant = null;
 
@@ -60,7 +60,7 @@ public class Board {
         } else if (PieceType.ROOK == pieceToMove.type()) {
             manageRookMove(startSquare, pieceToMove);
         } else if (PieceType.PAWN == pieceToMove.type()) {
-            managePawnMove(end, startSquare, endSquare, pieceToMove);
+            managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
         }
 
         // Move the piece to the destination square
@@ -69,7 +69,11 @@ public class Board {
         startSquare.removePiece();
     }
 
-    private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove) {
+    private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove, Character promote) {
+        if(promote == null){
+            promote = 'q';
+        }
+
         if (Math.abs(endSquare.tile().y() - startSquare.tile().y()) == 2) {
             // MOVE -> Pawn moved 2 cases
             if (pieceToMove.color().isWhite()) {
@@ -88,10 +92,10 @@ public class Board {
             }
         } else if(endSquare.tile().y() == 7 && pieceToMove.color().isWhite()) {
             // MOVE -> Promotion for WHITE to the top of the board
-            pieceToMove.promote('Q');
+            pieceToMove.promote(Character.toUpperCase(promote));
         } else if(endSquare.tile().y() == 0 && !pieceToMove.color().isWhite()) {
             // MOVE -> Promotion for BLACK to the bottom of the board
-            pieceToMove.promote('q');
+            pieceToMove.promote(Character.toLowerCase(promote));
         }
     }
 

@@ -1,9 +1,6 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.basis.MoveCommand;
-import ch.claudedy.chess.basis.Chess;
-import ch.claudedy.chess.basis.Tile;
-import ch.claudedy.chess.basis.MoveFeedBack;
+import ch.claudedy.chess.basis.*;
 import ch.claudedy.chess.systems.ConsolePrint;
 
 import java.io.BufferedReader;
@@ -26,11 +23,11 @@ public class ApplicationConsole {
             String end = reader.readLine();
             System.out.println();
 
-            MoveFeedBack moveFeedBack = chess.makeMove(new MoveCommand(Tile.valueOf(start), Tile.valueOf(end)));
-            if (moveFeedBack == MoveFeedBack.AUTHORIZED) {
+            MoveFeedBack status = chess.makeMove(new MoveCommand(Tile.valueOf(start), Tile.valueOf(end), null));
+            if (status == MoveFeedBack.AUTHORIZED) {
                 ConsolePrint.execute(chess);
             } else {
-                System.out.println(moveFeedBack);
+                System.out.println(status);
             }
         }
     }
