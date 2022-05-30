@@ -211,7 +211,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             if (status == MoveFeedBack.AUTHORIZED) {
                 this.reset();
                 this.printPreviousMove(moveCommand);
-            } else if(status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED) {
+            } else if(status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
                 System.out.println(status);
                 this.reset();
                 this.startGame();

@@ -87,7 +87,7 @@ public class FenUtils {
         fen.append(" ");
 
         // Number
-        fen.append(board.semiMoves());
+        fen.append(board.moves());
 
         return fen.toString();
     }
@@ -102,15 +102,15 @@ public class FenUtils {
         manageRoques(spaceBreaks[2], board);
         manageEnPassant(spaceBreaks[3], board);
         manageFiftyRule(spaceBreaks[4], board);
-        manageSemiMoves(spaceBreaks[5], board);
+        manageMoves(spaceBreaks[5], board);
 
         // Last move to add
 
         return board;
     }
 
-    private static void manageSemiMoves(String semiMoves, Board board) {
-        board.semiMoves(Integer.parseInt(semiMoves));
+    private static void manageMoves(String moves, Board board) {
+        board.moves(Integer.parseInt(moves));
     }
 
     private static void manageFiftyRule(String fiftyRules, Board board) {

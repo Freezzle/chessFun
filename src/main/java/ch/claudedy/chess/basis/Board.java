@@ -18,8 +18,8 @@ public class Board {
     private boolean canbqRoque = false;
     private boolean canbkRoque = false;
     private Tile enPassant = null;
-    private int fiftyRules;
-    private int semiMoves;
+    private int fiftyRules = 0;
+    private int moves = 1;
 
     public Board() {
         // Init the board
@@ -61,6 +61,17 @@ public class Board {
             manageRookMove(startSquare, pieceToMove);
         } else if (PieceType.PAWN == pieceToMove.type()) {
             managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
+        }
+
+
+        if(!this.currentPlayer.isWhite()) {
+            this.moves++;
+        }
+
+        if(endSquare.piece() != null && this.currentPlayer != endSquare.piece().color() || PieceType.PAWN == pieceToMove.type()) {
+            this.fiftyRules = 0;
+        } else {
+            this.fiftyRules++;
         }
 
         // Move the piece to the destination square

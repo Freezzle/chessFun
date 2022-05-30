@@ -51,6 +51,11 @@ public class Chess {
     }
 
     private MoveFeedBack checkGameStatus() {
+
+        if(this.currentBoard.fiftyRules() == 50) {
+            return MoveFeedBack.RULES_50;
+        }
+
         // King is checked
         Tile tileKing = this.getTileKing(currentBoard, this.currentBoard.currentPlayer());
 
