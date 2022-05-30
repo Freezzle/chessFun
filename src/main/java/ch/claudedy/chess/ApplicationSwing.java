@@ -16,15 +16,16 @@ import java.util.Map;
 
 public class ApplicationSwing extends JFrame implements MouseListener, MouseMotionListener {
 
-    private static final Color BLACK_POSITION = new Color(84, 206, 191);
-    private static final Color WHITE_POSITION = new Color(122, 230, 234);
+    private static final Color BLACK_POSITION = new Color(100, 180, 100);
+    private static final Color WHITE_POSITION = new Color(120, 200, 120);
 
-    private static final Color SQUARE_BLACK = new Color(62, 118, 168);
-    private static final Color SQUARE_WHITE = new Color(121, 173, 208, 255);
+    private static final Color SQUARE_BLACK = new Color(180, 140, 100);
+    private static final Color SQUARE_WHITE = new Color(240, 220, 180);
+
     private static final Color SQUARE_RED_DARK = new Color(175, 90, 90);
     private static final Color SQUARE_RED_NORMAL = new Color(200, 100, 100);
-    private static final Color SQUARE_YELLOW_DARK = new Color(200, 200, 50);
-    private static final Color SQUARE_YELLOW_NORMAL = new Color(255, 255, 100);
+    private static final Color SQUARE_YELLOW_DARK = new Color(180, 123, 100);
+    private static final Color SQUARE_YELLOW_NORMAL = new Color(240, 192, 180);
 
     // CHESS (TRUTH)
     private Chess chess;
