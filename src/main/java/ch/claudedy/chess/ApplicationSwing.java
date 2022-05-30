@@ -36,7 +36,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private Map<String, Tile> piecesView = new HashMap<>();
     private Map<Tile, Integer> squaresView = new HashMap<>();
     private Map<String, Tile> squaresAtView = new HashMap<>();
-    private Character promote = null;
 
     public static void main(String[] args) {
         ApplicationSwing frame = new ApplicationSwing();
@@ -150,7 +149,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         if (from != null)
             chessBoard.getComponent(squaresView.get(from)).setBackground(getColorTile(from.color()));
 
-        promote = null;
         from = null;
         piecesView = new HashMap<>();
     }
