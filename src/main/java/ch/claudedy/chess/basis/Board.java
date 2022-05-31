@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Accessors(fluent = true)
 @Setter
 @Getter
@@ -62,7 +65,6 @@ public class Board {
         } else if (PieceType.PAWN == pieceToMove.type()) {
             managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
         }
-
 
         if(!this.currentPlayer.isWhite()) {
             this.moves++;

@@ -18,17 +18,20 @@ public class Chess {
     private MoveCommand actualMove;
     private Board currentBoard;
 
+    private MoveFeedBack status;
+
     public Chess(String fen, MoveCommand previousMove) {
         this.currentBoard = FenUtils.fenToBoard(fen);
         this.historicalBoards = new ArrayList<>();
         this.actualMove = previousMove;
+        this.status = MoveFeedBack.RUNNING;
     }
 
     public MoveFeedBack makeMove(MoveCommand move) {
         // Check if the move is authorized
-        MoveFeedBack thatMoveLegal = this.isThatMoveLegal(move);
+        status = this.isThatMoveLegal(move);
 
-        if (thatMoveLegal == MoveFeedBack.AUTHORIZED) {
+        if (status == MoveFeedBack.RUNNING) {
             // Create a copy of the board before to make action
             this.historicalBoards.add(new HistoricalBoardFen().fen(FenUtils.boardToFen(this.currentBoard)).previousMove(this.actualMove));
 
@@ -42,12 +45,10 @@ public class Chess {
             this.currentBoard.switchPlayer();
 
             // Check if the enemy king is checkmated, etc..
-            thatMoveLegal = this.checkGameStatus();
-
-            System.out.println(FenUtils.boardToFen(currentBoard()));
+            status = this.checkGameStatus();
         }
 
-        return thatMoveLegal;
+        return status;
     }
 
     private MoveFeedBack checkGameStatus() {
@@ -62,7 +63,7 @@ public class Chess {
         boolean cannotMove = getLegalMoves(tileKing).isEmpty();
 
         if (!cannotMove) {
-            return MoveFeedBack.AUTHORIZED;
+            return MoveFeedBack.RUNNING;
         }
 
         boolean kingChecked = this.isTileChecked(currentBoard, this.currentBoard.currentPlayer(), tileKing);
@@ -89,7 +90,7 @@ public class Chess {
             }
         }
 
-        return MoveFeedBack.AUTHORIZED;
+        return MoveFeedBack.RUNNING;
     }
 
     public void rollbackPreviousState() {
@@ -108,8 +109,37 @@ public class Chess {
 
         // Remove the last index
         this.historicalBoards.remove(this.historicalBoards.size() - 1);
+    }
 
-        System.out.println(FenUtils.boardToFen(currentBoard()));
+
+    public List<MoveCommand> getAllMoves(Color player){
+        List<Tile> tilesPieces = this.getAlivePieces(player);
+
+        List<MoveCommand> moves = new ArrayList<>();
+
+        for(Tile tile : tilesPieces) {
+            List<Tile> legalMoves = this.getLegalMoves(tile);
+            legalMoves.forEach(dest -> {
+                moves.add(new MoveCommand(tile, dest, null));
+            });
+        }
+
+        return moves;
+    }
+
+    public List<Tile> getAlivePieces(Color colorPlayer) {
+        List<Tile> squareWithPieces = new ArrayList<>();
+
+        for (int x = 0; x <= 7; x++) {
+            for (int y = 0; y <= 7; y++) {
+                Piece occupiedPiece = this.currentBoard.squares()[x][y].piece();
+                if (occupiedPiece != null && occupiedPiece.color() == colorPlayer) {
+                    squareWithPieces.add(this.currentBoard.squares()[x][y].tile());
+                }
+            }
+        }
+
+        return squareWithPieces;
     }
 
     public List<Tile> getLegalMoves(Tile start) {
@@ -178,7 +208,7 @@ public class Chess {
             return MoveFeedBack.PIECE_BLOCKED;
         }
 
-        return MoveFeedBack.AUTHORIZED;
+        return MoveFeedBack.RUNNING;
     }
 
     private boolean isKingChecked(Board board, Color colorKing) {

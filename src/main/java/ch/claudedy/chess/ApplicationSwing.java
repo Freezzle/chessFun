@@ -1,8 +1,10 @@
 package ch.claudedy.chess;
 
 import ch.claudedy.chess.basis.*;
+import ch.claudedy.chess.systems.ComputerLogic;
 import ch.claudedy.chess.systems.DataForLoadingBoard;
 import ch.claudedy.chess.systems.LoaderFromFile;
+import ch.claudedy.chess.systems.SystemConfig;
 import ch.claudedy.chess.utils.FenUtils;
 
 import javax.swing.*;
@@ -33,6 +35,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     // VIEWS (ONLY VIEW PURPOSE)
     private final JLayeredPane layeredPane;
     private JPanel chessBoard;
+    private JPanel informationArea;
     private Tile from;
     private Map<String, Tile> piecesView = new HashMap<>();
     private Map<Tile, Integer> squaresView = new HashMap<>();
@@ -48,7 +51,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     public ApplicationSwing() {
-        Dimension boardSize = new Dimension(600, 600);
+        Dimension boardSize = new Dimension(600, 800);
 
         //  Use a Layered Pane for this application
         layeredPane = new JLayeredPane();
@@ -61,7 +64,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     private void startGame() {
-        Dimension boardSize = new Dimension(600, 600);
+        Dimension boardSize = new Dimension(600, 800);
 
         if (this.layeredPane.getComponentCount() != 0) {
             this.layeredPane.removeAll();
@@ -69,21 +72,81 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         //Add a chess board to the Layered Pane
         chessBoard = new JPanel();
+        chessBoard.setName("BOARD");
         chessBoard.setLayout(new GridLayout(8, 8));
         chessBoard.setPreferredSize(boardSize);
-        chessBoard.setBounds(0, 0, boardSize.width, boardSize.height);
+        chessBoard.setBounds(0, 0, 600, 600);
         layeredPane.add(chessBoard, JLayeredPane.DEFAULT_LAYER);
+
+        informationArea = new JPanel();
+        informationArea.setName("INFORMATION");
+        informationArea.setLayout(new GridLayout(4, 1));
+        informationArea.setPreferredSize(boardSize);
+        informationArea.setBounds(0, 600, 600, 200);
+        layeredPane.add(informationArea, JLayeredPane.DEFAULT_LAYER);
+
 
         DataForLoadingBoard loadingBoard = LoaderFromFile.readFile("fen/board-default.csv");
         chess = new Chess(loadingBoard.fen(), loadingBoard.previousMove());
 
         this.resetVariables();
         this.placeSquare();
+        this.placeSquareForInformationArea();
         this.resetBackgroundTiles();
         this.placePieces();
         this.printPreviousMove(chess.actualMove());
+    }
 
-        System.out.println(FenUtils.boardToFen(chess.currentBoard()));
+    private void placeSquareForInformationArea() {
+
+        if (informationArea.getComponentCount() != 0) {
+            informationArea.removeAll();
+        }
+
+        Board currentBoard = chess.currentBoard();
+
+        JPanel panelCurrentPlayer = new JPanel(new BorderLayout());
+        panelCurrentPlayer.setName("CURRENT_PLAYER");
+        panelCurrentPlayer.add(new JLabel("Current Player : " + currentBoard.currentPlayer()));
+        informationArea.add(panelCurrentPlayer);
+
+        JPanel panelMoves = new JPanel(new BorderLayout());
+        panelMoves.setName("MOVES");
+        final StringBuilder moves = new StringBuilder();
+        if (!chess.historicalBoards().isEmpty()) {
+            chess.historicalBoards().forEach(historic -> {
+                Board board = FenUtils.fenToBoard(historic.fen());
+                if (!moves.isEmpty()) {
+                    moves.append(", ");
+                }
+                if (historic.previousMove() != null) {
+                    moves.append(board.moves()).append(": ").append(historic.previousMove().endPosition());
+                }
+            });
+
+            if (chess.actualMove() != null) {
+                if (!moves.isEmpty()) {
+                    moves.append(", ");
+                }
+                moves.append(chess.currentBoard().moves()).append(": ").append(chess.actualMove().endPosition());
+            }
+        } else {
+            if (chess.actualMove() != null) {
+                moves.append(chess.currentBoard().moves()).append(": ").append(chess.actualMove().endPosition());
+            }
+        }
+
+        panelMoves.add(new JLabel("Moves : " + moves.toString()));
+        informationArea.add(panelMoves);
+
+        JTextField panelFen = new JTextField("Fen : " + FenUtils.boardToFen(currentBoard));
+        panelFen.setName("FEN");
+        informationArea.add(panelFen);
+
+        JPanel panelGameStatus = new JPanel(new BorderLayout());
+        panelGameStatus.setName("GAME_STATUS");
+        panelGameStatus.add(new JLabel("Status : " + chess.status()));
+        informationArea.add(panelGameStatus);
     }
 
     private void placeSquare() {
@@ -166,6 +229,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
     private void reset() {
         this.resetVariables();
+        this.placeSquareForInformationArea();
         this.placePieces();
         this.resetBackgroundTiles();
     }
@@ -186,61 +250,71 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (from == null && e.getButton() == 1) {
-            this.resetBackgroundTiles();
-            Component c = chessBoard.findComponentAt(e.getX(), e.getY());
+        if (chessBoard.findComponentAt(e.getX(), e.getY()) != null) {
 
-            if (c instanceof JPanel) {
-                return;
-            }
+            if (from == null && e.getButton() == 1) {
+                this.resetBackgroundTiles();
+                Component c = chessBoard.findComponentAt(e.getX(), e.getY());
 
-            from = piecesView.get(c.getParent().getName());
-            chessBoard.getComponent(squaresView.get(from)).setBackground(getColorTilePosition(from.color()));
+                if (c instanceof JPanel) {
+                    return;
+                }
 
-            this.colorizeLegalMoves(chess.getLegalMoves(from));
-        } else if (from != null && e.getButton() == 1) {
-            Component c = chessBoard.findComponentAt(e.getX(), e.getY());
-            Tile destination = squaresAtView.get(c.getName());
-            if (destination == null) {
-                destination = squaresAtView.get(c.getParent().getName());
-            }
+                from = piecesView.get(c.getParent().getName());
+                chessBoard.getComponent(squaresView.get(from)).setBackground(getColorTilePosition(from.color()));
 
-            MoveCommand moveCommand = new MoveCommand(from, destination, 'q');
+                this.colorizeLegalMoves(chess.getLegalMoves(from));
+            } else if (from != null && e.getButton() == 1) {
+                Component c = chessBoard.findComponentAt(e.getX(), e.getY());
+                Tile destination = squaresAtView.get(c.getName());
+                if (destination == null) {
+                    destination = squaresAtView.get(c.getParent().getName());
+                }
 
-            MoveFeedBack status = chess.makeMove(moveCommand);
+                MoveCommand moveCommand = new MoveCommand(from, destination, 'q');
 
-            if (status == MoveFeedBack.AUTHORIZED) {
+                MoveFeedBack status = chess.makeMove(moveCommand);
+
+                if (status == MoveFeedBack.RUNNING) {
+                    if (SystemConfig.COMPUTER_ON) {
+                        MoveCommand moveCommandComputer = ComputerLogic.minimaxRoot(1, chess);
+                        chess.makeMove(moveCommandComputer);
+                        this.reset();
+                        this.printPreviousMove(moveCommandComputer);
+                    } else {
+                        this.reset();
+                        this.printPreviousMove(moveCommand);
+                    }
+                }
+
+                if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
+                    this.reset();
+                    this.startGame();
+                } else {
+                    this.reset();
+                    this.mouseClicked(e);
+                }
+            } else if (from == null && e.getButton() == 3) {
+                // color background red
+                Component c = chessBoard.findComponentAt(e.getX(), e.getY());
+                Tile tileSelected = squaresAtView.get(c.getName());
+                if (tileSelected == null) {
+                    tileSelected = squaresAtView.get(c.getParent().getName());
+                }
+
+                if (tileSelected.color() == ch.claudedy.chess.basis.Color.BLACK) {
+                    chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_DARK);
+                } else {
+                    chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_NORMAL);
+                }
+            } else if (from == null && e.getButton() == 2) {
+                chess.rollbackPreviousState();
                 this.reset();
-                this.printPreviousMove(moveCommand);
-            } else if(status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
-                System.out.println(status);
-                this.reset();
-                this.startGame();
             } else {
-                System.out.println(status);
-                this.reset();
+                this.from = null;
+                this.resetBackgroundTiles();
                 this.mouseClicked(e);
             }
-        } else if (from == null && e.getButton() == 3) {
-            // color background red
-            Component c = chessBoard.findComponentAt(e.getX(), e.getY());
-            Tile tileSelected = squaresAtView.get(c.getName());
-            if (tileSelected == null) {
-                tileSelected = squaresAtView.get(c.getParent().getName());
-            }
-
-            if (tileSelected.color() == ch.claudedy.chess.basis.Color.BLACK) {
-                chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_DARK);
-            } else {
-                chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_NORMAL);
-            }
-        } else if (from == null && e.getButton() == 2) {
-            chess.rollbackPreviousState();
-            this.reset();
-        } else {
-            this.from = null;
-            this.resetBackgroundTiles();
-            this.mouseClicked(e);
         }
     }
 

@@ -88,7 +88,6 @@ public class FenUtils {
 
         // Number
         fen.append(board.moves());
-
         return fen.toString();
     }
 
