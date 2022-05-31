@@ -34,6 +34,8 @@ public class StockFish {
             processReader = new BufferedReader(new InputStreamReader(engineProcess.getInputStream()));
             processWriter = new OutputStreamWriter(engineProcess.getOutputStream());
             command("uci", Function.identity(), (s) -> s.startsWith("uciok"), 2000l);
+            command("setoption name UCI_LimitStrength value true", Function.identity(), (s) -> s.startsWith("readyok"), 100l);
+            command("setoption name UCI_Elo value" + SystemConfig.ELO_COMPUTER, Function.identity(), s -> s.startsWith("readyok"), 100l);
         } catch (Exception e) {
             LOG.severe(e.getMessage());
             return false;
