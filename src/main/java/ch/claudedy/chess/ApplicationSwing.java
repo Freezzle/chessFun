@@ -278,18 +278,12 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 }
 
                 MoveCommand moveCommand = new MoveCommand(from, destination, null);
-
-                System.out.println(FenUtils.boardToFen(chess.currentBoard()));
                 MoveFeedBack status = chess.makeMove(moveCommand);
 
                 if (status == MoveFeedBack.RUNNING) {
                     if (SystemConfig.COMPUTER_ON) {
-                        System.out.println(FenUtils.boardToFen(chess.currentBoard()));
-
-                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1500);
-
-                        System.out.println(bestMove);
-
+                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
+                        System.out.println("The computer'smove : " + bestMove);
                         MoveCommand commandComputer = new MoveCommand(Tile.valueOf(bestMove.substring(0, 2).toUpperCase()), Tile.valueOf(bestMove.substring(2, 4).toUpperCase()), null);
 
                         status = chess.makeMove(commandComputer);

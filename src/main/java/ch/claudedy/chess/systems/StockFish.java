@@ -44,10 +44,10 @@ public class StockFish {
 
     public String getBestMove(String fen, long waitTime) {
         try {
-            command("position fen " + fen, Function.identity(), s -> s.startsWith("readyok"), 500l);
+            command("position fen " + fen, Function.identity(), s -> s.startsWith("readyok"), 300l);
             return command("go movetime " + waitTime,
                     lines -> lines.stream().filter(s->s.startsWith("bestmove")).findFirst().get(),
-                    line -> line.startsWith("bestmove"), waitTime + 500l).split(" ")[1];
+                    line -> line.startsWith("bestmove"), waitTime + 300l).split(" ")[1];
         } catch (Exception e) {
         }
 
@@ -73,7 +73,6 @@ public class StockFish {
         CompletableFuture<T> command = CompletableFuture.supplyAsync(() -> {
             final List<String> output = new ArrayList<>();
             try {
-                System.out.println(cmd);
                 processWriter.flush();
                 processWriter.write(cmd + "\n");
                 processWriter.write("isready\n");
