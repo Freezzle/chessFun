@@ -1,10 +1,7 @@
 package ch.claudedy.chess;
 
 import ch.claudedy.chess.basis.*;
-import ch.claudedy.chess.systems.ComputerLogic;
-import ch.claudedy.chess.systems.DataForLoadingBoard;
-import ch.claudedy.chess.systems.LoaderFromFile;
-import ch.claudedy.chess.systems.SystemConfig;
+import ch.claudedy.chess.systems.*;
 import ch.claudedy.chess.utils.FenUtils;
 
 import javax.swing.*;
@@ -29,6 +26,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private static final Color SQUARE_YELLOW_DARK = new Color(180, 123, 100);
     private static final Color SQUARE_YELLOW_NORMAL = new Color(240, 192, 180);
 
+    private static StockFish stockFish;
+
     // CHESS (TRUTH)
     private Chess chess;
 
@@ -42,6 +41,10 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private Map<String, Tile> squaresAtView = new HashMap<>();
 
     public static void main(String[] args) {
+        if (SystemConfig.COMPUTER_ON) {
+            stockFish = new StockFish();
+        }
+
         ApplicationSwing frame = new ApplicationSwing();
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         frame.pack();
@@ -64,6 +67,9 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     private void startGame() {
+        if (SystemConfig.COMPUTER_ON) {
+            stockFish.startEngine();
+        }
         Dimension boardSize = new Dimension(600, 800);
 
         if (this.layeredPane.getComponentCount() != 0) {
@@ -86,7 +92,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         layeredPane.add(informationArea, JLayeredPane.DEFAULT_LAYER);
 
 
-        DataForLoadingBoard loadingBoard = LoaderFromFile.readFile("fen/board-default.csv");
+        DataForLoadingBoard loadingBoard = LoaderFromFile.readFile(SystemConfig.BOARD);
         chess = new Chess(loadingBoard.fen(), loadingBoard.previousMove());
 
         this.resetVariables();
@@ -271,16 +277,24 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     destination = squaresAtView.get(c.getParent().getName());
                 }
 
-                MoveCommand moveCommand = new MoveCommand(from, destination, 'q');
+                MoveCommand moveCommand = new MoveCommand(from, destination, null);
 
+                System.out.println(FenUtils.boardToFen(chess.currentBoard()));
                 MoveFeedBack status = chess.makeMove(moveCommand);
 
                 if (status == MoveFeedBack.RUNNING) {
                     if (SystemConfig.COMPUTER_ON) {
-                        MoveCommand moveCommandComputer = ComputerLogic.minimaxRoot(1, chess);
-                        chess.makeMove(moveCommandComputer);
+                        System.out.println(FenUtils.boardToFen(chess.currentBoard()));
+
+                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1500);
+
+                        System.out.println(bestMove);
+
+                        MoveCommand commandComputer = new MoveCommand(Tile.valueOf(bestMove.substring(0, 2).toUpperCase()), Tile.valueOf(bestMove.substring(2, 4).toUpperCase()), null);
+
+                        status = chess.makeMove(commandComputer);
                         this.reset();
-                        this.printPreviousMove(moveCommandComputer);
+                        this.printPreviousMove(commandComputer);
                     } else {
                         this.reset();
                         this.printPreviousMove(moveCommand);
@@ -288,6 +302,11 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 }
 
                 if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
+
+                    if (SystemConfig.COMPUTER_ON) {
+                        stockFish.stopEngine();
+                    }
+
                     this.reset();
                     this.startGame();
                 } else {

@@ -1,7 +1,6 @@
 package ch.claudedy.chess;
 
 import ch.claudedy.chess.basis.*;
-import ch.claudedy.chess.systems.ComputerLogic;
 import ch.claudedy.chess.systems.ConsolePrint;
 
 import java.io.BufferedReader;
