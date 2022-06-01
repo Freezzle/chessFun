@@ -10,4 +10,8 @@ public enum MoveFeedBack {
     public boolean isStatusError() {
         return this != RUNNING && !isGameOver();
     }
+
+    public boolean isStatusOk() {
+        return this == RUNNING;
+    }
 }

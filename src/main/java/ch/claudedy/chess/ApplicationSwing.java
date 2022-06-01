@@ -260,39 +260,15 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 MoveFeedBack status = chess.makeMove(moveCommand);
 
                 // If the move was authorized
-                if (status == MoveFeedBack.RUNNING) {
-                    this.reset();
-                    this.printPreviousMove(moveCommand, chess.currentBoard().currentPlayer().reverseColor());
+                this.manageAfterMove(status, moveCommand);
 
-                    if (SystemConfig.COMPUTER_ON) {
-                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
-                        System.out.println("The computer's move : " + bestMove);
-                        MoveCommand commandComputer = MoveCommand.convert(bestMove);
-                        status = chess.makeMove(commandComputer);
+                if (status.isStatusOk() && SystemConfig.COMPUTER_ON) {
+                    String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
+                    System.out.println("The computer's move : " + bestMove);
 
-                        this.reset();
-                        this.printPreviousMove(commandComputer, chess.currentBoard().currentPlayer().reverseColor());
-                    }
-
-                    if (status.isGameOver()) {
-                        if (SystemConfig.COMPUTER_ON) {
-                            stockFish.stopEngine();
-                        }
-
-                        this.reset();
-                        this.startNewGame();
-                    }
-                } else if (status.isGameOver()) {
-
-                    if (SystemConfig.COMPUTER_ON) {
-                        stockFish.stopEngine();
-                    }
-
-                    this.reset();
-                    this.startNewGame();
-                } else if (status.isStatusError()) {
-                    this.reset();
-                    this.mouseClicked(e);
+                    MoveCommand commandComputer = MoveCommand.convert(bestMove);
+                    status = chess.makeMove(commandComputer);
+                    this.manageAfterMove(status, commandComputer);
                 }
             } else if (selectedPieceTile == null && e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                 // color background red
@@ -314,6 +290,23 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 this.resetBackgroundTiles();
                 this.mouseClicked(e);
             }
+        }
+    }
+
+    private void manageAfterMove(MoveFeedBack status, MoveCommand moveMade) {
+        // If the move was authorized
+        if (status == MoveFeedBack.RUNNING) { // MOVE OK
+            this.reset();
+            this.printPreviousMove(moveMade, chess.currentBoard().currentPlayer().reverseColor());
+        } else if (status.isGameOver()) { // GAME OVER
+            if (SystemConfig.COMPUTER_ON) {
+                stockFish.stopEngine();
+            }
+
+            this.reset();
+            this.startNewGame();
+        } else if (status.isStatusError()) { // ERROR FROM MOVE
+            this.reset();
         }
     }
 
