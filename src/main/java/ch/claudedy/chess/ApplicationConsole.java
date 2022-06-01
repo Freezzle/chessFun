@@ -15,18 +15,12 @@ public class ApplicationConsole {
 
         while (true) {
             System.out.println();
-            System.out.print("start: ");
+            System.out.print("Move (E2E4, E7E8R (promote)): ");
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String start = reader.readLine();
+            String move = reader.readLine();
 
-            System.out.print("end: ");
-            String end = reader.readLine();
-            System.out.println();
-
-            MoveFeedBack status = chess.makeMove(new MoveCommand(Tile.valueOf(start), Tile.valueOf(end), null));
-            if (status == MoveFeedBack.RUNNING) {
-                ConsolePrint.execute(chess);
-            } else {
+            MoveFeedBack status = chess.makeMove(MoveCommand.convert(move));
+            if (status != MoveFeedBack.RUNNING) {
                 System.out.println(status);
             }
         }
