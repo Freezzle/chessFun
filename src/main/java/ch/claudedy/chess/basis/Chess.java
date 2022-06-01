@@ -1,5 +1,7 @@
 package ch.claudedy.chess.basis;
 
+import ch.claudedy.chess.systems.ConsolePrint;
+import ch.claudedy.chess.systems.SystemConfig;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,6 +48,10 @@ public class Chess {
 
             // Check if the enemy king is checkmated, etc..
             status = this.checkGameStatus();
+        }
+
+        if(SystemConfig.PRINT_CONSOLE){
+            ConsolePrint.execute(this);
         }
 
         return status;

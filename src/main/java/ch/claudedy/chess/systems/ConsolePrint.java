@@ -9,7 +9,6 @@ import ch.claudedy.chess.utils.FenUtils;
 import java.text.DecimalFormat;
 
 public class ConsolePrint {
-    private static final DecimalFormat df = new DecimalFormat("00.00");
 
     public static final String RESET = "\033[0m";
 
@@ -20,7 +19,6 @@ public class ConsolePrint {
     public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
     public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
     public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
-    public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
     public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
 
     public static void execute(Chess chess) {
