@@ -26,6 +26,10 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private static final Color SQUARE_YELLOW_DARK = new Color(180, 123, 100);
     private static final Color SQUARE_YELLOW_NORMAL = new Color(240, 192, 180);
 
+    private static final int LEFT_CLICK = 1;
+    private static final int RIGHT_CLICK = 3;
+    private static final int MIDDLE_CLICK = 2;
+
     private static StockFish stockFish;
 
     // CHESS (TRUTH)
@@ -228,44 +232,54 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     public void mouseClicked(MouseEvent e) {
-        if (chessBoard.findComponentAt(e.getX(), e.getY()) != null) {
+        Component tileClicked = getTileUI(e.getX(), e.getY());
+        int buttonClicked = e.getButton();
 
-            if (selectedPieceTile == null && e.getButton() == 1) {
+        if (tileClicked != null) {
+            if (selectedPieceTile == null && buttonClicked == LEFT_CLICK) { // No piece selected and we click left on board (select a piece)
                 this.resetBackgroundTiles();
-                Component c = chessBoard.findComponentAt(e.getX(), e.getY());
 
-                if (c instanceof JPanel) {
+                if (tileClicked instanceof JPanel) {
                     return;
                 }
 
-                selectedPieceTile = piecesView.get(c.getParent().getName());
+                selectedPieceTile = piecesView.get(tileClicked.getParent().getName());
                 chessBoard.getComponent(squaresView.get(selectedPieceTile)).setBackground(getColorTilePosition(selectedPieceTile.color()));
 
                 this.colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
-            } else if (selectedPieceTile != null && e.getButton() == 1) {
-                Component c = chessBoard.findComponentAt(e.getX(), e.getY());
-                Tile destination = squaresAtView.get(c.getName());
+            } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK) { // Piece already selected and we click left on board again (make move)
+                Tile destination = squaresAtView.get(tileClicked.getName());
                 if (destination == null) {
-                    destination = squaresAtView.get(c.getParent().getName());
+                    destination = squaresAtView.get(tileClicked.getParent().getName());
                 }
 
                 MoveCommand moveCommand = new MoveCommand(selectedPieceTile, destination, null);
                 MoveFeedBack status = chess.makeMove(moveCommand);
 
+                // If the move was authorized
                 if (status == MoveFeedBack.RUNNING) {
                     this.reset();
                     this.printPreviousMove(moveCommand);
+
                     if (SystemConfig.COMPUTER_ON) {
                         String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
-                        System.out.println("The computer'smove : " + bestMove);
+                        System.out.println("The computer's move : " + bestMove);
                         MoveCommand commandComputer = MoveCommand.convert(bestMove);
                         status = chess.makeMove(commandComputer);
+
                         this.reset();
                         this.printPreviousMove(commandComputer);
                     }
-                }
 
-                if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
+                    if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
+                        if (SystemConfig.COMPUTER_ON) {
+                            stockFish.stopEngine();
+                        }
+
+                        this.reset();
+                        this.startNewGame();
+                    }
+                } else if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
 
                     if (SystemConfig.COMPUTER_ON) {
                         stockFish.stopEngine();
@@ -277,12 +291,11 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     this.reset();
                     this.mouseClicked(e);
                 }
-            } else if (selectedPieceTile == null && e.getButton() == 3) {
+            } else if (selectedPieceTile == null && e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                 // color background red
-                Component c = chessBoard.findComponentAt(e.getX(), e.getY());
-                Tile tileSelected = squaresAtView.get(c.getName());
+                Tile tileSelected = squaresAtView.get(tileClicked.getName());
                 if (tileSelected == null) {
-                    tileSelected = squaresAtView.get(c.getParent().getName());
+                    tileSelected = squaresAtView.get(tileClicked.getParent().getName());
                 }
 
                 if (tileSelected.color() == ch.claudedy.chess.basis.Color.BLACK) {
@@ -290,10 +303,10 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 } else {
                     chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_NORMAL);
                 }
-            } else if (selectedPieceTile == null && e.getButton() == 2) {
+            } else if (selectedPieceTile == null && e.getButton() == MIDDLE_CLICK) { // No piece selected and we click middle (rollback last board)
                 chess.rollbackPreviousState();
                 this.reset();
-            } else {
+            } else { // Reset the board
                 this.selectedPieceTile = null;
                 this.resetBackgroundTiles();
                 this.mouseClicked(e);
@@ -319,6 +332,9 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     public void mouseDragged(MouseEvent e) {
     }
 
+    private Component getTileUI(int x, int y) {
+        return chessBoard.findComponentAt(x, y);
+    }
     private void colorizeLegalMoves(List<Tile> tiles) {
         tiles.forEach(tile -> {
             if (tile.color() == ch.claudedy.chess.basis.Color.BLACK) {
