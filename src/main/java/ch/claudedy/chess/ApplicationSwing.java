@@ -35,16 +35,19 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private final JLayeredPane layeredPane;
     private JPanel chessBoard;
     private JPanel informationArea;
-    private Tile from;
     private Map<String, Tile> piecesView = new HashMap<>();
     private Map<Tile, Integer> squaresView = new HashMap<>();
     private Map<String, Tile> squaresAtView = new HashMap<>();
+
+    // CHOICE ABOUT PLAYER
+    private Tile selectedPieceTile;
 
     public static void main(String[] args) {
         if (SystemConfig.COMPUTER_ON) {
             stockFish = new StockFish();
         }
 
+        // Configuration of the Swing Application
         ApplicationSwing frame = new ApplicationSwing();
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         frame.pack();
@@ -54,29 +57,30 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     public ApplicationSwing() {
-        Dimension boardSize = new Dimension(600, 800);
+        Dimension boardSize = new Dimension(600, 700);
 
-        //  Use a Layered Pane for this application
+        //  Create a root layer
         layeredPane = new JLayeredPane();
         layeredPane.setPreferredSize(boardSize);
         layeredPane.addMouseListener(this);
         layeredPane.addMouseMotionListener(this);
         getContentPane().add(layeredPane);
 
-        this.startGame();
+        // Launch the game (initm, etc...)
+        this.startNewGame();
     }
 
-    private void startGame() {
+    private void startNewGame() {
         if (SystemConfig.COMPUTER_ON) {
             stockFish.startEngine();
         }
-        Dimension boardSize = new Dimension(600, 800);
 
+        Dimension boardSize = new Dimension(600, 700);
         if (this.layeredPane.getComponentCount() != 0) {
             this.layeredPane.removeAll();
         }
 
-        //Add a chess board to the Layered Pane
+        // Add a chess board layer to the root Layer
         chessBoard = new JPanel();
         chessBoard.setName("BOARD");
         chessBoard.setLayout(new GridLayout(8, 8));
@@ -84,26 +88,23 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         chessBoard.setBounds(0, 0, 600, 600);
         layeredPane.add(chessBoard, JLayeredPane.DEFAULT_LAYER);
 
+        // Add an information layer to the root layer
         informationArea = new JPanel();
         informationArea.setName("INFORMATION");
-        informationArea.setLayout(new GridLayout(4, 1));
+        informationArea.setLayout(new GridLayout(3, 1));
         informationArea.setPreferredSize(boardSize);
-        informationArea.setBounds(0, 600, 600, 200);
+        informationArea.setBounds(0, 600, 600, 100);
         layeredPane.add(informationArea, JLayeredPane.DEFAULT_LAYER);
 
+        // Load the chess board from a file
+        chess = LoaderFromFile.readFile(SystemConfig.BOARD);
 
-        DataForLoadingBoard loadingBoard = LoaderFromFile.readFile(SystemConfig.BOARD);
-        chess = new Chess(loadingBoard.fen(), loadingBoard.previousMove());
-
-        this.resetVariables();
-        this.placeSquare();
-        this.placeSquareForInformationArea();
-        this.resetBackgroundTiles();
-        this.placePieces();
+        this.printSquares();
+        this.reset();
         this.printPreviousMove(chess.actualMove());
     }
 
-    private void placeSquareForInformationArea() {
+    private void printInformationArea() {
 
         if (informationArea.getComponentCount() != 0) {
             informationArea.removeAll();
@@ -111,52 +112,20 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         Board currentBoard = chess.currentBoard();
 
-        JPanel panelCurrentPlayer = new JPanel(new BorderLayout());
+        JTextField panelCurrentPlayer = new JTextField("Current Player : " + currentBoard.currentPlayer());
         panelCurrentPlayer.setName("CURRENT_PLAYER");
-        panelCurrentPlayer.add(new JLabel("Current Player : " + currentBoard.currentPlayer()));
         informationArea.add(panelCurrentPlayer);
-
-        JPanel panelMoves = new JPanel(new BorderLayout());
-        panelMoves.setName("MOVES");
-        final StringBuilder moves = new StringBuilder();
-        if (!chess.historicalBoards().isEmpty()) {
-            chess.historicalBoards().forEach(historic -> {
-                Board board = FenUtils.fenToBoard(historic.fen());
-                if (!moves.isEmpty()) {
-                    moves.append(", ");
-                }
-                if (historic.previousMove() != null) {
-                    moves.append(board.moves()).append(": ").append(historic.previousMove().endPosition());
-                }
-            });
-
-            if (chess.actualMove() != null) {
-                if (!moves.isEmpty()) {
-                    moves.append(", ");
-                }
-                moves.append(chess.currentBoard().moves()).append(": ").append(chess.actualMove().endPosition());
-            }
-        } else {
-            if (chess.actualMove() != null) {
-                moves.append(chess.currentBoard().moves()).append(": ").append(chess.actualMove().endPosition());
-            }
-        }
-
-        panelMoves.add(new JLabel("Moves : " + moves.toString()));
-        informationArea.add(panelMoves);
 
         JTextField panelFen = new JTextField("Fen : " + FenUtils.boardToFen(currentBoard));
         panelFen.setName("FEN");
         informationArea.add(panelFen);
 
-        JPanel panelGameStatus = new JPanel(new BorderLayout());
+        JTextField panelGameStatus = new JTextField("Status : " + chess.status());
         panelGameStatus.setName("GAME_STATUS");
-        panelGameStatus.add(new JLabel("Status : " + chess.status()));
         informationArea.add(panelGameStatus);
     }
 
-    private void placeSquare() {
-        piecesView = new HashMap<>();
+    private void printSquares() {
         squaresAtView = new HashMap<>();
         squaresView = new HashMap<>();
         chessBoard.removeAll();
@@ -179,7 +148,9 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
     }
 
-    private void placePieces() {
+    private void printPieces() {
+        piecesView = new HashMap<>();
+
         int counter = 0;
         Square[][] squares = chess.currentBoard().squares();
 
@@ -215,12 +186,13 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
     }
 
-    private void resetVariables() {
-        if (from != null)
-            chessBoard.getComponent(squaresView.get(from)).setBackground(getColorTile(from.color()));
+    private void initSelectedPieceTile() {
+        if (selectedPieceTile != null) {
+            // Reset color for the selected piece tile
+            chessBoard.getComponent(squaresView.get(selectedPieceTile)).setBackground(getColorTile(selectedPieceTile.color()));
+        }
 
-        from = null;
-        piecesView = new HashMap<>();
+        selectedPieceTile = null;
     }
 
     private void resetBackgroundTiles() {
@@ -234,9 +206,9 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     private void reset() {
-        this.resetVariables();
-        this.placeSquareForInformationArea();
-        this.placePieces();
+        this.initSelectedPieceTile();
+        this.printInformationArea();
+        this.printPieces();
         this.resetBackgroundTiles();
     }
 
@@ -258,7 +230,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     public void mouseClicked(MouseEvent e) {
         if (chessBoard.findComponentAt(e.getX(), e.getY()) != null) {
 
-            if (from == null && e.getButton() == 1) {
+            if (selectedPieceTile == null && e.getButton() == 1) {
                 this.resetBackgroundTiles();
                 Component c = chessBoard.findComponentAt(e.getX(), e.getY());
 
@@ -266,18 +238,18 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     return;
                 }
 
-                from = piecesView.get(c.getParent().getName());
-                chessBoard.getComponent(squaresView.get(from)).setBackground(getColorTilePosition(from.color()));
+                selectedPieceTile = piecesView.get(c.getParent().getName());
+                chessBoard.getComponent(squaresView.get(selectedPieceTile)).setBackground(getColorTilePosition(selectedPieceTile.color()));
 
-                this.colorizeLegalMoves(chess.getLegalMoves(from));
-            } else if (from != null && e.getButton() == 1) {
+                this.colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
+            } else if (selectedPieceTile != null && e.getButton() == 1) {
                 Component c = chessBoard.findComponentAt(e.getX(), e.getY());
                 Tile destination = squaresAtView.get(c.getName());
                 if (destination == null) {
                     destination = squaresAtView.get(c.getParent().getName());
                 }
 
-                MoveCommand moveCommand = new MoveCommand(from, destination, null);
+                MoveCommand moveCommand = new MoveCommand(selectedPieceTile, destination, null);
                 MoveFeedBack status = chess.makeMove(moveCommand);
 
                 if (status == MoveFeedBack.RUNNING) {
@@ -286,7 +258,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     if (SystemConfig.COMPUTER_ON) {
                         String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
                         System.out.println("The computer'smove : " + bestMove);
-                        MoveCommand commandComputer = new MoveCommand(Tile.valueOf(bestMove.substring(0, 2).toUpperCase()), Tile.valueOf(bestMove.substring(2, 4).toUpperCase()), null);
+                        MoveCommand commandComputer = MoveCommand.convert(bestMove);
                         status = chess.makeMove(commandComputer);
                         this.reset();
                         this.printPreviousMove(commandComputer);
@@ -300,12 +272,12 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     }
 
                     this.reset();
-                    this.startGame();
+                    this.startNewGame();
                 } else {
                     this.reset();
                     this.mouseClicked(e);
                 }
-            } else if (from == null && e.getButton() == 3) {
+            } else if (selectedPieceTile == null && e.getButton() == 3) {
                 // color background red
                 Component c = chessBoard.findComponentAt(e.getX(), e.getY());
                 Tile tileSelected = squaresAtView.get(c.getName());
@@ -318,11 +290,11 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 } else {
                     chessBoard.getComponent(squaresView.get(tileSelected)).setBackground(SQUARE_RED_NORMAL);
                 }
-            } else if (from == null && e.getButton() == 2) {
+            } else if (selectedPieceTile == null && e.getButton() == 2) {
                 chess.rollbackPreviousState();
                 this.reset();
             } else {
-                this.from = null;
+                this.selectedPieceTile = null;
                 this.resetBackgroundTiles();
                 this.mouseClicked(e);
             }

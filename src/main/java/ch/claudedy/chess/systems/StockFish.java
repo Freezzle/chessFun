@@ -1,8 +1,5 @@
 package ch.claudedy.chess.systems;
 
-import ch.claudedy.chess.basis.*;
-import ch.claudedy.chess.utils.FenUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,7 +25,7 @@ public class StockFish {
     private OutputStreamWriter processWriter;
 
 
-    public boolean startEngine() {
+    public void startEngine() {
         try {
             engineProcess = Runtime.getRuntime().exec(URL.getFile());
             processReader = new BufferedReader(new InputStreamReader(engineProcess.getInputStream()));
@@ -38,10 +35,8 @@ public class StockFish {
             command("setoption name UCI_Elo value" + SystemConfig.ELO_COMPUTER, Function.identity(), s -> s.startsWith("readyok"), 100l);
         } catch (Exception e) {
             LOG.severe(e.getMessage());
-            return false;
         }
 
-        return true;
     }
 
     public String getBestMove(String fen, long waitTime) {
@@ -51,6 +46,7 @@ public class StockFish {
                     lines -> lines.stream().filter(s->s.startsWith("bestmove")).findFirst().get(),
                     line -> line.startsWith("bestmove"), waitTime + 300l).split(" ")[1];
         } catch (Exception e) {
+            LOG.severe(e.getMessage());
         }
 
         return "";
@@ -58,10 +54,11 @@ public class StockFish {
 
     public void stopEngine() {
         try {
-            sendCommand("quit");
+            command("quit", Function.identity(), null, 100l);
             processReader.close();
             processWriter.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
+            LOG.severe(e.getMessage());
         }
     }
 
@@ -88,42 +85,18 @@ public class StockFish {
                         throw new RuntimeException("Unexpected token: " + line);
                     }
                     output.add(line);
-                    if (breakCondition.test(line)) {
+                    if (breakCondition == null || breakCondition.test(line)) {
                         // At this point we are no longer interested to read any more
                         // output from the engine, we consider that the engine responded
                         break;
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.severe(e.getMessage());
             }
             return commandProcessor.apply(output);
         });
 
         return command.get(timeout, TimeUnit.MILLISECONDS);
-    }
-
-    public void sendCommand(String command) throws IOException {
-        processWriter.write(command + "\n");
-        processWriter.flush();
-    }
-
-    public String getOutput(int waitTime) {
-        StringBuffer buffer = new StringBuffer();
-        try {
-            Thread.sleep(waitTime);
-            sendCommand("isready");
-            while (true) {
-                String text = processReader.readLine();
-                if (text.equals("readyok")) {
-                    break;
-                }
-
-                buffer.append(text + "\n");
-            }
-        } catch (Exception e) {
-        }
-
-        return buffer.toString();
     }
 }

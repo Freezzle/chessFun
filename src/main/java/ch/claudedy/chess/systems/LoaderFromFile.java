@@ -1,35 +1,38 @@
 package ch.claudedy.chess.systems;
 
+import ch.claudedy.chess.basis.Chess;
 import ch.claudedy.chess.basis.MoveCommand;
-import ch.claudedy.chess.basis.Tile;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Logger;
 
 public class LoaderFromFile {
-    public static DataForLoadingBoard readFile(String fileName) {
-        DataForLoadingBoard fileWrapper = null;
+    private static final Logger LOG = Logger.getLogger("LoaderFromFile");
+
+    public static Chess readFile(String fileName) {
+        String fen = null;
+        MoveCommand previousMove = null;
+
         try (BufferedReader br = new BufferedReader(new FileReader(getFileFromResource(fileName)))) {
             String line = br.readLine();
             String[] values = line.split(";");
 
-            MoveCommand previousMove = null;
-            if(!values[1].equals("-")) {
-                String[] positions = values[1].split("-");
-                previousMove = new MoveCommand(Tile.valueOf(positions[0]), Tile.valueOf(positions[1]), null);
+            if(values.length > 0) {
+                fen = values[0];
             }
 
-            fileWrapper = new DataForLoadingBoard(values[0], previousMove);
-
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            if(values.length > 1 && !values[1].equals("-")) {
+                previousMove = MoveCommand.convert(values[1]);
+            }
+        } catch (Exception e) {
+            LOG.severe(e.getMessage());
         }
 
-        return fileWrapper;
+        return new Chess(fen, previousMove);
     }
 
     private static File getFileFromResource(String fileName) throws URISyntaxException {
