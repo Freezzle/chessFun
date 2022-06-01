@@ -274,7 +274,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                         this.printPreviousMove(commandComputer, chess.currentBoard().currentPlayer().reverseColor());
                     }
 
-                    if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
+                    if (status.isGameOver()) {
                         if (SystemConfig.COMPUTER_ON) {
                             stockFish.stopEngine();
                         }
@@ -282,7 +282,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                         this.reset();
                         this.startNewGame();
                     }
-                } else if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
+                } else if (status.isGameOver()) {
 
                     if (SystemConfig.COMPUTER_ON) {
                         stockFish.stopEngine();
@@ -290,7 +290,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
                     this.reset();
                     this.startNewGame();
-                } else {
+                } else if (status.isStatusError()) {
                     this.reset();
                     this.mouseClicked(e);
                 }

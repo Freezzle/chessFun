@@ -159,6 +159,10 @@ public class Chess {
     }
 
     private MoveFeedBack isThatMoveLegal(MoveCommand move) {
+        if(move == null || move.startPosition() == null || move.endPosition() == null){
+            return MoveFeedBack.BAD_SELECTION;
+        }
+
         Square startSquare = this.currentBoard.get(move.startPosition());
 
         // Check if the start position contains a piece
