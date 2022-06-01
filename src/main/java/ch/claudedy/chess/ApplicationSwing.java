@@ -15,8 +15,11 @@ import java.util.Map;
 
 public class ApplicationSwing extends JFrame implements MouseListener, MouseMotionListener {
 
-    private static final Color BLACK_POSITION = new Color(100, 180, 100);
-    private static final Color WHITE_POSITION = new Color(120, 200, 120);
+    private static final Color DARK_GREEN_MOVE = new Color(100, 180, 100);
+    private static final Color NORMAL_GREEN_MOVE = new Color(120, 200, 120);
+
+    private static final Color DARK_ORANGE_MOVE = new Color(175, 100, 180);
+    private static final Color NORMAL_ORANGE_MOVE = new Color(200, 120, 183);
 
     private static final Color SQUARE_BLACK = new Color(180, 140, 100);
     private static final Color SQUARE_WHITE = new Color(240, 220, 180);
@@ -105,7 +108,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         this.printSquares();
         this.reset();
-        this.printPreviousMove(chess.actualMove());
+        this.printPreviousMove(chess.actualMove(), chess.currentBoard().currentPlayer().reverseColor());
     }
 
     private void printInformationArea() {
@@ -206,7 +209,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 chessBoard.getComponent(squaresView.get(currentTile)).setBackground(getColorTile(currentTile.color()));
             }
         }
-        this.printPreviousMove(chess.actualMove());
+        this.printPreviousMove(chess.actualMove(), chess.currentBoard().currentPlayer().reverseColor());
     }
 
     private void reset() {
@@ -216,7 +219,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         this.resetBackgroundTiles();
     }
 
-    private void printPreviousMove(MoveCommand move) {
+    private void printPreviousMove(MoveCommand move, ch.claudedy.chess.basis.Color player) {
 
         // Reset background previous move
         if (chess.actualMove() != null) {
@@ -226,8 +229,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         // Colorize the new move backgrounds
         if (move != null) {
-            chessBoard.getComponent(squaresView.get(move.startPosition())).setBackground(getColorTilePosition(move.startPosition().color()));
-            chessBoard.getComponent(squaresView.get(move.endPosition())).setBackground(getColorTilePosition(move.endPosition().color()));
+            chessBoard.getComponent(squaresView.get(move.startPosition())).setBackground(getColorTileAboutMove(move.startPosition().color(), player));
+            chessBoard.getComponent(squaresView.get(move.endPosition())).setBackground(getColorTileAboutMove(move.endPosition().color(), player));
         }
     }
 
@@ -244,7 +247,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 }
 
                 selectedPieceTile = piecesView.get(tileClicked.getParent().getName());
-                chessBoard.getComponent(squaresView.get(selectedPieceTile)).setBackground(getColorTilePosition(selectedPieceTile.color()));
+                chessBoard.getComponent(squaresView.get(selectedPieceTile)).setBackground(getColorTileAboutMove(selectedPieceTile.color(), chess.currentBoard().currentPlayer()));
 
                 this.colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
             } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK) { // Piece already selected and we click left on board again (make move)
@@ -259,7 +262,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 // If the move was authorized
                 if (status == MoveFeedBack.RUNNING) {
                     this.reset();
-                    this.printPreviousMove(moveCommand);
+                    this.printPreviousMove(moveCommand, chess.currentBoard().currentPlayer().reverseColor());
 
                     if (SystemConfig.COMPUTER_ON) {
                         String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
@@ -268,7 +271,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                         status = chess.makeMove(commandComputer);
 
                         this.reset();
-                        this.printPreviousMove(commandComputer);
+                        this.printPreviousMove(commandComputer, chess.currentBoard().currentPlayer().reverseColor());
                     }
 
                     if (status == MoveFeedBack.CHECKMATED || status == MoveFeedBack.STALEMATED || status == MoveFeedBack.RULES_50) {
@@ -335,6 +338,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private Component getTileUI(int x, int y) {
         return chessBoard.findComponentAt(x, y);
     }
+
     private void colorizeLegalMoves(List<Tile> tiles) {
         tiles.forEach(tile -> {
             if (tile.color() == ch.claudedy.chess.basis.Color.BLACK) {
@@ -349,7 +353,11 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         return colorTile.isSameColor(ch.claudedy.chess.basis.Color.BLACK) ? SQUARE_BLACK : SQUARE_WHITE;
     }
 
-    private Color getColorTilePosition(ch.claudedy.chess.basis.Color colorTile) {
-        return colorTile.isSameColor(ch.claudedy.chess.basis.Color.BLACK) ? BLACK_POSITION : WHITE_POSITION;
+    private Color getColorTileAboutMove(ch.claudedy.chess.basis.Color colorTile, ch.claudedy.chess.basis.Color player) {
+        if (player.isWhite()) {
+            return !colorTile.isWhite() ? DARK_GREEN_MOVE : NORMAL_GREEN_MOVE;
+        } else {
+            return !colorTile.isWhite() ? DARK_ORANGE_MOVE : NORMAL_ORANGE_MOVE;
+        }
     }
 }

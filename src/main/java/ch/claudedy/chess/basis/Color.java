@@ -8,6 +8,10 @@ public enum Color {
         return this == color;
     }
 
+    public Color reverseColor() {
+        return WHITE == this ? BLACK : WHITE;
+    }
+
     public boolean isWhite() {
         return this == WHITE;
     }
