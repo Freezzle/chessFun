@@ -48,10 +48,10 @@ public class Chess {
 
             // Check if the enemy king is checkmated, etc..
             status = this.checkGameStatus();
-        }
 
-        if(SystemConfig.PRINT_CONSOLE){
-            ConsolePrint.execute(this);
+            if(SystemConfig.PRINT_CONSOLE){
+                ConsolePrint.execute(this);
+            }
         }
 
         return status;
@@ -115,22 +115,6 @@ public class Chess {
 
         // Remove the last index
         this.historicalBoards.remove(this.historicalBoards.size() - 1);
-    }
-
-
-    public List<MoveCommand> getAllMoves(Color player){
-        List<Tile> tilesPieces = this.getAlivePieces(player);
-
-        List<MoveCommand> moves = new ArrayList<>();
-
-        for(Tile tile : tilesPieces) {
-            List<Tile> legalMoves = this.getLegalMoves(tile);
-            legalMoves.forEach(dest -> {
-                moves.add(new MoveCommand(tile, dest, null));
-            });
-        }
-
-        return moves;
     }
 
     public List<Tile> getAlivePieces(Color colorPlayer) {
