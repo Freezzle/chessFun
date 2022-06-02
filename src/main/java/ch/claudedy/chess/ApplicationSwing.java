@@ -13,7 +13,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,7 +112,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         this.printPreviousMove(chess.actualMove());
 
         if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
-            String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
+            String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
             System.out.println("The computer's move : " + bestMove);
 
             MoveFeedBack status = chess.makeMove(MoveCommand.convert(bestMove));
@@ -124,7 +123,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 int counter = 0;
                 MoveFeedBack status = MoveFeedBack.RUNNING;
                 while (counter <= 100 && status == MoveFeedBack.RUNNING) {
-                    String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
+                    String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
                     System.out.println("The computer's move : " + bestMove);
 
                     status = chess.makeMove(MoveCommand.convert(bestMove));
@@ -191,17 +190,16 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     JPanel panel = (JPanel) component;
 
                     if (currentSquare.piece() != null) {
-                        if(panel.getComponentCount() != 0 && currentSquare.piece().letter().toString().equals(panel.getComponent(panel.getComponentCount() - 1).getName())) {
+                        String namePiece = currentSquare.piece().type().getAbrevTechnicalBlack() + "_" + currentSquare.piece().color();
+
+                        if(panel.getComponentCount() != 0 && namePiece.equals(panel.getComponent(0).getName())) {
                             continue;
                         } else {
                             if (panel.getComponentCount() != 0) {
-                                Arrays.stream(panel.getComponents()).forEach(comp -> {
-                                    comp.setVisible(false);
-                                });
+                                panel.getComponent(0).setVisible(false);
                             }
                         }
 
-                        String namePiece = currentSquare.piece().type().getAbrevTechnicalBlack() + "_" + currentSquare.piece().color();
                         ImageIcon imagePiece = piecesImages.get(namePiece);
                         if(imagePiece == null) {
                             imagePiece = new ImageIcon(ClassLoader.getSystemResource("images/" + namePiece + ".png"));
@@ -209,15 +207,12 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                         }
 
                         JLabel piece = new JLabel(imagePiece);
-                        piece.setName(currentSquare.piece().letter().toString());
-
-                        panel.add(piece);
+                        piece.setName(namePiece);
                         panel.setFocusable(false);
+                        panel.add(piece, 0);
                     } else {
                         if (panel.getComponentCount() != 0) {
-                            Arrays.stream(panel.getComponents()).forEach(comp -> {
-                                comp.setVisible(false);
-                            });
+                            panel.getComponent(0).setVisible(false);
                         }
                         panel.setFocusable(true);
                     }
@@ -249,8 +244,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         this.initSelectedPieceTile();
         this.printInformationArea();
         // TODO: 02.06.2022 PERFORMANCE TO IMPROVE HERE
-        this.printPieces();
         this.resetBackgroundTiles();
+        this.printPieces();
     }
 
     private synchronized void printPreviousMove(MoveCommand move) {
@@ -302,7 +297,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 this.manageAfterMove(status);
 
                 if (status.isStatusOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
-                    String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
+                    String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
                     System.out.println("The computer's move : " + bestMove);
 
                     status = chess.makeMove(MoveCommand.convert(bestMove));
