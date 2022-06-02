@@ -147,17 +147,20 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         Board currentBoard = chess.currentBoard();
 
-        JTextField panelCurrentPlayer = new JTextField("Current Player : " + currentBoard.currentPlayer());
+        JTextField panelCurrentPlayer = new JTextField(currentBoard.currentPlayer().isWhite() ? "White's turn" : "Black's turn");
         panelCurrentPlayer.setName("CURRENT_PLAYER");
         informationArea.add(panelCurrentPlayer);
 
-        JTextField panelFen = new JTextField("Fen : " + FenUtils.boardToFen(currentBoard));
+        String lastMoveNotation = (chess.actualMove() != null) ? chess.actualMove().convert() : "-";
+        JTextField panelFen = new JTextField(FenUtils.boardToFen(currentBoard) + ";" + lastMoveNotation);
         panelFen.setName("FEN");
         informationArea.add(panelFen);
 
-        JTextField panelGameStatus = new JTextField("Status : " + chess.status());
+        JTextField panelGameStatus = new JTextField(chess.status().name());
         panelGameStatus.setName("GAME_STATUS");
         informationArea.add(panelGameStatus);
+
+        informationArea.doLayout();
     }
 
     private synchronized void createSquares() {
@@ -257,9 +260,10 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private synchronized void reset() {
         this.initSelectedPieceTile();
         this.printInformationArea();
-        // TODO: 02.06.2022 PERFORMANCE TO IMPROVE HERE
         this.resetBackgroundTiles();
         this.printPieces();
+
+        chessBoard.doLayout();
     }
 
     private synchronized void printPreviousMove(MoveCommand move) {
