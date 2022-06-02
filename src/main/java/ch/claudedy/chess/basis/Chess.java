@@ -2,11 +2,11 @@ package ch.claudedy.chess.basis;
 
 import ch.claudedy.chess.systems.ConsolePrint;
 import ch.claudedy.chess.systems.SystemConfig;
+import ch.claudedy.chess.utils.FenUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import ch.claudedy.chess.utils.FenUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,21 +115,6 @@ public class Chess {
 
         // Remove the last index
         this.historicalBoards.remove(this.historicalBoards.size() - 1);
-    }
-
-    public List<Tile> getAlivePieces(Color colorPlayer) {
-        List<Tile> squareWithPieces = new ArrayList<>();
-
-        for (int x = 0; x <= 7; x++) {
-            for (int y = 0; y <= 7; y++) {
-                Piece occupiedPiece = this.currentBoard.squares()[x][y].piece();
-                if (occupiedPiece != null && occupiedPiece.color() == colorPlayer) {
-                    squareWithPieces.add(this.currentBoard.squares()[x][y].tile());
-                }
-            }
-        }
-
-        return squareWithPieces;
     }
 
     public List<Tile> getLegalMoves(Tile start) {
