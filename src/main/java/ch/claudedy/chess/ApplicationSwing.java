@@ -32,7 +32,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
     private static final int LEFT_CLICK = 1;
     private static final int RIGHT_CLICK = 3;
-    private static final int MIDDLE_CLICK = 2;
 
     private static final Map<String, ImageIcon> piecesImages = new HashMap<>();
 
@@ -41,12 +40,14 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     // CHESS (TRUTH)
     private Chess chess;
 
+    private boolean isComputerThinking = false;
+
     // VIEWS (ONLY VIEW PURPOSE)
     private final JLayeredPane layeredPane;
     private JPanel chessBoard;
     private JPanel informationArea;
 
-    private Map<String, Integer> squaresBoardUI = new HashMap<>();
+    private final Map<String, Integer> squaresBoardUI = new HashMap<>();
 
     // CHOICE ABOUT PLAYER
     private Tile selectedPieceTile;
@@ -113,8 +114,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
             String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-            System.out.println("The computer's move : " + bestMove);
-
             MoveFeedBack status = chess.makeMove(MoveCommand.convert(bestMove));
             this.manageAfterMove(status);
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
@@ -124,10 +123,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 MoveFeedBack status = MoveFeedBack.RUNNING;
                 while (counter <= 100 && status == MoveFeedBack.RUNNING) {
                     String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-                    System.out.println("The computer's move : " + bestMove);
-
                     status = chess.makeMove(MoveCommand.convert(bestMove));
-                    manageAfterMove(status);
+                    this.manageAfterMove(status);
 
                     counter++;
                 }
@@ -165,14 +162,27 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         Square[][] squares = chess.currentBoard().squares();
 
         int counter = 0;
-        for (int y = 7; y >= 0; y--) {
-            for (int x = 0; x <= 7; x++) {
-                JPanel squarePanel = new JPanel(new BorderLayout());
-                Square currentSquare = squares[x][y];
-                squarePanel.setName(currentSquare.tile().name());
-                chessBoard.add(squarePanel, counter);
-                squaresBoardUI.put(currentSquare.tile().name(), counter);
-                counter++;
+        if(SystemConfig.IS_WHITE_VIEW) {
+            for (int y = 7; y >= 0; y--) {
+                for (int x = 0; x <= 7; x++) {
+                    JPanel squarePanel = new JPanel(new BorderLayout());
+                    Square currentSquare = squares[x][y];
+                    squarePanel.setName(currentSquare.tile().name());
+                    chessBoard.add(squarePanel, counter);
+                    squaresBoardUI.put(currentSquare.tile().name(), counter);
+                    counter++;
+                }
+            }
+        } else {
+            for (int y = 0; y <= 7; y++) {
+                for (int x = 7; x >= 0; x--) {
+                    JPanel squarePanel = new JPanel(new BorderLayout());
+                    Square currentSquare = squares[x][y];
+                    squarePanel.setName(currentSquare.tile().name());
+                    chessBoard.add(squarePanel, counter);
+                    squaresBoardUI.put(currentSquare.tile().name(), counter);
+                    counter++;
+                }
             }
         }
     }
@@ -192,7 +202,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     if (currentSquare.piece() != null) {
                         String namePiece = currentSquare.piece().type().getAbrevTechnicalBlack() + "_" + currentSquare.piece().color();
 
-                        if(panel.getComponentCount() != 0 && namePiece.equals(panel.getComponent(0).getName())) {
+                        if(panel.getComponentCount() != 0 && namePiece.equals(panel.getComponent(0).getName()) && panel.getComponent(0).isVisible()) {
                             continue;
                         } else {
                             if (panel.getComponentCount() != 0) {
@@ -268,7 +278,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         int buttonClicked = e.getButton();
 
         if (tileClicked != null) {
-            if (selectedPieceTile == null && buttonClicked == LEFT_CLICK) { // No piece selected and we click left on board (select a piece)
+            if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !this.isComputerThinking) { // No piece selected and we click left on board (select a piece)
                 this.resetBackgroundTiles();
 
                 if (tileClicked instanceof JPanel) {
@@ -284,7 +294,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 chessBoard.getComponent(this.squaresBoardUI.get(selectedPieceTile.name())).setBackground(getColorTileAboutMove(selectedPieceTile.color()));
 
                 this.colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
-            } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK) { // Piece already selected and we click left on board again (make move)
+            } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !this.isComputerThinking) { // Piece already selected and we click left on board again (make move)
                 Tile destination = Tile.getEnum(tileClicked.getName());
 
                 if (destination == null) {
@@ -297,11 +307,16 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 this.manageAfterMove(status);
 
                 if (status.isStatusOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
-                    String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-                    System.out.println("The computer's move : " + bestMove);
+                    this.isComputerThinking = true;
 
-                    status = chess.makeMove(MoveCommand.convert(bestMove));
-                    this.manageAfterMove(status);
+                    Thread thread = new Thread(() -> {
+                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
+                        this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
+
+                        this.isComputerThinking = false;
+                    });
+
+                    thread.start();
                 }
             } else if (selectedPieceTile == null && e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                 // color background red
@@ -312,9 +327,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 } else {
                     chessBoard.getComponent(this.squaresBoardUI.get(tileSelected.name())).setBackground(SQUARE_RED_NORMAL);
                 }
-            } else if (selectedPieceTile == null && e.getButton() == MIDDLE_CLICK) { // No piece selected and we click middle (rollback last board)
-                chess.rollbackPreviousState();
-                this.reset();
             } else { // Reset the board
                 this.selectedPieceTile = null;
                 this.resetBackgroundTiles();

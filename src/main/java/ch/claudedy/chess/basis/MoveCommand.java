@@ -3,7 +3,6 @@ package ch.claudedy.chess.basis;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
-import ch.claudedy.chess.basis.Tile;
 
 @Accessors(fluent = true)
 @Getter
@@ -27,5 +26,9 @@ public class MoveCommand {
         }
 
         return new MoveCommand(Tile.valueOf(move.substring(0, 2).toUpperCase()), Tile.valueOf(move.substring(2, 4).toUpperCase()), null);
+    }
+
+    public String convert() {
+        return startPosition.name() + endPosition.name() + ((promote != null) ? promote : "");
     }
 }

@@ -6,8 +6,6 @@ import ch.claudedy.chess.basis.Square;
 import ch.claudedy.chess.basis.Tile;
 import ch.claudedy.chess.utils.FenUtils;
 
-import java.text.DecimalFormat;
-
 public class ConsolePrint {
 
     public static final String RESET = "\033[0m";
@@ -96,7 +94,7 @@ public class ConsolePrint {
         }
         System.out.println();
 
-        System.out.println(FenUtils.boardToFen(chess.currentBoard()));
+        System.out.println(FenUtils.boardToFen(chess.currentBoard()) + ";" + chess.actualMove().convert());
         System.out.println();
     }
 }
