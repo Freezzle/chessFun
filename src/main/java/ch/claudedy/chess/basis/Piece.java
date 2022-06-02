@@ -34,23 +34,23 @@ public class Piece {
         int x = source.x();
         int y = source.y();
 
-        if (type.isTypeDiagonal()) {
+        if (type.canMoveDiagonally()) {
             addDiagonaleMoves(moves, squares, x, y, true);
         }
 
-        if (type.isTypeLinear()) {
+        if (type.canMoveLinearly()) {
             addLinearMoves(moves, squares, x, y, true);
         }
 
-        if (type.isTypeL()) {
+        if (type.canMoveInLShape()) {
             addLMoves(moves, squares, x, y, true);
         }
 
-        if (type.isTypeKing()) {
+        if (type.canOnlyMoveOneCase()) {
             addKingMoves(moves, board, x, y, true);
         }
 
-        if (type.isTypePawn()) {
+        if (type.canMoveOnlyForward()) {
             addPawnMoves(moves, board, x, y, true);
         }
 
@@ -64,23 +64,23 @@ public class Piece {
         int x = source.x();
         int y = source.y();
 
-        if (type.isTypeDiagonal()) {
+        if (type.canMoveDiagonally()) {
             addDiagonaleMoves(moves, squares, x, y, false);
         }
 
-        if (type.isTypeLinear()) {
+        if (type.canMoveLinearly()) {
             addLinearMoves(moves, squares, x, y, false);
         }
 
-        if (type.isTypeL()) {
+        if (type.canMoveInLShape()) {
             addLMoves(moves, squares, x, y, false);
         }
 
-        if (type.isTypeKing()) {
+        if (type.canOnlyMoveOneCase()) {
             addKingMoves(moves, board, x, y, false);
         }
 
-        if (type.isTypePawn()) {
+        if (type.canMoveOnlyForward()) {
             addPawnMoves(moves, board, x, y, false);
         }
 

@@ -49,23 +49,17 @@ public enum PieceType {
         return Color.BLACK;
     }
 
-    public boolean isTypeDiagonal() {
-        return this == QUEEN || this == BISHOP;
-    }
-
-    public boolean isTypeLinear() {
+    public boolean canMoveDiagonally() { return this == QUEEN || this == BISHOP; }
+    public boolean canMoveLinearly() {
         return this == QUEEN || this == ROOK;
     }
-
-    public boolean isTypeL() {
+    public boolean canMoveInLShape() {
         return this == KNIGHT;
     }
-
-    public boolean isTypeKing() {
+    public boolean canOnlyMoveOneCase() {
         return this == KING;
     }
-
-    public boolean isTypePawn() {
+    public boolean canMoveOnlyForward() {
         return this == PAWN;
     }
 }
