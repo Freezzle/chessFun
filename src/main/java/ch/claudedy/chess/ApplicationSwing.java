@@ -104,7 +104,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             stockFish.startEngine();
         }
 
-        this.printSquares();
+        this.createSquares();
+
         this.reset();
         this.printPreviousMove(chess.actualMove(), chess.currentBoard().currentPlayer().reverseColor());
     }
@@ -130,7 +131,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         informationArea.add(panelGameStatus);
     }
 
-    private void printSquares() {
+    private void createSquares() {
         squaresAtView = new HashMap<>();
         squaresView = new HashMap<>();
         chessBoard.removeAll();
