@@ -195,7 +195,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             for (int x = 0; x <= 7; x++) {
 
                 Square currentSquare = squares[x][y];
-                Component component = chessBoard.getComponent(this.squaresBoardUI.get(currentSquare.tile().name()));
+                Component component = getComponentUI(currentSquare.tile());
                 if (component instanceof JPanel) {
                     JPanel panel = (JPanel) component;
 
@@ -234,7 +234,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private synchronized void initSelectedPieceTile() {
         if (selectedPieceTile != null) {
             // Reset color for the selected piece tile
-            chessBoard.getComponent(this.squaresBoardUI.get(selectedPieceTile.name())).setBackground(getColorTile(selectedPieceTile.color()));
+            getComponentUI(selectedPieceTile).setBackground(getColorTile(selectedPieceTile.color()));
         }
 
         selectedPieceTile = null;
@@ -244,7 +244,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
                 Tile currentTile = chess.currentBoard().squares()[x][y].tile();
-                chessBoard.getComponent(this.squaresBoardUI.get(currentTile.name())).setBackground(getColorTile(currentTile.color()));
+                getComponentUI(currentTile).setBackground(getColorTile(currentTile.color()));
             }
         }
         this.printPreviousMove(chess.actualMove());
@@ -262,14 +262,14 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         // Reset background previous move
         if (chess.actualMove() != null) {
-            chessBoard.getComponent(this.squaresBoardUI.get(chess.actualMove().startPosition().name())).setBackground(getColorTile(chess.actualMove().startPosition().color()));
-            chessBoard.getComponent(this.squaresBoardUI.get(chess.actualMove().endPosition().name())).setBackground(getColorTile(chess.actualMove().endPosition().color()));
+            getComponentUI(chess.actualMove().startPosition()).setBackground(getColorTile(chess.actualMove().startPosition().color()));
+            getComponentUI(chess.actualMove().endPosition()).setBackground(getColorTile(chess.actualMove().endPosition().color()));
         }
 
         // Colorize the new move backgrounds
         if (move != null) {
-            chessBoard.getComponent(this.squaresBoardUI.get(move.startPosition().name())).setBackground(getColorTileAboutMove(move.startPosition().color()));
-            chessBoard.getComponent(this.squaresBoardUI.get(move.endPosition().name())).setBackground(getColorTileAboutMove(move.endPosition().color()));
+            getComponentUI(move.startPosition()).setBackground(getColorTileAboutMove(move.startPosition().color()));
+            getComponentUI(move.endPosition()).setBackground(getColorTileAboutMove(move.endPosition().color()));
         }
     }
 
@@ -291,7 +291,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     selectedPieceTile = Tile.getEnum(tileClicked.getName());
                 }
 
-                chessBoard.getComponent(this.squaresBoardUI.get(selectedPieceTile.name())).setBackground(getColorTileAboutMove(selectedPieceTile.color()));
+                getComponentUI(selectedPieceTile).setBackground(getColorTileAboutMove(selectedPieceTile.color()));
 
                 this.colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
             } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !this.isComputerThinking) { // Piece already selected and we click left on board again (make move)
@@ -323,9 +323,9 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 final Tile tileSelected = tileClicked.getName() != null ? Tile.getEnum(tileClicked.getName()) : Tile.getEnum(tileClicked.getParent().getName());
 
                 if (tileSelected.color() == ch.claudedy.chess.basis.Color.BLACK) {
-                    chessBoard.getComponent(this.squaresBoardUI.get(tileSelected.name())).setBackground(SQUARE_RED_DARK);
+                    getComponentUI(tileSelected).setBackground(SQUARE_RED_DARK);
                 } else {
-                    chessBoard.getComponent(this.squaresBoardUI.get(tileSelected.name())).setBackground(SQUARE_RED_NORMAL);
+                    getComponentUI(tileSelected).setBackground(SQUARE_RED_NORMAL);
                 }
             } else { // Reset the board
                 this.selectedPieceTile = null;
@@ -373,12 +373,16 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         return chessBoard.findComponentAt(x, y);
     }
 
+    private Component getComponentUI(Tile tile) {
+        return chessBoard.getComponent(this.squaresBoardUI.get(tile.name()));
+    }
+
     private void colorizeLegalMoves(List<Tile> tiles) {
         tiles.forEach(tile -> {
             if (tile.color() == ch.claudedy.chess.basis.Color.BLACK) {
-                chessBoard.getComponent(this.squaresBoardUI.get(tile.name())).setBackground(SQUARE_YELLOW_DARK);
+                getComponentUI(tile).setBackground(SQUARE_YELLOW_DARK);
             } else {
-                chessBoard.getComponent(this.squaresBoardUI.get(tile.name())).setBackground(SQUARE_YELLOW_NORMAL);
+                getComponentUI(tile).setBackground(SQUARE_YELLOW_NORMAL);
             }
         });
     }
