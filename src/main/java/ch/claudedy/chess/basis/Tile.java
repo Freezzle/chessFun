@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Accessors(fluent = true)
 @Getter
@@ -91,5 +92,9 @@ public enum Tile {
 
     public static Tile getEnum(int x, int y){
         return Arrays.stream(VALUES).filter(value -> value.x == x && value.y == y).findFirst().orElse(null);
+    }
+
+    public static Tile getEnum(String tile){
+        return Arrays.stream(VALUES).filter(value -> value.name().equals(tile)).findFirst().orElse(null);
     }
 }
