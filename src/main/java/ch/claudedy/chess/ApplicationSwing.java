@@ -107,9 +107,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
             System.out.println("The computer's move : " + bestMove);
 
-            MoveCommand commandComputer = MoveCommand.convert(bestMove);
-            MoveFeedBack status = chess.makeMove(commandComputer);
-            this.manageAfterMove(status, commandComputer);
+            MoveFeedBack status = chess.makeMove(MoveCommand.convert(bestMove));
+            this.manageAfterMove(status);
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
 
             Thread thread = new Thread(() -> {
@@ -119,9 +118,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
                     System.out.println("The computer's move : " + bestMove);
 
-                    MoveCommand commandComputer = MoveCommand.convert(bestMove);
-                    status = chess.makeMove(commandComputer);
-                    manageAfterMove(status, commandComputer);
+                    status = chess.makeMove(MoveCommand.convert(bestMove));
+                    manageAfterMove(status);
 
                     counter++;
                 }
@@ -268,19 +266,17 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     destination = Tile.getEnum(tileClicked.getParent().getName());
                 }
 
-                MoveCommand moveCommand = new MoveCommand(selectedPieceTile, destination, null);
-                MoveFeedBack status = chess.makeMove(moveCommand);
+                MoveFeedBack status = chess.makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
                 // If the move was authorized
-                this.manageAfterMove(status, moveCommand);
+                this.manageAfterMove(status);
 
                 if (status.isStatusOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
                     String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
                     System.out.println("The computer's move : " + bestMove);
 
-                    MoveCommand commandComputer = MoveCommand.convert(bestMove);
-                    status = chess.makeMove(commandComputer);
-                    this.manageAfterMove(status, commandComputer);
+                    status = chess.makeMove(MoveCommand.convert(bestMove));
+                    this.manageAfterMove(status);
                 }
             } else if (selectedPieceTile == null && e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                 // color background red
@@ -302,7 +298,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
     }
 
-    public synchronized void manageAfterMove(MoveFeedBack status, MoveCommand moveMade) {
+    public synchronized void manageAfterMove(MoveFeedBack status) {
         // If the move was authorized
         if (status == MoveFeedBack.RUNNING) { // MOVE OK
             this.reset();
