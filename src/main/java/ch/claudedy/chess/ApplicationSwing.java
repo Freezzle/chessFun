@@ -31,6 +31,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private static final Color SQUARE_YELLOW_NORMAL = new Color(240, 192, 180);
 
     private static final int LEFT_CLICK = 1;
+    private static final int MIDDLE_CLICK = 2;
     private static final int RIGHT_CLICK = 3;
 
     private static final Map<String, ImageIcon> piecesImages = new HashMap<>();
@@ -41,6 +42,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private Chess chess;
 
     private boolean isComputerThinking = false;
+    private boolean isWhiteView = SystemConfig.IS_WHITE_VIEW;
 
     // VIEWS (ONLY VIEW PURPOSE)
     private final JLayeredPane layeredPane;
@@ -120,11 +122,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
             Thread thread = new Thread(() -> {
                 int counter = 0;
-                MoveFeedBack status = MoveFeedBack.RUNNING;
-                while (counter <= 100 && status == MoveFeedBack.RUNNING) {
-                    String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-                    status = chess.makeMove(MoveCommand.convert(bestMove));
-                    this.manageAfterMove(status);
+                while (counter <= 100 && chess.status() == MoveFeedBack.RUNNING) {
+                    launchComputerMove();
 
                     counter++;
                 }
@@ -134,6 +133,11 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
             thread.start();
         }
+    }
+
+    private void launchComputerMove() {
+        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
+        this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
     }
 
     private synchronized void printInformationArea() {
@@ -162,7 +166,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         Square[][] squares = chess.currentBoard().squares();
 
         int counter = 0;
-        if(SystemConfig.IS_WHITE_VIEW) {
+        if(isWhiteView) {
             for (int y = 7; y >= 0; y--) {
                 for (int x = 0; x <= 7; x++) {
                     JPanel squarePanel = new JPanel(new BorderLayout());
@@ -310,9 +314,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     this.isComputerThinking = true;
 
                     Thread thread = new Thread(() -> {
-                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-                        this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
-
+                        launchComputerMove();
                         this.isComputerThinking = false;
                     });
 
@@ -327,6 +329,12 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 } else {
                     getComponentUI(tileSelected).setBackground(SQUARE_RED_NORMAL);
                 }
+            } else if(e.getButton() == MIDDLE_CLICK) {
+                isWhiteView = !isWhiteView;
+                this.createSquares();
+
+                this.reset();
+                this.printPreviousMove(chess.actualMove());
             } else { // Reset the board
                 this.selectedPieceTile = null;
                 this.resetBackgroundTiles();
@@ -345,7 +353,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             }
 
             this.reset();
-            this.startNewGame();
         } else if (status.isStatusError()) { // ERROR FROM MOVE
             this.reset();
         }
