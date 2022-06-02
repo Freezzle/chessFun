@@ -29,10 +29,20 @@ public class ConsolePrint {
         Tile startMove = chess.actualMove() != null ? chess.actualMove().startPosition() : null;
         Tile endMove = chess.actualMove() != null ? chess.actualMove().endPosition() : null;
 
+        System.out.print("  ");
+        for(int x=0; x<=7;x++){
+            System.out.print(" " + Tile.getEnum(x, 7).col() + " ");
+        }
+        System.out.println();
+
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
                 Square square = chess.currentBoard().squares()[x][y];
                 Piece piece = square.piece();
+
+                if(x == 0) {
+                    System.out.print(Tile.getEnum(x, y).line() + " ");
+                }
 
                 if (startMove != null && startMove.equals(square.tile())) {
                     if (chess.currentBoard().currentPlayer().isWhite()) {
@@ -72,9 +82,20 @@ public class ConsolePrint {
                 System.out.print(chess.currentBoard().squares()[x][y].printSquare());
                 System.out.print(" ");
                 System.out.print(RESET);
+
+                if(x == 7) {
+                    System.out.print(" " + Tile.getEnum(x, y).line() + " ");
+                }
             }
             System.out.println();
         }
+
+        System.out.print("  ");
+        for(int x=0; x<=7;x++){
+            System.out.print(" " + Tile.getEnum(x, 0).col() + " ");
+        }
+        System.out.println();
+
         System.out.println(FenUtils.boardToFen(chess.currentBoard()));
         System.out.println();
     }
