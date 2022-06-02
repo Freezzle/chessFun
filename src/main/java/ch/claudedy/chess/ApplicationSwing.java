@@ -33,7 +33,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private static final int RIGHT_CLICK = 3;
     private static final int MIDDLE_CLICK = 2;
 
-    private static StockFish stockFish;
+    private StockFish stockFish;
 
     // CHESS (TRUTH)
     private Chess chess;
@@ -50,10 +50,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private Tile selectedPieceTile;
 
     public static void main(String[] args) {
-        if (SystemConfig.COMPUTER_ON) {
-            stockFish = new StockFish();
-        }
-
         // Configuration of the Swing Application
         ApplicationSwing frame = new ApplicationSwing();
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -79,6 +75,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
     private void startNewGame() {
         if (SystemConfig.COMPUTER_ON) {
+            stockFish = new StockFish();
             stockFish.startEngine();
         }
 
@@ -105,6 +102,10 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         // Load the chess board from a file
         chess = LoaderFromFile.readFile(SystemConfig.BOARD);
+
+        if(SystemConfig.COMPUTER_ON){
+            stockFish.startEngine();
+        }
 
         this.printSquares();
         this.reset();
@@ -293,7 +294,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
     }
 
-    private void manageAfterMove(MoveFeedBack status, MoveCommand moveMade) {
+    public void manageAfterMove(MoveFeedBack status, MoveCommand moveMade) {
         // If the move was authorized
         if (status == MoveFeedBack.RUNNING) { // MOVE OK
             this.reset();
