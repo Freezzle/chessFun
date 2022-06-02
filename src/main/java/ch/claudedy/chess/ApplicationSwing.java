@@ -114,7 +114,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             Thread thread = new Thread(() -> {
                 int counter = 0;
                 MoveFeedBack status = MoveFeedBack.RUNNING;
-                while (counter <= 50 && status == MoveFeedBack.RUNNING) {
+                while (counter <= 100 && status == MoveFeedBack.RUNNING) {
                     String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), 1000);
                     System.out.println("The computer's move : " + bestMove);
 
@@ -123,6 +123,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
                     counter++;
                 }
+
+                Thread.currentThread().interrupt();
             });
 
             thread.start();
@@ -130,7 +132,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     private synchronized void printInformationArea() {
-
         if (informationArea.getComponentCount() != 0) {
             informationArea.removeAll();
         }
@@ -179,7 +180,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     if (panel.getComponentCount() != 0) {
                         Arrays.stream(panel.getComponents()).forEach(comp -> {
                             comp.setVisible(false);
-                            panel.remove(comp);
                         });
                     }
 
