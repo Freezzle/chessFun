@@ -19,16 +19,16 @@ import java.util.Map;
 
 public class ApplicationSwing extends JFrame implements MouseListener, MouseMotionListener {
 
-    private static final Color DARK_GREEN_MOVE = new Color(100, 180, 100);
-    private static final Color NORMAL_GREEN_MOVE = new Color(120, 200, 120);
+    private static final Color BLACK_SQUARE = new Color(75, 115, 145);
+    private static final Color WHITE_SQUARE = new Color(230, 230, 210);
 
-    private static final Color SQUARE_BLACK = new Color(75, 115, 145);
-    private static final Color SQUARE_WHITE = new Color(230, 230, 210);
+    private static final Color PREVIOUS_MOVE_BLACK_SQUARE = new Color(100, 180, 100);
+    private static final Color PREVIOUS_MOVE_WHITE_SQUARE = new Color(130, 200, 130);
 
-    private static final Color SQUARE_RED_DARK = new Color(200, 100, 90);
-    private static final Color SQUARE_RED_NORMAL = new Color(235, 125, 100);
-    private static final Color SQUARE_YELLOW_DARK = new Color(180, 123, 100);
-    private static final Color SQUARE_YELLOW_NORMAL = new Color(240, 192, 180);
+    private static final Color ANALYSE_CLICKED_BLACK_SQUARE = new Color(200, 100, 90);
+    private static final Color ANALYSE_CLICKED_WHITE_SQUARE = new Color(235, 125, 100);
+    private static final Color LEGAL_MOVE_BLACK_SQUARE = new Color(180, 123, 100);
+    private static final Color LEGAL_MOVE_WHITE_SQUARE = new Color(240, 192, 180);
 
     private static final int LEFT_CLICK = 1;
     private static final int MIDDLE_CLICK = 2;
@@ -332,9 +332,9 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 }
 
                 if (tileSelected.color() == ch.claudedy.chess.basis.Color.BLACK) {
-                    getComponentUI(tileSelected).setBackground(SQUARE_RED_DARK);
+                    getComponentUI(tileSelected).setBackground(ANALYSE_CLICKED_BLACK_SQUARE);
                 } else {
-                    getComponentUI(tileSelected).setBackground(SQUARE_RED_NORMAL);
+                    getComponentUI(tileSelected).setBackground(ANALYSE_CLICKED_WHITE_SQUARE);
                 }
             } else if(e.getButton() == MIDDLE_CLICK) {
                 isWhiteView = !isWhiteView;
@@ -392,18 +392,18 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private void colorizeLegalMoves(List<Tile> tiles) {
         tiles.forEach(tile -> {
             if (tile.color() == ch.claudedy.chess.basis.Color.BLACK) {
-                getComponentUI(tile).setBackground(SQUARE_YELLOW_DARK);
+                getComponentUI(tile).setBackground(LEGAL_MOVE_BLACK_SQUARE);
             } else {
-                getComponentUI(tile).setBackground(SQUARE_YELLOW_NORMAL);
+                getComponentUI(tile).setBackground(LEGAL_MOVE_WHITE_SQUARE);
             }
         });
     }
 
     private Color getColorTile(ch.claudedy.chess.basis.Color colorTile) {
-        return colorTile.isSameColor(ch.claudedy.chess.basis.Color.BLACK) ? SQUARE_BLACK : SQUARE_WHITE;
+        return colorTile.isSameColor(ch.claudedy.chess.basis.Color.BLACK) ? BLACK_SQUARE : WHITE_SQUARE;
     }
 
     private Color getColorTileAboutMove(ch.claudedy.chess.basis.Color colorTile) {
-        return !colorTile.isWhite() ? DARK_GREEN_MOVE : NORMAL_GREEN_MOVE;
+        return !colorTile.isWhite() ? PREVIOUS_MOVE_BLACK_SQUARE : PREVIOUS_MOVE_WHITE_SQUARE;
     }
 }
