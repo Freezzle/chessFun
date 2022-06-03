@@ -286,11 +286,13 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         JTextField panelWhitePlayer = new JTextField(playerWhite.getName() + " (" + playerWhite.getElo() + ")" + (currentBoard.currentPlayer().isWhite() ? " - your turn" : ""));
         panelWhitePlayer.setName("WHITE_PLAYER");
+        panelWhitePlayer.setFont(new Font("Arial", Font.BOLD, 12));
         panelWhitePlayer.setBounds(new Rectangle(600, 50));
         informationWhiteArea.add(panelWhitePlayer);
 
         JTextField panelBlackPieces = new JTextField(Calculator.giveRemovedPieces(currentBoard, Color.BLACK));
         panelBlackPieces.setName("ENNEMY_BLACK_PIECES_REMOVED");
+        panelBlackPieces.setFont(new Font("Arial", Font.BOLD, 12));
         panelBlackPieces.setBounds(new Rectangle(600, 50));
         informationWhiteArea.add(panelBlackPieces);
 
@@ -299,11 +301,17 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         JTextField panelBlackPlayer = new JTextField(playerBlack.getName() + " (" + playerBlack.getElo() + ")" + (!currentBoard.currentPlayer().isWhite() ? " - your turn" : ""));
         panelBlackPlayer.setName("BLACK_PLAYER");
         panelBlackPlayer.setBounds(new Rectangle(600, 50));
+        panelBlackPlayer.setBackground(java.awt.Color.DARK_GRAY);
+        panelBlackPlayer.setFont(new Font("Arial", Font.BOLD, 12));
+        panelBlackPlayer.setForeground(java.awt.Color.WHITE);
         informationBlackArea.add(panelBlackPlayer);
 
         JTextField panelWhitePieces = new JTextField(Calculator.giveRemovedPieces(currentBoard, Color.WHITE));
         panelWhitePieces.setName("ENNEMY_WHITE_PIECES_REMOVED");
         panelWhitePieces.setBounds(new Rectangle(600, 50));
+        panelWhitePieces.setBackground(java.awt.Color.DARK_GRAY);
+        panelWhitePieces.setFont(new Font("Arial", Font.BOLD, 12));
+        panelWhitePieces.setForeground(java.awt.Color.WHITE);
         informationBlackArea.add(panelWhitePieces);
 
         informationBlackArea.doLayout();
