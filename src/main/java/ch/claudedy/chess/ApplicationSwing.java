@@ -287,6 +287,10 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     public void mouseClicked(MouseEvent e) {
+        if(chess.gameStatus().isGameOver()){
+            return;
+        }
+
         Component tileClicked = getTileUI(e.getX(), e.getY());
         int buttonClicked = e.getButton();
 
@@ -319,7 +323,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 // If the move was authorized
                 this.manageAfterMove(status);
 
-                if (status.isStatusOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
+                if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
                     this.isComputerThinking = true;
 
                     Thread thread = new Thread(() -> {
@@ -353,19 +357,17 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
     }
 
-    public synchronized void manageAfterMove(MoveStatus status) {
+    public synchronized void manageAfterMove(MoveStatus moveDoneStatus) {
         // If the move was authorized
-        if (status == MoveStatus.OK) { // MOVE OK
-            this.reset();
-        } else if (status.isGameOver()) { // GAME OVER
-            if (SystemConfig.GAME_TYPE.containsAComputer()) {
-                stockFish.stopEngine();
+        if (moveDoneStatus.isOk()) { // MOVE OK
+            if (chess.gameStatus().isGameOver()) { // GAME OVER
+                if (SystemConfig.GAME_TYPE.containsAComputer()) {
+                    stockFish.stopEngine();
+                }
             }
-
-            this.reset();
-        } else if (status.isStatusError()) { // ERROR FROM MOVE
-            this.reset();
         }
+
+        this.reset();
     }
 
     public void mouseReleased(MouseEvent e) {
