@@ -125,7 +125,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
             Thread thread = new Thread(() -> {
                 int counter = 0;
-                while (counter <= 100 && !chess.gameStatus().isGameOver()) {
+                while (counter <= 250 && !chess.gameStatus().isGameOver()) {
 
                     if (chess.gameStatus().isGameWaitingMove()) {
                         launchComputerMove();
