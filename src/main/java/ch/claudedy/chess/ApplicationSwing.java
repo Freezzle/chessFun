@@ -384,6 +384,19 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
     }
 
+    public synchronized void manageAfterMove(MoveStatus moveDoneStatus) {
+        // If the move was authorized
+        if (moveDoneStatus.isOk()) { // MOVE OK
+            if (chess.gameStatus().isGameOver()) { // GAME OVER
+                if (SystemConfig.GAME_TYPE.containsAComputer()) {
+                    stockFish.stopEngine();
+                }
+            }
+        }
+
+        this.reset();
+    }
+
     public void mouseClicked(MouseEvent e) {
         if (e == null || chess.gameStatus().isGameOver()) {
             return;
@@ -443,24 +456,64 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
     }
 
-    public synchronized void manageAfterMove(MoveStatus moveDoneStatus) {
-        // If the move was authorized
-        if (moveDoneStatus.isOk()) { // MOVE OK
-            if (chess.gameStatus().isGameOver()) { // GAME OVER
-                if (SystemConfig.GAME_TYPE.containsAComputer()) {
-                    stockFish.stopEngine();
+    public void mousePressed(MouseEvent e) {
+        if (e == null || chess.gameStatus().isGameOver()) {
+            return;
+        }
+
+        Component tileClicked = getTileUI(e.getX(), e.getY());
+        int buttonClicked = e.getButton();
+
+        if (tileClicked != null) {
+            if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !this.isComputerThinking) { // No piece selected and we click left on board (select a piece)
+                this.resetBackgroundTiles();
+
+                if (tileClicked instanceof JPanel) {
+                    return;
+                }
+
+                selectedPieceTile = Tile.getEnum(tileClicked.getParent().getName());
+
+                if (selectedPieceTile == null) {
+                    selectedPieceTile = Tile.getEnum(tileClicked.getName());
+                }
+
+                getComponentUI(selectedPieceTile).setBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
+
+                this.colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
+            }
+        }
+    }
+
+
+    public void mouseReleased(MouseEvent e) {
+        if (e == null || chess.gameStatus().isGameOver()) {
+            return;
+        }
+
+        Component tileClicked = getTileUI(e.getX(), e.getY());
+        int buttonClicked = e.getButton();
+
+        if (tileClicked != null) {
+            if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !this.isComputerThinking) { // Piece already selected and we click left on board again (make move)
+                Tile destination = Tile.getEnum(tileClicked.getName());
+
+                if (destination == null) {
+                    destination = Tile.getEnum(tileClicked.getParent().getName());
+                }
+
+                MoveStatus status = chess.makeMove(new MoveCommand(selectedPieceTile, destination, null));
+
+                // If the move was authorized
+                this.manageAfterMove(status);
+
+                if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
+                    launchComputerMove();
                 }
             }
         }
-
-        this.reset();
     }
 
-    public void mouseReleased(MouseEvent e) {
-    }
-
-    public void mousePressed(MouseEvent e) {
-    }
 
     public void mouseMoved(MouseEvent e) {
     }
