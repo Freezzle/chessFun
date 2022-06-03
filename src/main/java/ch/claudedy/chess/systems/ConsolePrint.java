@@ -25,6 +25,8 @@ public class ConsolePrint {
         Tile startMove = chess.actualMove() != null ? chess.actualMove().startPosition() : null;
         Tile endMove = chess.actualMove() != null ? chess.actualMove().endPosition() : null;
 
+        System.out.println("Black : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.WHITE));
+
         System.out.print("  ");
         for (int x = 0; x <= 7; x++) {
             System.out.print(" " + Tile.getEnum(x, 7).col() + " ");
@@ -91,13 +93,15 @@ public class ConsolePrint {
             System.out.print(" " + Tile.getEnum(x, 0).col() + " ");
         }
         System.out.println();
+        System.out.println("White : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.BLACK));
 
+        System.out.println();
         System.out.print(FenUtils.boardToFen(chess.currentBoard()));
         System.out.print(chess.actualMove() != null ? ";" + chess.actualMove().convert() : ";-");
         System.out.println();
 
-        System.out.println("White : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.BLACK));
-        System.out.println("Black : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.WHITE));
         System.out.println("Status : " + chess.gameStatus());
+        System.out.println();
+        System.out.println();
     }
 }
