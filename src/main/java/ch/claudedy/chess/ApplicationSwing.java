@@ -118,9 +118,12 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         this.printPreviousMove(chess.actualMove());
 
         if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
-            String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-            MoveStatus status = chess.makeMove(MoveCommand.convert(bestMove));
-            this.manageAfterMove(status);
+            this.isComputerThinking = true;
+
+            new Thread(() -> {
+                launchComputerMove();
+                this.isComputerThinking = false;
+            }).start();
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
             this.isComputerThinking = true;
             new Thread(() -> {
