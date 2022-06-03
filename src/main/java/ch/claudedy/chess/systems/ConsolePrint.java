@@ -1,9 +1,7 @@
 package ch.claudedy.chess.systems;
 
-import ch.claudedy.chess.basis.Chess;
-import ch.claudedy.chess.basis.Piece;
-import ch.claudedy.chess.basis.Square;
-import ch.claudedy.chess.basis.Tile;
+import ch.claudedy.chess.basis.*;
+import ch.claudedy.chess.utils.Calculator;
 import ch.claudedy.chess.utils.FenUtils;
 
 public class ConsolePrint {
@@ -97,5 +95,8 @@ public class ConsolePrint {
         System.out.print(FenUtils.boardToFen(chess.currentBoard()));
         System.out.print(chess.actualMove() != null ? ";" + chess.actualMove().convert() : ";-");
         System.out.println();
+
+        System.out.println("White : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.BLACK));
+        System.out.println("Black : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.WHITE));
     }
 }

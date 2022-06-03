@@ -2,7 +2,6 @@ package ch.claudedy.chess.basis;
 
 import ch.claudedy.chess.systems.ConsolePrint;
 import ch.claudedy.chess.systems.SystemConfig;
-import ch.claudedy.chess.utils.Calculator;
 import ch.claudedy.chess.utils.FenUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -57,8 +56,6 @@ public class Chess {
 
             if (SystemConfig.PRINT_CONSOLE) {
                 ConsolePrint.execute(this);
-                System.out.println("White : " + Calculator.giveRemovedPieces(currentBoard(), Color.BLACK));
-                System.out.println("Black : " + Calculator.giveRemovedPieces(currentBoard(), Color.WHITE));
             }
         }
 
