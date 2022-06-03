@@ -149,7 +149,7 @@ public class Chess {
 
     private MoveStatus isThatMoveLegal(MoveCommand move) {
         if (move == null || move.startPosition() == null || move.endPosition() == null) {
-            return MoveStatus.BAD_SELECTION;
+            return MoveStatus.BAD_MOVE_COMMAND;
         }
 
         Square startSquare = this.currentBoard.get(move.startPosition());
