@@ -118,18 +118,14 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         this.printPreviousMove(chess.actualMove());
 
         if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
-            this.isComputerThinking = true;
-
-            new Thread(() -> {
-                launchComputerMove();
-                this.isComputerThinking = false;
-            }).start();
+            launchComputerMove();
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
             this.isComputerThinking = true;
             new Thread(() -> {
                 while (!chess.gameStatus().isGameOver()) {
                     if (chess.gameStatus().isGameWaitingMove()) {
-                        launchComputerMove();
+                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
+                        this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
                     }
                 }
                 Thread.currentThread().interrupt();
@@ -138,8 +134,13 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     private void launchComputerMove() {
-        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-        this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
+        this.isComputerThinking = true;
+
+        new Thread(() -> {
+            String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
+            this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
+            this.isComputerThinking = false;
+        }).start();
     }
 
     private synchronized void printInformationArea() {
@@ -321,12 +322,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 this.manageAfterMove(status);
 
                 if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
-                    this.isComputerThinking = true;
-
-                    new Thread(() -> {
-                        launchComputerMove();
-                        this.isComputerThinking = false;
-                    }).start();
+                    launchComputerMove();
                 }
             } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                 // color background red
