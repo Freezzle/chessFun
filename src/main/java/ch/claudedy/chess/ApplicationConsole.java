@@ -1,6 +1,8 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.basis.*;
+import ch.claudedy.chess.basis.Chess;
+import ch.claudedy.chess.basis.MoveCommand;
+import ch.claudedy.chess.basis.MoveStatus;
 import ch.claudedy.chess.systems.ConsolePrint;
 
 import java.io.BufferedReader;
@@ -19,8 +21,8 @@ public class ApplicationConsole {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String move = reader.readLine();
 
-            MoveFeedBack status = chess.makeMove(MoveCommand.convert(move));
-            if (status != MoveFeedBack.RUNNING) {
+            MoveStatus status = chess.makeMove(MoveCommand.convert(move));
+            if (status != MoveStatus.OK) {
                 System.out.println(status);
             }
         }

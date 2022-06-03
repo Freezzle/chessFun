@@ -19,21 +19,26 @@ public class Chess {
     private List<HistoricalBoardFen> historicalBoards;
     private MoveCommand actualMove;
     private Board currentBoard;
-
-    private MoveFeedBack status;
+    private GameStatus gameStatus;
 
     public Chess(String fen, MoveCommand previousMove) {
         this.currentBoard = FenUtils.fenToBoard(fen);
         this.historicalBoards = new ArrayList<>();
         this.actualMove = previousMove;
-        this.status = MoveFeedBack.RUNNING;
+        this.gameStatus = GameStatus.WAITING_MOVE;
     }
 
-    public MoveFeedBack makeMove(MoveCommand move) {
-        // Check if the move is authorized
-        status = this.isThatMoveLegal(move);
+    public MoveStatus makeMove(MoveCommand move) {
+        if(!this.gameStatus.isGameWaitingMove()) {
+            return MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE;
+        }
 
-        if (status == MoveFeedBack.RUNNING) {
+        this.gameStatus = GameStatus.EXECUTING;
+
+        // Check if the move is authorized
+        MoveStatus statusMoveDone = this.isThatMoveLegal(move);
+
+        if (statusMoveDone == MoveStatus.OK) {
             // Create a copy of the board before to make action
             this.historicalBoards.add(new HistoricalBoardFen().fen(FenUtils.boardToFen(this.currentBoard)).previousMove(this.actualMove));
 
@@ -47,20 +52,22 @@ public class Chess {
             this.currentBoard.switchPlayer();
 
             // Check if the enemy king is checkmated, etc..
-            status = this.checkGameStatus();
+            this.synchroGameStatus();
 
-            if(SystemConfig.PRINT_CONSOLE){
+            if (SystemConfig.PRINT_CONSOLE) {
                 ConsolePrint.execute(this);
             }
         }
 
-        return status;
+        this.gameStatus = GameStatus.WAITING_MOVE;
+        return statusMoveDone;
     }
 
-    private MoveFeedBack checkGameStatus() {
+    private void synchroGameStatus() {
 
-        if(this.currentBoard.fiftyRules() == 50) {
-            return MoveFeedBack.RULES_50;
+        if (this.currentBoard.fiftyRules() == 50) {
+            gameStatus = GameStatus.RULES_50;
+            return;
         }
 
         // King is checked
@@ -68,35 +75,29 @@ public class Chess {
 
         boolean cannotMove = getLegalMoves(tileKing).isEmpty();
 
-        if (!cannotMove) {
-            return MoveFeedBack.RUNNING;
-        }
+        if (cannotMove) {
+            boolean kingChecked = this.isTileChecked(currentBoard, this.currentBoard.currentPlayer(), tileKing);
 
-        boolean kingChecked = this.isTileChecked(currentBoard, this.currentBoard.currentPlayer(), tileKing);
-
-        boolean aPieceCanMove = false;
-        for (int x = 0; x <= 7; x++) {
-            for (int y = 0; y <= 7; y++) {
-                Piece piece = currentBoard.squares()[x][y].piece();
-                if (piece != null && piece.color() == this.currentBoard.currentPlayer()) {
-                    List<Tile> legalMoves = this.getLegalMoves(currentBoard.squares()[x][y].tile());
-                    if (!legalMoves.isEmpty()) {
-                        aPieceCanMove = true;
-                        break;
+            boolean aPieceCanMove = false;
+            for (int x = 0; x <= 7; x++) {
+                for (int y = 0; y <= 7; y++) {
+                    Piece piece = currentBoard.squares()[x][y].piece();
+                    if (piece != null && piece.color() == this.currentBoard.currentPlayer()) {
+                        List<Tile> legalMoves = this.getLegalMoves(currentBoard.squares()[x][y].tile());
+                        if (!legalMoves.isEmpty()) {
+                            aPieceCanMove = true;
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        if (!aPieceCanMove) {
-            if(kingChecked) {
-                return MoveFeedBack.CHECKMATED;
-            } else {
-                return MoveFeedBack.STALEMATED;
+            if (!aPieceCanMove && kingChecked) {
+                gameStatus = GameStatus.CHECKMATED;
+            } else if (!aPieceCanMove && !kingChecked) {
+                gameStatus = GameStatus.STALEMATED;
             }
         }
-
-        return MoveFeedBack.RUNNING;
     }
 
     public void rollbackPreviousState() {
@@ -143,39 +144,39 @@ public class Chess {
         return movesLegal;
     }
 
-    private MoveFeedBack isThatMoveLegal(MoveCommand move) {
-        if(move == null || move.startPosition() == null || move.endPosition() == null){
-            return MoveFeedBack.BAD_SELECTION;
+    private MoveStatus isThatMoveLegal(MoveCommand move) {
+        if (move == null || move.startPosition() == null || move.endPosition() == null) {
+            return MoveStatus.BAD_SELECTION;
         }
 
         Square startSquare = this.currentBoard.get(move.startPosition());
 
         // Check if the start position contains a piece
         if (startSquare.piece() == null) {
-            return MoveFeedBack.NO_PIECE_SELECTED;
+            return MoveStatus.NO_PIECE_SELECTED;
         }
 
         // Is it an ally piece ?
         if (startSquare.piece().color() != this.currentBoard.currentPlayer()) {
-            return MoveFeedBack.ENNEMY_PIECE_SELECTED;
+            return MoveStatus.ENNEMY_PIECE_SELECTED;
         }
 
         Square endSquare = this.currentBoard.get(move.endPosition());
 
         // Is that piece want to go on an ally piece square ?
         if (endSquare.piece() != null && endSquare.piece().color() == this.currentBoard.currentPlayer()) {
-            return MoveFeedBack.PIECE_CANT_EAT_ALLY_PIECE;
+            return MoveStatus.PIECE_CANT_EAT_ALLY_PIECE;
         }
 
         // Is that piece want to go on the enemy king square ?
         if (endSquare.piece() != null && PieceType.KING == endSquare.piece().type() && endSquare.piece().color() != this.currentBoard.currentPlayer()) {
-            return MoveFeedBack.CANT_EAT_ENEMY_KING;
+            return MoveStatus.CANT_EAT_ENEMY_KING;
         }
 
         // The possible moves doesnt contains the given move
         List<Tile> allMoves = startSquare.piece().getMoves(currentBoard, startSquare.tile());
         if (!allMoves.contains(endSquare.tile())) {
-            return MoveFeedBack.PIECE_ILLEGAL_MOVE;
+            return MoveStatus.PIECE_ILLEGAL_MOVE;
         }
 
         // Is our king is not checked when we move that piece ?
@@ -184,10 +185,10 @@ public class Chess {
         boolean kingChecked = this.isKingChecked(chessFake.currentBoard(), startSquare.piece().color());
 
         if (kingChecked) {
-            return MoveFeedBack.PIECE_BLOCKED;
+            return MoveStatus.PIECE_BLOCKED;
         }
 
-        return MoveFeedBack.RUNNING;
+        return MoveStatus.OK;
     }
 
     private boolean isKingChecked(Board board, Color colorKing) {
