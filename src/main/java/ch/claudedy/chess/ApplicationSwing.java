@@ -25,6 +25,9 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     private static final Color PREVIOUS_MOVE_BLACK_SQUARE = new Color(100, 180, 100);
     private static final Color PREVIOUS_MOVE_WHITE_SQUARE = new Color(130, 200, 130);
 
+    private static final Color SELECTED_PIECE_BLACK_SQUARE = new Color(100, 155, 180);
+    private static final Color SELECTED_PIECE_WHITE_SQUARE = new Color(130, 170, 200);
+
     private static final Color ANALYSE_CLICKED_BLACK_SQUARE = new Color(200, 100, 90);
     private static final Color ANALYSE_CLICKED_WHITE_SQUARE = new Color(235, 125, 100);
     private static final Color LEGAL_MOVE_BLACK_SQUARE = new Color(180, 123, 100);
@@ -276,8 +279,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         // Colorize the new move backgrounds
         if (move != null) {
-            getComponentUI(move.startPosition()).setBackground(getColorTileAboutMove(move.startPosition().color()));
-            getComponentUI(move.endPosition()).setBackground(getColorTileAboutMove(move.endPosition().color()));
+            getComponentUI(move.startPosition()).setBackground(getColorTileForPreviousMove(move.startPosition().color()));
+            getComponentUI(move.endPosition()).setBackground(getColorTileForPreviousMove(move.endPosition().color()));
         }
     }
 
@@ -299,7 +302,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                     selectedPieceTile = Tile.getEnum(tileClicked.getName());
                 }
 
-                getComponentUI(selectedPieceTile).setBackground(getColorTileAboutMove(selectedPieceTile.color()));
+                getComponentUI(selectedPieceTile).setBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
 
                 this.colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
             } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !this.isComputerThinking) { // Piece already selected and we click left on board again (make move)
@@ -403,7 +406,11 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         return colorTile.isSameColor(ch.claudedy.chess.basis.Color.BLACK) ? BLACK_SQUARE : WHITE_SQUARE;
     }
 
-    private Color getColorTileAboutMove(ch.claudedy.chess.basis.Color colorTile) {
+    private Color getColorTileForPreviousMove(ch.claudedy.chess.basis.Color colorTile) {
         return !colorTile.isWhite() ? PREVIOUS_MOVE_BLACK_SQUARE : PREVIOUS_MOVE_WHITE_SQUARE;
+    }
+
+    private Color getColorTileForSelectedPiece(ch.claudedy.chess.basis.Color colorTile) {
+        return !colorTile.isWhite() ? SELECTED_PIECE_BLACK_SQUARE : SELECTED_PIECE_WHITE_SQUARE;
     }
 }
