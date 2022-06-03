@@ -324,9 +324,12 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
                     thread.start();
                 }
-            } else if (selectedPieceTile == null && e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
+            } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                 // color background red
-                final Tile tileSelected = tileClicked.getName() != null ? Tile.getEnum(tileClicked.getName()) : Tile.getEnum(tileClicked.getParent().getName());
+                Tile tileSelected = Tile.getEnum(tileClicked.getName());
+                if(tileSelected == null) {
+                    tileSelected = Tile.getEnum(tileClicked.getParent().getName());
+                }
 
                 if (tileSelected.color() == ch.claudedy.chess.basis.Color.BLACK) {
                     getComponentUI(tileSelected).setBackground(SQUARE_RED_DARK);
@@ -336,9 +339,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             } else if(e.getButton() == MIDDLE_CLICK) {
                 isWhiteView = !isWhiteView;
                 this.createSquares();
-
                 this.reset();
-                this.printPreviousMove(chess.actualMove());
             } else { // Reset the board
                 this.selectedPieceTile = null;
                 this.resetBackgroundTiles();
