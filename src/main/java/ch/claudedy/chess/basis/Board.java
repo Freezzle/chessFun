@@ -53,7 +53,7 @@ public class Board {
 
         Piece pieceToMove = startSquare.piece();
 
-        if(pieceToMove == null) {
+        if (pieceToMove == null) {
             return;
         }
 
@@ -66,11 +66,11 @@ public class Board {
             managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
         }
 
-        if(!this.currentPlayer.isWhite()) {
+        if (!this.currentPlayer.isWhite()) {
             this.moves++;
         }
 
-        if(endSquare.piece() != null && this.currentPlayer != endSquare.piece().color() || PieceType.PAWN == pieceToMove.type()) {
+        if (endSquare.piece() != null && this.currentPlayer != endSquare.piece().color() || PieceType.PAWN == pieceToMove.type()) {
             this.fiftyRules = 0;
         } else {
             this.fiftyRules++;
@@ -89,7 +89,7 @@ public class Board {
                 // Empty tiles
                 Piece piece = this.squares[x][y].piece();
 
-                if(piece != null && piece.color() == player){
+                if (piece != null && piece.color() == player) {
                     pieces.add(piece);
                 }
             }
@@ -99,7 +99,7 @@ public class Board {
     }
 
     private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove, Character promote) {
-        if(promote == null){
+        if (promote == null) {
             promote = 'q';
         }
 
@@ -119,10 +119,10 @@ public class Board {
                     get(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
                 }
             }
-        } else if(endSquare.tile().y() == 7 && pieceToMove.color().isWhite()) {
+        } else if (endSquare.tile().y() == 7 && pieceToMove.color().isWhite()) {
             // MOVE -> Promotion for WHITE to the top of the board
             pieceToMove.promote(Character.toUpperCase(promote));
-        } else if(endSquare.tile().y() == 0 && !pieceToMove.color().isWhite()) {
+        } else if (endSquare.tile().y() == 0 && !pieceToMove.color().isWhite()) {
             // MOVE -> Promotion for BLACK to the bottom of the board
             pieceToMove.promote(Character.toLowerCase(promote));
         }

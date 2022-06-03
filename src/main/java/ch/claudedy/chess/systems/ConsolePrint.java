@@ -26,7 +26,7 @@ public class ConsolePrint {
         Tile endMove = chess.actualMove() != null ? chess.actualMove().endPosition() : null;
 
         System.out.print("  ");
-        for(int x=0; x<=7;x++){
+        for (int x = 0; x <= 7; x++) {
             System.out.print(" " + Tile.getEnum(x, 7).col() + " ");
         }
         System.out.println();
@@ -36,7 +36,7 @@ public class ConsolePrint {
                 Square square = chess.currentBoard().squares()[x][y];
                 Piece piece = square.piece();
 
-                if(x == 0) {
+                if (x == 0) {
                     System.out.print(Tile.getEnum(x, y).line() + " ");
                 }
 
@@ -79,7 +79,7 @@ public class ConsolePrint {
                 System.out.print(" ");
                 System.out.print(RESET);
 
-                if(x == 7) {
+                if (x == 7) {
                     System.out.print(" " + Tile.getEnum(x, y).line() + " ");
                 }
             }
@@ -87,7 +87,7 @@ public class ConsolePrint {
         }
 
         System.out.print("  ");
-        for(int x=0; x<=7;x++){
+        for (int x = 0; x <= 7; x++) {
             System.out.print(" " + Tile.getEnum(x, 0).col() + " ");
         }
         System.out.println();

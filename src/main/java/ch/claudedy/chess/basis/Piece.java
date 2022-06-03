@@ -20,6 +20,7 @@ public class Piece implements Comparable<Piece> {
     public Piece(char piece) {
         promote(piece);
     }
+
     public Piece(String piece) {
         promote(piece.charAt(0));
     }
@@ -342,7 +343,7 @@ public class Piece implements Comparable<Piece> {
         } else if (destPiece.color() != sourcePiece.color() && !(destPiece.type == PieceType.KING)) {
             moves.add(to.tile());
             return true;
-        } else if(destPiece.color() != sourcePiece.color() && destPiece.type == PieceType.KING && withKingChecked) {
+        } else if (destPiece.color() != sourcePiece.color() && destPiece.type == PieceType.KING && withKingChecked) {
             moves.add(to.tile());
             return true;
         }
@@ -352,12 +353,12 @@ public class Piece implements Comparable<Piece> {
 
     @Override
     public int compareTo(Piece o) {
-        if(this.type.getValue() > o.type.getValue()) {
+        if (this.type.getValue() > o.type.getValue()) {
             return -1;
-        } else if(this.type.getValue() < o.type.getValue()) {
+        } else if (this.type.getValue() < o.type.getValue()) {
             return 1;
         } else {
-            if(this.type == PieceType.BISHOP) {
+            if (this.type == PieceType.BISHOP) {
                 return -1;
             } else {
                 return 1;

@@ -21,11 +21,11 @@ public class LoaderFromFile {
             String line = br.readLine();
             String[] values = line.split(";");
 
-            if(values.length > 0) {
+            if (values.length > 0) {
                 fen = values[0];
             }
 
-            if(values.length > 1 && !values[1].equals("-")) {
+            if (values.length > 1 && !values[1].equals("-")) {
                 previousMove = MoveCommand.convert(values[1]);
             }
         } catch (Exception e) {

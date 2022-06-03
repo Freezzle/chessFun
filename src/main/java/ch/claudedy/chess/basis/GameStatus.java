@@ -6,6 +6,7 @@ public enum GameStatus {
     public boolean isGameOver() {
         return this == CHECKMATED || this == STALEMATED || this == RULES_50;
     }
+
     public boolean isGameWaitingMove() {
         return this == WAITING_MOVE;
     }

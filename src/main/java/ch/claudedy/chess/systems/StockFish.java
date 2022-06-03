@@ -43,7 +43,7 @@ public class StockFish {
         try {
             command("position fen " + fen, Function.identity(), s -> s.startsWith("readyok"), 300l);
             return command("go movetime " + waitTime,
-                    lines -> lines.stream().filter(s->s.startsWith("bestmove")).findFirst().get(),
+                    lines -> lines.stream().filter(s -> s.startsWith("bestmove")).findFirst().get(),
                     line -> line.startsWith("bestmove"), waitTime + 300l).split(" ")[1];
         } catch (Exception e) {
             LOG.severe(e.getMessage());

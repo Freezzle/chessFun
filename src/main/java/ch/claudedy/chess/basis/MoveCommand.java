@@ -13,11 +13,11 @@ public class MoveCommand {
     private final Character promote;
 
     public static MoveCommand convert(String move) {
-        if(move == null) {
+        if (move == null) {
             return new MoveCommand(null, null, null);
         }
 
-        if(move.length() < 4) {
+        if (move.length() < 4) {
             return new MoveCommand(null, null, null);
         }
 

@@ -50,7 +50,7 @@ public class Calculator {
 
         long diff = totalEnnemy - total;
 
-        if(diff > 0) {
+        if (diff > 0) {
             result = result + " +" + diff;
         }
 
