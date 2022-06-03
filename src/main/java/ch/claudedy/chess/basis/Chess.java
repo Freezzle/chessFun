@@ -59,7 +59,10 @@ public class Chess {
             }
         }
 
-        this.gameStatus = GameStatus.WAITING_MOVE;
+        if(!this.gameStatus.isGameOver()){
+            this.gameStatus = GameStatus.WAITING_MOVE;
+        }
+
         return statusMoveDone;
     }
 
