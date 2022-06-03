@@ -122,19 +122,15 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             MoveStatus status = chess.makeMove(MoveCommand.convert(bestMove));
             this.manageAfterMove(status);
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
-
-            Thread thread = new Thread(() -> {
+            this.isComputerThinking = true;
+            new Thread(() -> {
                 while (!chess.gameStatus().isGameOver()) {
-
                     if (chess.gameStatus().isGameWaitingMove()) {
                         launchComputerMove();
                     }
                 }
-
                 Thread.currentThread().interrupt();
-            });
-
-            thread.start();
+            }).start();
         }
     }
 
@@ -285,7 +281,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
     }
 
     public void mouseClicked(MouseEvent e) {
-        if(chess.gameStatus().isGameOver()){
+        if (e == null || chess.gameStatus().isGameOver()) {
             return;
         }
 
@@ -324,12 +320,10 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
                 if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
                     this.isComputerThinking = true;
 
-                    Thread thread = new Thread(() -> {
+                    new Thread(() -> {
                         launchComputerMove();
                         this.isComputerThinking = false;
-                    });
-
-                    thread.start();
+                    }).start();
                 }
             } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                 // color background red
@@ -350,7 +344,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             } else { // Reset the board
                 this.selectedPieceTile = null;
                 this.resetBackgroundTiles();
-                this.mouseClicked(e);
             }
         }
     }

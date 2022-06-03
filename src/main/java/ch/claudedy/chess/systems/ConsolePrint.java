@@ -94,7 +94,8 @@ public class ConsolePrint {
         }
         System.out.println();
 
-        System.out.println(FenUtils.boardToFen(chess.currentBoard()) + ";" + chess.actualMove().convert());
+        System.out.print(FenUtils.boardToFen(chess.currentBoard()));
+        System.out.print(chess.actualMove() != null ? ";" + chess.actualMove().convert() : ";-");
         System.out.println();
     }
 }

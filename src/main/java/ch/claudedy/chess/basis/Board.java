@@ -82,6 +82,22 @@ public class Board {
         startSquare.removePiece();
     }
 
+    public List<Piece> getAlivePieces(Color player) {
+        List<Piece> pieces = new ArrayList<>();
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                // Empty tiles
+                Piece piece = this.squares[x][y].piece();
+
+                if(piece != null && piece.color() == player){
+                    pieces.add(piece);
+                }
+            }
+        }
+
+        return pieces;
+    }
+
     private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove, Character promote) {
         if(promote == null){
             promote = 'q';

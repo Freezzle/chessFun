@@ -22,6 +22,7 @@ public class ApplicationConsole {
             String move = reader.readLine();
 
             MoveStatus status = chess.makeMove(MoveCommand.convert(move));
+
             if (status != MoveStatus.OK) {
                 System.out.println(status);
             }

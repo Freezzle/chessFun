@@ -12,13 +12,16 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class Piece {
+public class Piece implements Comparable<Piece> {
     private Color color;
     private PieceType type;
     private Character letter;
 
     public Piece(char piece) {
         promote(piece);
+    }
+    public Piece(String piece) {
+        promote(piece.charAt(0));
     }
 
     public void promote(char piece) {
@@ -345,5 +348,20 @@ public class Piece {
         }
 
         return false;
+    }
+
+    @Override
+    public int compareTo(Piece o) {
+        if(this.type.getValue() > o.type.getValue()) {
+            return -1;
+        } else if(this.type.getValue() < o.type.getValue()) {
+            return 1;
+        } else {
+            if(this.type == PieceType.BISHOP) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
     }
 }
