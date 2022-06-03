@@ -125,15 +125,25 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             this.reset();
             this.printPreviousMove(chess.actualMove());
         } else if(SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
-            playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
-            playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+            if (chess.currentBoard().currentPlayer().isWhite()) {
+                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+            } else {
+                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+            }
             this.createSquares();
             this.reset();
             this.printPreviousMove(chess.actualMove());
             launchStockFishEngine();
         } else if(SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
-            playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-            playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+            if (chess.currentBoard().currentPlayer().isWhite()) {
+                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+            } else {
+                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+            }
             this.createSquares();
             this.reset();
             this.printPreviousMove(chess.actualMove());
@@ -185,6 +195,8 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         }
 
         Square[][] squares = chess.currentBoard().squares();
+
+        Color colorCurrentPlayer = chess.currentBoard().currentPlayer();
 
         int counter = 0;
         if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {

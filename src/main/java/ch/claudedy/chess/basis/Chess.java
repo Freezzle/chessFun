@@ -33,6 +33,10 @@ public class Chess {
             return MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE;
         }
 
+        if (this.gameStatus.isGameOver()) {
+            return MoveStatus.GAME_ALREADY_OVER;
+        }
+
         this.gameStatus = GameStatus.EXECUTING;
 
         // Check if the move is authorized
@@ -54,12 +58,14 @@ public class Chess {
             // Check if the enemy king is checkmated, etc..
             this.synchroGameStatus();
 
+            if (!this.gameStatus.isGameOver()) {
+                this.gameStatus = GameStatus.WAITING_MOVE;
+            }
+
             if (SystemConfig.PRINT_CONSOLE) {
                 ConsolePrint.execute(this);
             }
-        }
-
-        if (!this.gameStatus.isGameOver()) {
+        } else {
             this.gameStatus = GameStatus.WAITING_MOVE;
         }
 

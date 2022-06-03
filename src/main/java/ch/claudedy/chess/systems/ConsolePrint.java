@@ -98,5 +98,6 @@ public class ConsolePrint {
 
         System.out.println("White : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.BLACK));
         System.out.println("Black : " + Calculator.giveRemovedPieces(chess.currentBoard(), Color.WHITE));
+        System.out.println("Status : " + chess.gameStatus());
     }
 }
