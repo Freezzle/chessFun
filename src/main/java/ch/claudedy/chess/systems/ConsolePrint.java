@@ -43,7 +43,7 @@ public class ConsolePrint {
                 }
 
                 if (startMove != null && startMove.equals(square.tile())) {
-                    if (chess.currentBoard().currentPlayer().isWhite()) {
+                    if (chess.currentBoard().isWhiteCurrentPlayer()) {
                         System.out.print(ANSI_RED_BACKGROUND);
                     } else {
                         System.out.print(ANSI_GREEN_BACKGROUND);
@@ -53,7 +53,7 @@ public class ConsolePrint {
                         System.out.print(BLACK_BOLD);
                     }
                 } else if (endMove != null && endMove.equals(square.tile())) {
-                    if (chess.currentBoard().currentPlayer().isWhite()) {
+                    if (chess.currentBoard().isWhiteCurrentPlayer()) {
                         System.out.print(ANSI_RED_BACKGROUND);
                     } else {
                         System.out.print(ANSI_GREEN_BACKGROUND);
@@ -63,15 +63,15 @@ public class ConsolePrint {
                         System.out.print(BLACK_BOLD);
                     }
                 } else {
-                    if (square.tile().color().isWhite()) {
+                    if (square.tile().isWhiteTile()) {
                         System.out.print(ANSI_WHITE_BACKGROUND);
                     } else {
                         System.out.print(ANSI_BLACK_BACKGROUND);
                     }
 
-                    if (piece != null && piece.color().isWhite()) {
+                    if (piece != null && piece.isWhitePiece()) {
                         System.out.print(GREEN_BOLD);
-                    } else if (piece != null && !piece.color().isWhite()) {
+                    } else if (piece != null && !piece.isWhitePiece()) {
                         System.out.print(RED_BOLD);
                     }
                 }

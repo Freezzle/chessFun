@@ -61,6 +61,10 @@ public class Piece implements Comparable<Piece> {
         return moves;
     }
 
+    public boolean isWhitePiece() {
+        return this.color.isWhite();
+    }
+
     public List<Tile> getMoves(Board board, Tile source) {
         List<Tile> moves = new ArrayList<>();
         Square[][] squares = board.squares();
@@ -92,7 +96,7 @@ public class Piece implements Comparable<Piece> {
     }
 
     private void addPawnMoves(List<Tile> moves, Board board, int x, int y, boolean withKingChecked) {
-        int changerPromotion = this.color.isWhite() ? 1 : -1;
+        int changerPromotion = isWhitePiece() ? 1 : -1;
 
         // PROMOTION
         if (y + (changerPromotion) == 7 || y + (changerPromotion) == 0) {
@@ -103,11 +107,11 @@ public class Piece implements Comparable<Piece> {
         }
 
         // STANDARD
-        int changer1StepMove = this.color.isWhite() ? 1 : -1;
+        int changer1StepMove = isWhitePiece() ? 1 : -1;
         if (y + (changer1StepMove) > 0 && y + (changer1StepMove) < 7 && board.squares()[x][y + (changer1StepMove)].piece() == null) {
             moves.add(Tile.getEnum(x, y + changer1StepMove));
 
-            int changer2StepMove = this.color.isWhite() ? 2 : -2;
+            int changer2StepMove = isWhitePiece() ? 2 : -2;
             if (this.color == Color.WHITE && board.squares()[x][1] == board.squares()[x][y] || this.color == Color.BLACK && board.squares()[x][6] == board.squares()[x][y]) {
                 // BIG MOVE FOR FIRST TIME
                 if (board.squares()[x][y + (changer2StepMove)].piece() == null) {
@@ -117,7 +121,7 @@ public class Piece implements Comparable<Piece> {
         }
 
         // ATTACK MOVE RIGHT
-        int changerAttack = this.color.isWhite() ? 1 : -1;
+        int changerAttack = isWhitePiece() ? 1 : -1;
         if (x + 1 <= 7) {
             Square square = board.squares()[x + 1][y + changerAttack];
             Piece piece = square.piece();
@@ -192,10 +196,10 @@ public class Piece implements Comparable<Piece> {
             addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y - 1], withKingChecked);
 
 
-        int ySide = color.isWhite() ? 0 : 7;
+        int ySide = isWhitePiece() ? 0 : 7;
 
         // CASTLING QUEEN SIDE
-        if ((color.isWhite() && board.canwQRoque()) || !color.isWhite() && board.canbqRoque()) {
+        if ((isWhitePiece() && board.canwQRoque()) || !isWhitePiece() && board.canbqRoque()) {
             boolean canQueenCastling = true;
             for (int i = 1; i <= x - 1; i++) {
                 if (board.squares()[i][ySide].piece() != null) {
@@ -210,7 +214,7 @@ public class Piece implements Comparable<Piece> {
         }
 
         // CASTLING KING SIDE
-        if ((color.isWhite() && board.canwKRoque()) || !color.isWhite() && board.canbkRoque()) {
+        if ((isWhitePiece() && board.canwKRoque()) || !isWhitePiece() && board.canbkRoque()) {
             boolean canKingCastling = true;
             for (int i = x + 1; i <= 7 - 1; i++) {
                 if (board.squares()[i][ySide].piece() != null) {
