@@ -7,6 +7,7 @@ import ch.claudedy.chess.systems.LoaderFromFile;
 import ch.claudedy.chess.systems.StockFish;
 import ch.claudedy.chess.systems.SystemConfig;
 import ch.claudedy.chess.ui.InfoPlayer;
+import ch.claudedy.chess.ui.UIFactory;
 import ch.claudedy.chess.utils.Calculator;
 import ch.claudedy.chess.utils.FenUtils;
 
@@ -118,13 +119,13 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         // Load the chess board from a file
         chess = LoaderFromFile.readFile(SystemConfig.BOARD);
 
-        if(SystemConfig.GAME_TYPE == GameType.PLAYER_V_PLAYER) {
+        if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_PLAYER) {
             playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
             playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
             this.createSquares();
             this.reset();
             this.printPreviousMove(chess.actualMove());
-        } else if(SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
+        } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
             if (chess.currentBoard().currentPlayer().isWhite()) {
                 playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
                 playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
@@ -136,7 +137,7 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
             this.reset();
             this.printPreviousMove(chess.actualMove());
             launchStockFishEngine();
-        } else if(SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
+        } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
             if (chess.currentBoard().currentPlayer().isWhite()) {
                 playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
                 playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
@@ -196,80 +197,39 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         Square[][] squares = chess.currentBoard().squares();
 
-        Color colorCurrentPlayer = chess.currentBoard().currentPlayer();
+        // PANEL INFO TOP
+        if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
+            informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
+            layeredPane.add(informationBlackArea);
+        } else {
+            informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
+            layeredPane.add(informationWhiteArea);
+        }
+
+        // PANEL BOARD
+        chessBoard = UIFactory.createPanel("BOARD", new GridLayout(8, 8), new Dimension(600, 600), new Rectangle(0, 50, 600, 600));
+        chessBoard.addMouseListener(this);
+        chessBoard.addMouseMotionListener(this);
+        layeredPane.add(chessBoard);
 
         int counter = 0;
-        if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
-            informationBlackArea = new JPanel();
-            informationBlackArea.setName("INFORMATION_BLACK");
-            informationBlackArea.setLayout(new GridLayout(2, 1));
-            informationBlackArea.setPreferredSize(new Dimension(600, 50));
-            informationBlackArea.setBounds(new Rectangle(0, 0, 600, 50));
-            layeredPane.add(informationBlackArea);
-
-            // Add a chess board layer to the root Layer
-            chessBoard = new JPanel();
-            chessBoard.setName("BOARD");
-            chessBoard.setLayout(new GridLayout(8, 8));
-            chessBoard.setPreferredSize(new Dimension(600, 600));
-            chessBoard.setBounds(new Rectangle(0, 50, 600, 600));
-            chessBoard.setBackground(java.awt.Color.blue);
-            chessBoard.addMouseListener(this);
-            chessBoard.addMouseMotionListener(this);
-            layeredPane.add(chessBoard);
-
-            for (int y = 7; y >= 0; y--) {
-                for (int x = 0; x <= 7; x++) {
-                    JPanel squarePanel = new JPanel(new BorderLayout());
-                    Square currentSquare = squares[x][y];
-                    squarePanel.setName(currentSquare.tile().name());
-                    chessBoard.add(squarePanel, counter);
-                    squaresBoardUI.put(currentSquare.tile().name(), counter);
-                    counter++;
-                }
+        for (int y = 7; y >= 0; y--) {
+            for (int x = 0; x <= 7; x++) {
+                JPanel squarePanel = new JPanel(new BorderLayout());
+                Square currentSquare = squares[x][y];
+                squarePanel.setName(currentSquare.tile().name());
+                chessBoard.add(squarePanel, counter);
+                squaresBoardUI.put(currentSquare.tile().name(), counter);
+                counter++;
             }
+        }
 
-            informationWhiteArea = new JPanel();
-            informationWhiteArea.setName("INFORMATION_WHITE");
-            informationWhiteArea.setLayout(new GridLayout(2, 1));
-            informationWhiteArea.setPreferredSize(new Dimension(600, 50));
-            informationWhiteArea.setBounds(new Rectangle(0, 650, 600, 50));
+        // PANEL INFO BOTTOM
+        if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
+            informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
             layeredPane.add(informationWhiteArea);
         } else {
-            informationWhiteArea = new JPanel();
-            informationWhiteArea.setName("INFORMATION_WHITE");
-            informationWhiteArea.setLayout(new GridLayout(2, 1));
-            informationWhiteArea.setPreferredSize(new Dimension(600, 50));
-            informationWhiteArea.setBounds(new Rectangle(0, 0, 600, 50));
-            layeredPane.add(informationWhiteArea);
-
-            // Add a chess board layer to the root Layer
-            chessBoard = new JPanel();
-            chessBoard.setName("BOARD");
-            chessBoard.setLayout(new GridLayout(8, 8));
-            chessBoard.setPreferredSize(new Dimension(600, 600));
-            chessBoard.setBounds(new Rectangle(0, 50, 600, 600));
-            chessBoard.setBackground(java.awt.Color.blue);
-            chessBoard.addMouseListener(this);
-            chessBoard.addMouseMotionListener(this);
-            layeredPane.add(chessBoard);
-
-            for (int y = 0; y <= 7; y++) {
-                for (int x = 7; x >= 0; x--) {
-                    JPanel squarePanel = new JPanel(new BorderLayout());
-                    Square currentSquare = squares[x][y];
-                    squarePanel.setName(currentSquare.tile().name());
-                    chessBoard.add(squarePanel, counter);
-                    squaresBoardUI.put(currentSquare.tile().name(), counter);
-                    counter++;
-                }
-            }
-
-            informationBlackArea = new JPanel();
-            informationBlackArea.setName("INFORMATION_BLACK");
-            informationBlackArea.setLayout(new GridLayout(2, 1));
-            informationBlackArea.setPreferredSize(new Dimension(600, 50));
-            informationBlackArea.setBounds(new Rectangle(0, 650, 600, 50));
+            informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
             layeredPane.add(informationBlackArea);
         }
     }
@@ -284,36 +244,12 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
 
         Board currentBoard = chess.currentBoard();
 
-        JTextField panelWhitePlayer = new JTextField(playerWhite.getName() + " (" + playerWhite.getElo() + ")" + (currentBoard.currentPlayer().isWhite() ? " - your turn" : ""));
-        panelWhitePlayer.setName("WHITE_PLAYER");
-        panelWhitePlayer.setFont(new Font("Arial", Font.BOLD, 12));
-        panelWhitePlayer.setBounds(new Rectangle(600, 50));
-        informationWhiteArea.add(panelWhitePlayer);
-
-        JTextField panelBlackPieces = new JTextField(Calculator.giveRemovedPieces(currentBoard, Color.BLACK));
-        panelBlackPieces.setName("ENNEMY_BLACK_PIECES_REMOVED");
-        panelBlackPieces.setFont(new Font("Arial", Font.BOLD, 12));
-        panelBlackPieces.setBounds(new Rectangle(600, 50));
-        informationWhiteArea.add(panelBlackPieces);
-
+        UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.getName() + " (" + playerWhite.getElo() + ")" + (currentBoard.currentPlayer().isWhite() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
+        UIFactory.createTextField(informationWhiteArea, "ENNEMY_BLACK_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.BLACK), java.awt.Color.WHITE, java.awt.Color.BLACK);
         informationWhiteArea.doLayout();
 
-        JTextField panelBlackPlayer = new JTextField(playerBlack.getName() + " (" + playerBlack.getElo() + ")" + (!currentBoard.currentPlayer().isWhite() ? " - your turn" : ""));
-        panelBlackPlayer.setName("BLACK_PLAYER");
-        panelBlackPlayer.setBounds(new Rectangle(600, 50));
-        panelBlackPlayer.setBackground(java.awt.Color.DARK_GRAY);
-        panelBlackPlayer.setFont(new Font("Arial", Font.BOLD, 12));
-        panelBlackPlayer.setForeground(java.awt.Color.WHITE);
-        informationBlackArea.add(panelBlackPlayer);
-
-        JTextField panelWhitePieces = new JTextField(Calculator.giveRemovedPieces(currentBoard, Color.WHITE));
-        panelWhitePieces.setName("ENNEMY_WHITE_PIECES_REMOVED");
-        panelWhitePieces.setBounds(new Rectangle(600, 50));
-        panelWhitePieces.setBackground(java.awt.Color.DARK_GRAY);
-        panelWhitePieces.setFont(new Font("Arial", Font.BOLD, 12));
-        panelWhitePieces.setForeground(java.awt.Color.WHITE);
-        informationBlackArea.add(panelWhitePieces);
-
+        UIFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.getName() + " (" + playerBlack.getElo() + ")" + (!currentBoard.currentPlayer().isWhite() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
+        UIFactory.createTextField(informationBlackArea, "ENNEMY_WHITE_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.WHITE), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
         informationBlackArea.doLayout();
     }
 
