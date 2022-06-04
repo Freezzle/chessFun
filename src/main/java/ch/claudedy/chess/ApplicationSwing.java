@@ -13,12 +13,15 @@ import ch.claudedy.chess.utils.FenUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ApplicationSwing extends JFrame implements MouseListener, MouseMotionListener {
+public class ApplicationSwing extends JFrame implements MouseListener {
 
     private static final java.awt.Color BLACK_SQUARE = new java.awt.Color(75, 115, 145);
     private static final java.awt.Color WHITE_SQUARE = new java.awt.Color(230, 230, 210);
@@ -209,7 +212,6 @@ public class ApplicationSwing extends JFrame implements MouseListener, MouseMoti
         // PANEL BOARD
         chessBoard = UIFactory.createPanel("BOARD", new GridLayout(8, 8), new Dimension(600, 600), new Rectangle(0, 50, 600, 600));
         chessBoard.addMouseListener(this);
-        chessBoard.addMouseMotionListener(this);
         layeredPane.add(chessBoard);
 
         int counter = 0;
