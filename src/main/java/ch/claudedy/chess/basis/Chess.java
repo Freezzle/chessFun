@@ -9,7 +9,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Accessors(fluent = true)
 @Getter
@@ -79,12 +81,21 @@ public class Chess {
             return;
         }
 
+        // Threefold repetition rule
+        HistoricalBoardFen fenCurrentBoard = new HistoricalBoardFen().fen(FenUtils.boardToFen(this.currentBoard)).previousMove(this.actualMove);
+        int nbTimes = Collections.frequency(this.historicalBoards.stream().map(HistoricalBoardFen::onlyBoardFen).collect(Collectors.toList()), fenCurrentBoard.onlyBoardFen());
+        if (nbTimes >= 3) {
+            gameStatus = GameStatus.REPETITION_RULE;
+            return;
+        }
+
         // King is checked
         Tile tileKing = this.getTileKing(currentBoard, this.currentBoard.currentPlayer());
 
         boolean cannotMove = getLegalMoves(tileKing).isEmpty();
 
         if (cannotMove) {
+            // King can't move !
             boolean kingChecked = this.isTileChecked(currentBoard, this.currentBoard.currentPlayer(), tileKing);
 
             boolean aPieceCanMove = false;
@@ -105,6 +116,30 @@ public class Chess {
                 gameStatus = GameStatus.CHECKMATED;
             } else if (!aPieceCanMove && !kingChecked) {
                 gameStatus = GameStatus.STALEMATED;
+            }
+        } else {
+            // King can move !
+
+            // IMPOSSIBLE CHECKMATE
+            List<Piece> allPieces = new ArrayList<>();
+            allPieces.addAll(currentBoard.getAlivePieces(Color.WHITE));
+            allPieces.addAll(currentBoard.getAlivePieces(Color.BLACK));
+
+            if (allPieces.size() == 2) {
+                // king vs king
+                gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE;
+            } else if (allPieces.size() == 3) {
+                if (allPieces.stream().anyMatch(p -> p.type() == PieceType.BISHOP) || allPieces.stream().anyMatch(p -> p.type() == PieceType.KNIGHT)) {
+                    // king + bishop vs king || king + knight vs king
+                    gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE;
+                }
+            } else if (allPieces.size() == 4) {
+                List<Square> bishopsSquares = currentBoard.getSquarePieces().stream().filter(s -> s.piece().type() == PieceType.BISHOP).collect(Collectors.toList());
+
+                if (bishopsSquares.size() == 2 && bishopsSquares.get(0).tile().color().isSameColor(bishopsSquares.get(1).tile().color())) {
+                    // king + bishop vs king + bishop (bishop same color)
+                    gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE;
+                }
             }
         }
     }

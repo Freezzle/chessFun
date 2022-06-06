@@ -82,6 +82,22 @@ public class Board {
         startSquare.removePiece();
     }
 
+    public List<Square> getSquarePieces() {
+        List<Square> squares = new ArrayList<>();
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                // Empty tiles
+                Piece piece = this.squares[x][y].piece();
+
+                if (piece != null) {
+                    squares.add(this.squares[x][y]);
+                }
+            }
+        }
+
+        return squares;
+    }
+
     public List<Piece> getAlivePieces(Color player) {
         List<Piece> pieces = new ArrayList<>();
         for (int x = 0; x < 8; x++) {
