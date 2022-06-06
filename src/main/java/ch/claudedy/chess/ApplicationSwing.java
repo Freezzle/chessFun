@@ -21,25 +21,27 @@ import java.awt.event.WindowListener;
 public class ApplicationSwing extends JFrame {
 
     // VIEWS (ONLY VIEW PURPOSE)
-    private final JLayeredPane layeredPane;
+    private final JLayeredPane mainLayer;
     private StockFish stockFish;
-    // CHESS (TRUTH)
+
     @Getter
     private Chess chess;
-    private InfoPlayer playerWhite;
-    private InfoPlayer playerBlack;
     @Getter
     private boolean isComputerThinking = false;
+
+    // UI
     private ChessBoard chessBoard;
     private JPanel informationWhiteArea;
     private JPanel informationBlackArea;
+    private InfoPlayer playerWhite;
+    private InfoPlayer playerBlack;
 
     public ApplicationSwing() {
         //  Create a root layer
-        layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(600, 700));
-        layeredPane.setBounds(new Rectangle(0, 0, 600, 700));
-        getContentPane().add(layeredPane);
+        mainLayer = new JLayeredPane();
+        mainLayer.setPreferredSize(new Dimension(600, 700));
+        mainLayer.setBounds(new Rectangle(0, 0, 600, 700));
+        getContentPane().add(mainLayer);
 
         // Launch the game (initm, etc...)
         startNewGame();
@@ -165,8 +167,8 @@ public class ApplicationSwing extends JFrame {
     }
 
     private synchronized void initLayers() {
-        if (this.layeredPane.getComponentCount() != 0) {
-            this.layeredPane.removeAll();
+        if (this.mainLayer.getComponentCount() != 0) {
+            this.mainLayer.removeAll();
         }
 
         Square[][] squares = chess.currentBoard().squares();
@@ -174,15 +176,15 @@ public class ApplicationSwing extends JFrame {
         // PANEL INFO TOP
         if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
-            layeredPane.add(informationBlackArea);
+            mainLayer.add(informationBlackArea);
         } else {
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
-            layeredPane.add(informationWhiteArea);
+            mainLayer.add(informationWhiteArea);
         }
 
         // PANEL BOARD
         chessBoard = new ChessBoard(this);
-        layeredPane.add(chessBoard);
+        mainLayer.add(chessBoard);
 
         int counter = 0;
 
@@ -211,10 +213,10 @@ public class ApplicationSwing extends JFrame {
         // PANEL INFO BOTTOM
         if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
-            layeredPane.add(informationWhiteArea);
+            mainLayer.add(informationWhiteArea);
         } else {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
-            layeredPane.add(informationBlackArea);
+            mainLayer.add(informationBlackArea);
         }
     }
 
