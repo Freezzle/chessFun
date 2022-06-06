@@ -2,7 +2,6 @@ package ch.claudedy.chess.basis;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.List;
 
 @Accessors(fluent = true)
 @Getter
-@Setter
 @EqualsAndHashCode
 public class Piece implements Comparable<Piece> {
     private Color color;
@@ -95,7 +93,7 @@ public class Piece implements Comparable<Piece> {
         return moves;
     }
 
-    private void addPawnMoves(List<Tile> moves, Board board, int x, int y, boolean withKingChecked) {
+    private void addPawnMoves(List<Tile> moves, Board board, int x, int y, boolean includeKingThreat) {
         int changerPromotion = isWhitePiece() ? 1 : -1;
 
         // PROMOTION
@@ -125,7 +123,7 @@ public class Piece implements Comparable<Piece> {
         if (x + 1 <= 7) {
             Square square = board.squares()[x + 1][y + changerAttack];
             Piece piece = square.piece();
-            if ((piece != null && piece.color != this.color && (piece.type != PieceType.KING || piece.type == PieceType.KING && withKingChecked)) || (piece == null && board.enPassant() == square.tile())) {
+            if ((piece != null && piece.color != this.color && (piece.type != PieceType.KING || piece.type == PieceType.KING && includeKingThreat)) || (piece == null && board.enPassant() == square.tile())) {
                 moves.add(Tile.getEnum(x + 1, y + changerAttack));
             }
         }
@@ -134,66 +132,66 @@ public class Piece implements Comparable<Piece> {
         if (x - 1 >= 0) {
             Square square = board.squares()[x - 1][y + changerAttack];
             Piece piece = square.piece();
-            if ((piece != null && piece.color != this.color && (piece.type != PieceType.KING || piece.type == PieceType.KING && withKingChecked)) || (piece == null && board.enPassant() == square.tile())) {
+            if ((piece != null && piece.color != this.color && (piece.type != PieceType.KING || piece.type == PieceType.KING && includeKingThreat)) || (piece == null && board.enPassant() == square.tile())) {
                 moves.add(Tile.getEnum(x - 1, y + changerAttack));
             }
         }
     }
 
-    private void addLMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean withKingChecked) {
+    private void addLMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean includeKingThreat) {
         Square sourceSquare = squares[x][y];
 
         if (x + 2 <= 7 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y + 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y + 1], includeKingThreat);
 
         if (x + 1 <= 7 && y + 2 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y + 2], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y + 2], includeKingThreat);
 
         if (x - 2 >= 0 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y + 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y + 1], includeKingThreat);
 
         if (x - 1 >= 0 && y + 2 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y + 2], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y + 2], includeKingThreat);
 
         if (x - 1 >= 0 && y - 2 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y - 2], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y - 2], includeKingThreat);
 
         if (x - 2 >= 0 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y - 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y - 1], includeKingThreat);
 
         if (x + 1 <= 7 && y - 2 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y - 2], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y - 2], includeKingThreat);
 
         if (x + 2 <= 7 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y - 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y - 1], includeKingThreat);
     }
 
-    private void addKingMoves(List<Tile> moves, Board board, int x, int y, boolean withKingChecked) {
+    private void addKingMoves(List<Tile> moves, Board board, int x, int y, boolean includeKingThreat) {
         Square sourceSquare = board.squares()[x][y];
 
         if (x + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y], includeKingThreat);
 
         if (x + 1 <= 7 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y + 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y + 1], includeKingThreat);
 
         if (y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y + 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y + 1], includeKingThreat);
 
         if (x - 1 >= 0 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y + 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y + 1], includeKingThreat);
 
         if (x - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y], includeKingThreat);
 
         if (x - 1 >= 0 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y - 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y - 1], includeKingThreat);
 
         if (y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y - 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y - 1], includeKingThreat);
 
         if (x + 1 <= 7 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y - 1], withKingChecked);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y - 1], includeKingThreat);
 
 
         int ySide = isWhitePiece() ? 0 : 7;
@@ -237,14 +235,14 @@ public class Piece implements Comparable<Piece> {
         }
     }
 
-    private void addLinearMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean withKingChecked) {
+    private void addLinearMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean includeKingThreat) {
         Square sourceSquare = squares[x][y];
 
         if (x < 7) {
             // RIGHT
             for (int i = x + 1; i <= 7; i++) {
                 Square destinationSquare = squares[i][y];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
                 if (!hasAdded || destinationSquare.piece() != null) {
                     break;
                 }
@@ -255,7 +253,7 @@ public class Piece implements Comparable<Piece> {
             // LEFT
             for (int i = x - 1; i >= 0; i--) {
                 Square destinationSquare = squares[i][y];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
                 if (!hasAdded || destinationSquare.piece() != null) {
                     break;
                 }
@@ -266,7 +264,7 @@ public class Piece implements Comparable<Piece> {
             // UP
             for (int i = y + 1; i <= 7; i++) {
                 Square destinationSquare = squares[x][i];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
                 if (!hasAdded || destinationSquare.piece() != null) {
                     break;
                 }
@@ -277,7 +275,7 @@ public class Piece implements Comparable<Piece> {
             // DOWN
             for (int i = y - 1; i >= 0; i--) {
                 Square destinationSquare = squares[x][i];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
                 if (!hasAdded || destinationSquare.piece() != null) {
                     break;
                 }
@@ -285,7 +283,7 @@ public class Piece implements Comparable<Piece> {
         }
     }
 
-    private void addDiagonaleMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean withKingChecked) {
+    private void addDiagonaleMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean includeKingThreat) {
         Square sourceSquare = squares[x][y];
 
         // RIGHT UP
@@ -295,7 +293,7 @@ public class Piece implements Comparable<Piece> {
             }
 
             Square destinationSquare = squares[x + i][y + i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
             if (!hasAdded || destinationSquare.piece() != null) {
                 break;
             }
@@ -308,7 +306,7 @@ public class Piece implements Comparable<Piece> {
             }
 
             Square destinationSquare = squares[x - i][y - i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
             if (!hasAdded || destinationSquare.piece() != null) {
                 break;
             }
@@ -321,7 +319,7 @@ public class Piece implements Comparable<Piece> {
             }
 
             Square destinationSquare = squares[x + i][y - i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
             if (!hasAdded || destinationSquare.piece() != null) {
                 break;
             }
@@ -334,14 +332,14 @@ public class Piece implements Comparable<Piece> {
             }
 
             Square destinationSquare = squares[x - i][y + i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, withKingChecked);
+            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
             if (!hasAdded || destinationSquare.piece() != null) {
                 break;
             }
         }
     }
 
-    public boolean addMoveIfNecessary(List<Tile> moves, Square from, Square to, boolean withKingChecked) {
+    public boolean addMoveIfNecessary(List<Tile> moves, Square from, Square to, boolean includeKingThreat) {
         if (to == null || from == null) {
             return false;
         }
@@ -355,7 +353,7 @@ public class Piece implements Comparable<Piece> {
         } else if (destPiece.color() != sourcePiece.color() && !(destPiece.type == PieceType.KING)) {
             moves.add(to.tile());
             return true;
-        } else if (destPiece.color() != sourcePiece.color() && destPiece.type == PieceType.KING && withKingChecked) {
+        } else if (destPiece.color() != sourcePiece.color() && destPiece.type == PieceType.KING && includeKingThreat) {
             moves.add(to.tile());
             return true;
         }
@@ -365,9 +363,9 @@ public class Piece implements Comparable<Piece> {
 
     @Override
     public int compareTo(Piece o) {
-        if (this.type.getValue() > o.type.getValue()) {
+        if (this.type.value() > o.type.value()) {
             return -1;
-        } else if (this.type.getValue() < o.type.getValue()) {
+        } else if (this.type.value() < o.type.value()) {
             return 1;
         } else {
             if (this.type == PieceType.BISHOP) {

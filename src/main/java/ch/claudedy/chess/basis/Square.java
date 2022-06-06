@@ -1,16 +1,12 @@
 package ch.claudedy.chess.basis;
 
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
-@Setter(value = AccessLevel.PUBLIC)
 @Getter
 public class Square {
     private final Tile tile;
-
     private Piece piece;
 
     public Square(final Tile tile) {

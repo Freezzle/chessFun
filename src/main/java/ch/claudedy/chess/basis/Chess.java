@@ -3,9 +3,7 @@ package ch.claudedy.chess.basis;
 import ch.claudedy.chess.systems.ConsolePrint;
 import ch.claudedy.chess.systems.SystemConfig;
 import ch.claudedy.chess.utils.FenUtils;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
@@ -15,10 +13,9 @@ import java.util.stream.Collectors;
 
 @Accessors(fluent = true)
 @Getter
-@Setter(AccessLevel.PRIVATE)
 public class Chess {
 
-    private List<HistoricalBoardFen> historicalBoards;
+    private final List<HistoricalBoardFen> historicalBoards;
     private MoveCommand actualMove;
     private Board currentBoard;
     private GameStatus gameStatus;
@@ -134,7 +131,7 @@ public class Chess {
                     gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE;
                 }
             } else if (allPieces.size() == 4) {
-                List<Square> bishopsSquares = currentBoard.getSquarePieces().stream().filter(s -> s.piece().type() == PieceType.BISHOP).collect(Collectors.toList());
+                List<Square> bishopsSquares = currentBoard.getAllPiecesSquares().stream().filter(s -> s.piece().type() == PieceType.BISHOP).collect(Collectors.toList());
 
                 if (bishopsSquares.size() == 2 && bishopsSquares.get(0).tile().color().isSameColor(bishopsSquares.get(1).tile().color())) {
                     // king + bishop vs king + bishop (bishop same color)
@@ -164,7 +161,7 @@ public class Chess {
 
     public List<Tile> getLegalMoves(Tile start) {
         // Check if the start position contains a piece
-        Piece piece = currentBoard.get(start).piece();
+        Piece piece = currentBoard.getSquare(start).piece();
         if (piece == null) {
             return new ArrayList<>();
         }
@@ -193,7 +190,7 @@ public class Chess {
             return MoveStatus.BAD_MOVE_COMMAND;
         }
 
-        Square startSquare = this.currentBoard.get(move.startPosition());
+        Square startSquare = this.currentBoard.getSquare(move.startPosition());
 
         // Check if the start position contains a piece
         if (startSquare.piece() == null) {
@@ -205,7 +202,7 @@ public class Chess {
             return MoveStatus.ENNEMY_PIECE_SELECTED;
         }
 
-        Square endSquare = this.currentBoard.get(move.endPosition());
+        Square endSquare = this.currentBoard.getSquare(move.endPosition());
 
         // Is that piece want to go on an ally piece square ?
         if (endSquare.piece() != null && endSquare.piece().color() == this.currentBoard.currentPlayer()) {

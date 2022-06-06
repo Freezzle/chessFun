@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Accessors(fluent = true)
-@Setter
 @Getter
+@Setter
 @EqualsAndHashCode
 public class Board {
     private final Square[][] squares;
@@ -40,7 +40,7 @@ public class Board {
         return this.currentPlayer.isWhite();
     }
 
-    public Square get(Tile tile) {
+    public Square getSquare(Tile tile) {
         return this.squares[tile.x()][tile.y()];
     }
 
@@ -66,10 +66,12 @@ public class Board {
         manageRookMove(startSquare, pieceToMove);
         managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
 
+        // Increment a full move
         if (!isWhiteCurrentPlayer()) {
             this.moves++;
         }
 
+        // Reset fifty rules if capturing a enemy piece OR moving a pawn
         if (endSquare.piece() != null && this.currentPlayer != endSquare.piece().color() || PieceType.PAWN == pieceToMove.type()) {
             this.fiftyRules = 0;
         } else {
@@ -82,7 +84,7 @@ public class Board {
         startSquare.removePiece();
     }
 
-    public List<Square> getSquarePieces() {
+    public List<Square> getAllPiecesSquares() {
         List<Square> squares = new ArrayList<>();
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
@@ -134,9 +136,9 @@ public class Board {
             // MOVE -> Pawn go to the enPassant tile
             if (this.enPassant == end) {
                 if (pieceToMove.isWhitePiece()) {
-                    get(Tile.getEnum(end.x(), end.y() - 1)).removePiece();
+                    getSquare(Tile.getEnum(end.x(), end.y() - 1)).removePiece();
                 } else {
-                    get(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
+                    getSquare(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
                 }
             }
         } else if (endSquare.tile().y() == 7 && pieceToMove.isWhitePiece()) {
@@ -179,17 +181,17 @@ public class Board {
         if (pieceToMove.isWhitePiece()) {
             if (end == Tile.C1 && this.canwQRoque) {
                 // MOVE -> Roque WHITE Queen side
-                Piece rookQSide = this.get(Tile.A1).piece();
+                Piece rookQSide = this.getSquare(Tile.A1).piece();
                 if (rookQSide != null && rookQSide.type() == PieceType.ROOK) {
-                    this.get(Tile.A1).removePiece();
-                    this.get(Tile.D1).placePiece(rookQSide.letter());
+                    this.getSquare(Tile.A1).removePiece();
+                    this.getSquare(Tile.D1).placePiece(rookQSide.letter());
                 }
             } else if (end == Tile.G1 && this.canwKRoque) {
                 // MOVE -> Roque WHITE King side
-                Piece rookKSide = this.get(Tile.H1).piece();
+                Piece rookKSide = this.getSquare(Tile.H1).piece();
                 if (rookKSide != null && rookKSide.type() == PieceType.ROOK) {
-                    this.get(Tile.H1).removePiece();
-                    this.get(Tile.F1).placePiece(rookKSide.letter());
+                    this.getSquare(Tile.H1).removePiece();
+                    this.getSquare(Tile.F1).placePiece(rookKSide.letter());
                 }
             }
 
@@ -199,17 +201,17 @@ public class Board {
         } else {
             if (end == Tile.C8 && this.canbqRoque) {
                 // MOVE -> Roque BLACK Queen side
-                Piece rookQSide = this.get(Tile.A8).piece();
+                Piece rookQSide = this.getSquare(Tile.A8).piece();
                 if (rookQSide != null && rookQSide.type() == PieceType.ROOK) {
-                    this.get(Tile.A8).removePiece();
-                    this.get(Tile.D8).placePiece(rookQSide.letter());
+                    this.getSquare(Tile.A8).removePiece();
+                    this.getSquare(Tile.D8).placePiece(rookQSide.letter());
                 }
             } else if (end == Tile.G8 && this.canbkRoque) {
                 // MOVE -> Roque BLACK King side
-                Piece rookKSide = this.get(Tile.H8).piece();
+                Piece rookKSide = this.getSquare(Tile.H8).piece();
                 if (rookKSide != null && rookKSide.type() == PieceType.ROOK) {
-                    this.get(Tile.H8).removePiece();
-                    this.get(Tile.F8).placePiece(rookKSide.letter());
+                    this.getSquare(Tile.H8).removePiece();
+                    this.getSquare(Tile.F8).placePiece(rookKSide.letter());
                 }
             }
 

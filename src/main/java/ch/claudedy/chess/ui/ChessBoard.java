@@ -4,6 +4,7 @@ import ch.claudedy.chess.ApplicationSwing;
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.*;
 import ch.claudedy.chess.systems.SystemConfig;
+import lombok.experimental.Accessors;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+@Accessors(fluent = true)
 public class ChessBoard extends JPanel {
     private static final int LEFT_CLICK = 1;
     private static final int RIGHT_CLICK = 3;
@@ -45,7 +48,7 @@ public class ChessBoard extends JPanel {
         this.addMouseListener(new MouseListener() {
 
             public void mouseClicked(MouseEvent e) {
-                if (e == null || app.getChess().gameStatus().isGameOver()) {
+                if (e == null || app.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -68,7 +71,7 @@ public class ChessBoard extends JPanel {
 
                         getComponentUI(selectedPieceTile).setBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
 
-                        colorizeLegalMoves(app.getChess().getLegalMoves(selectedPieceTile));
+                        colorizeLegalMoves(app.chess().getLegalMoves(selectedPieceTile));
                     } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // Piece already selected and we click left on board again (make move)
                         Tile destination = Tile.getEnum(tileClicked.getName());
 
@@ -76,7 +79,7 @@ public class ChessBoard extends JPanel {
                             destination = Tile.getEnum(tileClicked.getParent().getName());
                         }
 
-                        MoveStatus status = app.getChess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
+                        MoveStatus status = app.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
                         // If the move was authorized
                         app.manageAfterMove(status);
@@ -104,7 +107,7 @@ public class ChessBoard extends JPanel {
             }
 
             public void mousePressed(MouseEvent e) {
-                if (e == null || app.getChess().gameStatus().isGameOver()) {
+                if (e == null || app.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -127,14 +130,14 @@ public class ChessBoard extends JPanel {
 
                         getComponentUI(selectedPieceTile).setBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
 
-                        colorizeLegalMoves(app.getChess().getLegalMoves(selectedPieceTile));
+                        colorizeLegalMoves(app.chess().getLegalMoves(selectedPieceTile));
                     }
                 }
             }
 
 
             public void mouseReleased(MouseEvent e) {
-                if (e == null || app.getChess().gameStatus().isGameOver()) {
+                if (e == null || app.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -149,7 +152,7 @@ public class ChessBoard extends JPanel {
                             destination = Tile.getEnum(tileClicked.getParent().getName());
                         }
 
-                        MoveStatus status = app.getChess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
+                        MoveStatus status = app.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
                         // If the move was authorized
                         app.manageAfterMove(status);
@@ -177,9 +180,11 @@ public class ChessBoard extends JPanel {
         doLayout();
     }
 
-    public void addSquare(JPanel square, Integer counter) {
-        this.add(square, counter);
-        squaresBoardUI.put(square.getName(), counter);
+    public void createSquare(Square squareChess, Integer counter) {
+        JPanel squarePanel = new JPanel(new BorderLayout());
+        squarePanel.setName(squareChess.tile().name());
+        this.add(squarePanel, counter);
+        squaresBoardUI.put(squarePanel.getName(), counter);
     }
 
 
@@ -195,20 +200,20 @@ public class ChessBoard extends JPanel {
     private synchronized void resetBackgroundTiles() {
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
-                Tile currentTile = app.getChess().currentBoard().squares()[x][y].tile();
+                Tile currentTile = app.chess().currentBoard().squares()[x][y].tile();
                 getComponentUI(currentTile).setBackground(getColorTile(currentTile.color()));
             }
         }
-        this.printPreviousMove(app.getChess().actualMove());
+        this.printPreviousMove(app.chess().actualMove());
     }
 
 
     private synchronized void printPreviousMove(MoveCommand move) {
 
         // Reset background previous move
-        if (app.getChess().actualMove() != null) {
-            getComponentUI(app.getChess().actualMove().startPosition()).setBackground(getColorTile(app.getChess().actualMove().startPosition().color()));
-            getComponentUI(app.getChess().actualMove().endPosition()).setBackground(getColorTile(app.getChess().actualMove().endPosition().color()));
+        if (app.chess().actualMove() != null) {
+            getComponentUI(app.chess().actualMove().startPosition()).setBackground(getColorTile(app.chess().actualMove().startPosition().color()));
+            getComponentUI(app.chess().actualMove().endPosition()).setBackground(getColorTile(app.chess().actualMove().endPosition().color()));
         }
 
         // Colorize the new move backgrounds
@@ -219,7 +224,7 @@ public class ChessBoard extends JPanel {
     }
 
     private synchronized void printPieces() {
-        Square[][] squares = app.getChess().currentBoard().squares();
+        Square[][] squares = app.chess().currentBoard().squares();
 
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
@@ -230,7 +235,7 @@ public class ChessBoard extends JPanel {
                     JPanel panel = (JPanel) component;
 
                     if (currentSquare.piece() != null) {
-                        String namePiece = currentSquare.piece().type().getAbrevTechnicalBlack() + "_" + currentSquare.piece().color();
+                        String namePiece = currentSquare.piece().type().abrevUniversal() + "_" + currentSquare.piece().color();
 
                         if (panel.getComponentCount() != 0 && namePiece.equals(panel.getComponent(0).getName()) && panel.getComponent(0).isVisible()) {
                             continue;

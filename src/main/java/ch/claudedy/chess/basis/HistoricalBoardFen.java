@@ -8,7 +8,6 @@ import lombok.experimental.Accessors;
 public class HistoricalBoardFen {
 
     @Getter
-    @Setter
     private String fen;
 
     @Getter

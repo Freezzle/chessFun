@@ -6,16 +6,16 @@ import ch.claudedy.chess.utils.FenUtils;
 
 public class ConsolePrint {
 
-    public static final String RESET = "\033[0m";
+    private static final String RESET = "\033[0m";
 
-    public static final String BLACK_BOLD = "\033[1;30m";
-    public static final String RED_BOLD = "\033[1;91m";
-    public static final String GREEN_BOLD = "\033[1;92m";
+    private static final String BLACK_BOLD = "\033[1;30m";
+    private static final String RED_BOLD = "\033[1;91m";
+    private static final String GREEN_BOLD = "\033[1;92m";
 
-    public static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
-    public static final String ANSI_RED_BACKGROUND = "\u001B[41m";
-    public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
-    public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
+    private static final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+    private static final String ANSI_RED_BACKGROUND = "\u001B[41m";
+    private static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+    private static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
 
     public static void execute(Chess chess) {
         if (!SystemConfig.PRINT_CONSOLE) {

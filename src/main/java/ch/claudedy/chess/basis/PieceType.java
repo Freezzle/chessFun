@@ -1,9 +1,11 @@
 package ch.claudedy.chess.basis;
 
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 import java.util.Arrays;
 
+@Accessors(fluent = true)
 @Getter
 public enum PieceType {
     ROOK("r", 'R', 'r', 5),
@@ -30,13 +32,13 @@ public enum PieceType {
     public static PieceType getFromAbrevTechnical(char character) {
         if (Character.isUpperCase(character)) {
             return Arrays.stream(PieceType.VALUES)
-                    .filter(value -> value.getAbrevTechnicalWhite() == character)
+                    .filter(value -> value.abrevTechnicalWhite() == character)
                     .findFirst()
                     .orElse(null);
         }
 
         return Arrays.stream(PieceType.VALUES)
-                .filter(value -> value.getAbrevTechnicalBlack() == character)
+                .filter(value -> value.abrevTechnicalBlack() == character)
                 .findFirst()
                 .orElse(null);
     }
@@ -47,6 +49,10 @@ public enum PieceType {
         }
 
         return Color.BLACK;
+    }
+
+    public String abrevUniversal() {
+        return String.valueOf(this.abrevTechnicalWhite).toLowerCase();
     }
 
     public boolean canMoveDiagonally() {

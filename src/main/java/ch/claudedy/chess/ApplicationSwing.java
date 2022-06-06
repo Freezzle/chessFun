@@ -12,12 +12,14 @@ import ch.claudedy.chess.ui.UIFactory;
 import ch.claudedy.chess.utils.Calculator;
 import ch.claudedy.chess.utils.FenUtils;
 import lombok.Getter;
+import lombok.experimental.Accessors;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+@Accessors(fluent = true)
 public class ApplicationSwing extends JFrame {
 
     // VIEWS (ONLY VIEW PURPOSE)
@@ -177,44 +179,37 @@ public class ApplicationSwing extends JFrame {
         if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
             mainLayer.add(informationBlackArea);
-        } else {
-            informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
-            mainLayer.add(informationWhiteArea);
-        }
 
-        // PANEL BOARD
-        chessBoard = new ChessBoard(this);
-        mainLayer.add(chessBoard);
 
-        int counter = 0;
+            chessBoard = new ChessBoard(this);
+            mainLayer.add(chessBoard);
 
-        if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
+            int counter = 0;
             for (int y = 7; y >= 0; y--) {
                 for (int x = 0; x <= 7; x++) {
-                    JPanel squarePanel = new JPanel(new BorderLayout());
-                    Square currentSquare = squares[x][y];
-                    squarePanel.setName(currentSquare.tile().name());
-                    chessBoard.addSquare(squarePanel, counter);
+                    chessBoard.createSquare(squares[x][y], counter);
                     counter++;
                 }
             }
-        } else {
-            for (int y = 0; y <= 7; y++) {
-                for (int x = 7; x >= 0; x--) {
-                    JPanel squarePanel = new JPanel(new BorderLayout());
-                    Square currentSquare = squares[x][y];
-                    squarePanel.setName(currentSquare.tile().name());
-                    chessBoard.addSquare(squarePanel, counter);
-                    counter++;
-                }
-            }
-        }
 
-        // PANEL INFO BOTTOM
-        if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
             mainLayer.add(informationWhiteArea);
         } else {
+            informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
+            mainLayer.add(informationWhiteArea);
+
+
+            chessBoard = new ChessBoard(this);
+            mainLayer.add(chessBoard);
+
+            int counter = 0;
+            for (int y = 0; y <= 7; y++) {
+                for (int x = 7; x >= 0; x--) {
+                    chessBoard.createSquare(squares[x][y], counter);
+                    counter++;
+                }
+            }
+
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
             mainLayer.add(informationBlackArea);
         }
@@ -230,11 +225,11 @@ public class ApplicationSwing extends JFrame {
 
         Board currentBoard = chess.currentBoard();
 
-        UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.getName() + " (" + playerWhite.getElo() + ")" + (currentBoard.isWhiteCurrentPlayer() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
+        UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.name() + " (" + playerWhite.elo() + ")" + (currentBoard.isWhiteCurrentPlayer() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
         UIFactory.createTextField(informationWhiteArea, "ENNEMY_BLACK_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.BLACK), java.awt.Color.WHITE, java.awt.Color.BLACK);
         informationWhiteArea.doLayout();
 
-        UIFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.getName() + " (" + playerBlack.getElo() + ")" + (!currentBoard.isWhiteCurrentPlayer() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
+        UIFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.name() + " (" + playerBlack.elo() + ")" + (!currentBoard.isWhiteCurrentPlayer() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
         UIFactory.createTextField(informationBlackArea, "ENNEMY_WHITE_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.WHITE), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
         informationBlackArea.doLayout();
     }

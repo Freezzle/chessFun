@@ -4,8 +4,6 @@ import ch.claudedy.chess.basis.Board;
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.Piece;
 import ch.claudedy.chess.basis.PieceType;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,8 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Setter
-@Getter
 public class Calculator {
 
     private static final List<Piece> BLACK_PIECES = Arrays.stream("k;q;r;r;b;b;n;n;p;p;p;p;p;p;p;p".split(";")).map(Piece::new).sorted().collect(Collectors.toList());
@@ -45,8 +41,8 @@ public class Calculator {
             result = result + clone.stream().map(Piece::letter).map(Object::toString).collect(Collectors.joining("")).toLowerCase();
         }
 
-        Integer total = alivePieces.stream().map(Piece::type).map(PieceType::getValue).reduce(0, Integer::sum);
-        Integer totalEnnemy = alivePiecesEnnemy.stream().map(Piece::type).map(PieceType::getValue).reduce(0, Integer::sum);
+        Integer total = alivePieces.stream().map(Piece::type).map(PieceType::value).reduce(0, Integer::sum);
+        Integer totalEnnemy = alivePiecesEnnemy.stream().map(Piece::type).map(PieceType::value).reduce(0, Integer::sum);
 
         long diff = totalEnnemy - total;
 

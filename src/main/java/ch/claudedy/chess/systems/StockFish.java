@@ -24,7 +24,6 @@ public class StockFish {
     private BufferedReader processReader;
     private OutputStreamWriter processWriter;
 
-
     public void startEngine() {
         try {
             engineProcess = Runtime.getRuntime().exec(URL.getFile());

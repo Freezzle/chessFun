@@ -136,7 +136,7 @@ public class FenUtils {
                     int digit = Character.getNumericValue(currentChar);
                     xCurrent += digit;
                 } else {
-                    board.get(Tile.getEnum(xCurrent, yCurrent)).placePiece(currentChar);
+                    board.getSquare(Tile.getEnum(xCurrent, yCurrent)).placePiece(currentChar);
                     xCurrent += 1;
                 }
             }
