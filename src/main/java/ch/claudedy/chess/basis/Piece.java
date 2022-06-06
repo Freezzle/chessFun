@@ -201,11 +201,15 @@ public class Piece implements Comparable<Piece> {
         // CASTLING QUEEN SIDE
         if ((isWhitePiece() && board.canwQRoque()) || !isWhitePiece() && board.canbqRoque()) {
             boolean canQueenCastling = true;
-            for (int i = 1; i <= x - 1; i++) {
-                if (board.squares()[i][ySide].piece() != null) {
-                    canQueenCastling = false;
-                    break;
+            if (board.squares()[0][ySide].piece() != null && board.squares()[0][ySide].piece().type == PieceType.ROOK) {
+                for (int i = 1; i <= x - 1; i++) {
+                    if (board.squares()[i][ySide].piece() != null) {
+                        canQueenCastling = false;
+                        break;
+                    }
                 }
+            } else {
+                canQueenCastling = false;
             }
 
             if (canQueenCastling) {
@@ -216,11 +220,15 @@ public class Piece implements Comparable<Piece> {
         // CASTLING KING SIDE
         if ((isWhitePiece() && board.canwKRoque()) || !isWhitePiece() && board.canbkRoque()) {
             boolean canKingCastling = true;
-            for (int i = x + 1; i <= 7 - 1; i++) {
-                if (board.squares()[i][ySide].piece() != null) {
-                    canKingCastling = false;
-                    break;
+            if (board.squares()[7][ySide].piece() != null && board.squares()[7][ySide].piece().type == PieceType.ROOK) {
+                for (int i = x + 1; i <= 7 - 1; i++) {
+                    if (board.squares()[i][ySide].piece() != null) {
+                        canKingCastling = false;
+                        break;
+                    }
                 }
+            } else {
+                canKingCastling = false;
             }
 
             if (canKingCastling) {

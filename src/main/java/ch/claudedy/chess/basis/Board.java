@@ -164,14 +164,14 @@ public class Board {
             if (end == Tile.C1 && this.canwQRoque) {
                 // MOVE -> Roque WHITE Queen side
                 Piece rookQSide = this.get(Tile.A1).piece();
-                if (rookQSide != null) {
+                if (rookQSide != null && rookQSide.type() == PieceType.ROOK) {
                     this.get(Tile.A1).removePiece();
                     this.get(Tile.D1).placePiece(rookQSide.letter());
                 }
             } else if (end == Tile.G1 && this.canwKRoque) {
                 // MOVE -> Roque WHITE King side
                 Piece rookKSide = this.get(Tile.H1).piece();
-                if (rookKSide != null) {
+                if (rookKSide != null && rookKSide.type() == PieceType.ROOK) {
                     this.get(Tile.H1).removePiece();
                     this.get(Tile.F1).placePiece(rookKSide.letter());
                 }
@@ -184,14 +184,14 @@ public class Board {
             if (end == Tile.C8 && this.canbqRoque) {
                 // MOVE -> Roque BLACK Queen side
                 Piece rookQSide = this.get(Tile.A8).piece();
-                if (rookQSide != null) {
+                if (rookQSide != null && rookQSide.type() == PieceType.ROOK) {
                     this.get(Tile.A8).removePiece();
                     this.get(Tile.D8).placePiece(rookQSide.letter());
                 }
             } else if (end == Tile.G8 && this.canbkRoque) {
                 // MOVE -> Roque BLACK King side
                 Piece rookKSide = this.get(Tile.H8).piece();
-                if (rookKSide != null) {
+                if (rookKSide != null && rookKSide.type() == PieceType.ROOK) {
                     this.get(Tile.H8).removePiece();
                     this.get(Tile.F8).placePiece(rookKSide.letter());
                 }

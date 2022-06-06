@@ -183,13 +183,26 @@ public class ApplicationSwing extends JFrame {
         layeredPane.add(chessBoard);
 
         int counter = 0;
-        for (int y = 7; y >= 0; y--) {
-            for (int x = 0; x <= 7; x++) {
-                JPanel squarePanel = new JPanel(new BorderLayout());
-                Square currentSquare = squares[x][y];
-                squarePanel.setName(currentSquare.tile().name());
-                chessBoard.addSquare(squarePanel, counter);
-                counter++;
+
+        if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
+            for (int y = 7; y >= 0; y--) {
+                for (int x = 0; x <= 7; x++) {
+                    JPanel squarePanel = new JPanel(new BorderLayout());
+                    Square currentSquare = squares[x][y];
+                    squarePanel.setName(currentSquare.tile().name());
+                    chessBoard.addSquare(squarePanel, counter);
+                    counter++;
+                }
+            }
+        } else {
+            for (int y = 0; y <= 7; y++) {
+                for (int x = 7; x >= 0; x--) {
+                    JPanel squarePanel = new JPanel(new BorderLayout());
+                    Square currentSquare = squares[x][y];
+                    squarePanel.setName(currentSquare.tile().name());
+                    chessBoard.addSquare(squarePanel, counter);
+                    counter++;
+                }
             }
         }
 

@@ -32,7 +32,7 @@ public class StockFish {
             processWriter = new OutputStreamWriter(engineProcess.getOutputStream());
             command("uci", Function.identity(), (s) -> s.startsWith("uciok"), 2000l);
             command("setoption name UCI_LimitStrength value true", Function.identity(), (s) -> s.startsWith("readyok"), 100l);
-            command("setoption name UCI_Elo value" + SystemConfig.ELO_COMPUTER, Function.identity(), s -> s.startsWith("readyok"), 100l);
+            command("setoption name UCI_Elo value " + SystemConfig.ELO_COMPUTER, Function.identity(), s -> s.startsWith("readyok"), 100l);
         } catch (Exception e) {
             LOG.severe(e.getMessage());
         }
@@ -85,6 +85,7 @@ public class StockFish {
                         throw new RuntimeException("Unexpected token: " + line);
                     }
                     output.add(line);
+                    System.out.println(line);
                     if (breakCondition == null || breakCondition.test(line)) {
                         // At this point we are no longer interested to read any more
                         // output from the engine, we consider that the engine responded
