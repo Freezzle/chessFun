@@ -33,9 +33,8 @@ public class ChessBoard extends JPanel {
 
     private final Map<String, ImageIcon> piecesImages = new HashMap<>();
     private final Map<String, Integer> squaresBoardUI = new HashMap<>();
-    private Tile selectedPieceTile;
-
     private final ApplicationSwing app;
+    private Tile selectedPieceTile;
 
     public ChessBoard(ApplicationSwing application) {
         this.setName("BOARD");

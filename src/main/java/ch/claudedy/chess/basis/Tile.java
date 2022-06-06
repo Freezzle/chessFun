@@ -89,15 +89,15 @@ public enum Tile {
         this.color = color;
     }
 
-    public boolean isWhiteTile() {
-        return this.color.isWhite();
-    }
-
     public static Tile getEnum(int x, int y) {
         return Arrays.stream(VALUES).filter(value -> value.x == x && value.y == y).findFirst().orElse(null);
     }
 
     public static Tile getEnum(String tile) {
         return Arrays.stream(VALUES).filter(value -> value.name().equals(tile)).findFirst().orElse(null);
+    }
+
+    public boolean isWhiteTile() {
+        return this.color.isWhite();
     }
 }

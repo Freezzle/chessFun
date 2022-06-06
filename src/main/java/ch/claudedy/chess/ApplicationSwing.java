@@ -20,23 +20,30 @@ import java.awt.event.WindowListener;
 
 public class ApplicationSwing extends JFrame {
 
+    // VIEWS (ONLY VIEW PURPOSE)
+    private final JLayeredPane layeredPane;
     private StockFish stockFish;
-
     // CHESS (TRUTH)
     @Getter
     private Chess chess;
-
     private InfoPlayer playerWhite;
     private InfoPlayer playerBlack;
-
     @Getter
     private boolean isComputerThinking = false;
-
-    // VIEWS (ONLY VIEW PURPOSE)
-    private final JLayeredPane layeredPane;
     private ChessBoard chessBoard;
     private JPanel informationWhiteArea;
     private JPanel informationBlackArea;
+
+    public ApplicationSwing() {
+        //  Create a root layer
+        layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(600, 700));
+        layeredPane.setBounds(new Rectangle(0, 0, 600, 700));
+        getContentPane().add(layeredPane);
+
+        // Launch the game (initm, etc...)
+        startNewGame();
+    }
 
     public static void main(String[] args) {
         // Configuration of the Swing Application
@@ -80,17 +87,6 @@ public class ApplicationSwing extends JFrame {
 
             }
         });
-    }
-
-    public ApplicationSwing() {
-        //  Create a root layer
-        layeredPane = new JLayeredPane();
-        layeredPane.setPreferredSize(new Dimension(600, 700));
-        layeredPane.setBounds(new Rectangle(0, 0, 600, 700));
-        getContentPane().add(layeredPane);
-
-        // Launch the game (initm, etc...)
-        startNewGame();
     }
 
     private synchronized void startNewGame() {
