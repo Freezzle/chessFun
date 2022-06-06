@@ -4,8 +4,6 @@ import ch.claudedy.chess.ApplicationSwing;
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.*;
 import ch.claudedy.chess.systems.SystemConfig;
-import lombok.Getter;
-import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,11 +31,8 @@ public class ChessBoard extends JPanel {
     private static final java.awt.Color LEGAL_MOVE_BLACK_SQUARE = new java.awt.Color(180, 123, 100);
     private static final java.awt.Color LEGAL_MOVE_WHITE_SQUARE = new java.awt.Color(240, 192, 180);
 
-    private static final Map<String, ImageIcon> piecesImages = new HashMap<>();
+    private final Map<String, ImageIcon> piecesImages = new HashMap<>();
     private final Map<String, Integer> squaresBoardUI = new HashMap<>();
-    // CHOICE ABOUT PLAYER
-    @Getter
-    @Setter
     private Tile selectedPieceTile;
 
     private final ApplicationSwing app;
@@ -175,8 +170,21 @@ public class ChessBoard extends JPanel {
         });
     }
 
+    public void resetBoard() {
+        initSelectedPieceTile();
+        resetBackgroundTiles();
+        printPieces();
 
-    public synchronized void initSelectedPieceTile() {
+        doLayout();
+    }
+
+    public void addSquare(JPanel square, Integer counter) {
+        this.add(square, counter);
+        squaresBoardUI.put(square.getName(), counter);
+    }
+
+
+    private synchronized void initSelectedPieceTile() {
         if (selectedPieceTile != null) {
             // Reset color for the selected piece tile
             getComponentUI(selectedPieceTile).setBackground(getColorTile(selectedPieceTile.color()));
@@ -185,7 +193,7 @@ public class ChessBoard extends JPanel {
         selectedPieceTile = null;
     }
 
-    public synchronized void resetBackgroundTiles() {
+    private synchronized void resetBackgroundTiles() {
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
                 Tile currentTile = app.getChess().currentBoard().squares()[x][y].tile();
@@ -196,7 +204,7 @@ public class ChessBoard extends JPanel {
     }
 
 
-    public synchronized void printPreviousMove(MoveCommand move) {
+    private synchronized void printPreviousMove(MoveCommand move) {
 
         // Reset background previous move
         if (app.getChess().actualMove() != null) {
@@ -211,8 +219,7 @@ public class ChessBoard extends JPanel {
         }
     }
 
-
-    public synchronized void printPieces() {
+    private synchronized void printPieces() {
         Square[][] squares = app.getChess().currentBoard().squares();
 
         for (int y = 7; y >= 0; y--) {
@@ -255,21 +262,15 @@ public class ChessBoard extends JPanel {
         }
     }
 
-    public void addSquare(JPanel square, Integer counter) {
-        this.add(square, counter);
-        squaresBoardUI.put(square.getName(), counter);
-    }
-
-
-    public Component getTileUI(int x, int y) {
+    private Component getTileUI(int x, int y) {
         return findComponentAt(x, y);
     }
 
-    public Component getComponentUI(Tile tile) {
+    private Component getComponentUI(Tile tile) {
         return getComponent(this.squaresBoardUI.get(tile.name()));
     }
 
-    public void colorizeLegalMoves(List<Tile> tiles) {
+    private void colorizeLegalMoves(List<Tile> tiles) {
         tiles.forEach(tile -> {
             if (tile.color() == Color.BLACK) {
                 getComponentUI(tile).setBackground(LEGAL_MOVE_BLACK_SQUARE);
@@ -279,15 +280,15 @@ public class ChessBoard extends JPanel {
         });
     }
 
-    public java.awt.Color getColorTileForSelectedPiece(Color colorTile) {
+    private java.awt.Color getColorTileForSelectedPiece(Color colorTile) {
         return !colorTile.isWhite() ? SELECTED_PIECE_BLACK_SQUARE : SELECTED_PIECE_WHITE_SQUARE;
     }
 
-    public java.awt.Color getColorTile(Color colorTile) {
+    private java.awt.Color getColorTile(Color colorTile) {
         return colorTile.isSameColor(Color.BLACK) ? BLACK_SQUARE : WHITE_SQUARE;
     }
 
-    public java.awt.Color getColorTileForPreviousMove(Color colorTile) {
+    private java.awt.Color getColorTileForPreviousMove(Color colorTile) {
         return !colorTile.isWhite() ? PREVIOUS_MOVE_BLACK_SQUARE : PREVIOUS_MOVE_WHITE_SQUARE;
     }
 

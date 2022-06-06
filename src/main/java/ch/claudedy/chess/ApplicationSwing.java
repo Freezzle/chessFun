@@ -102,7 +102,6 @@ public class ApplicationSwing extends JFrame {
             playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
             this.createSquares();
             this.reset();
-            chessBoard.printPreviousMove(chess.actualMove());
         } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
             if (chess.currentBoard().isWhiteCurrentPlayer()) {
                 playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
@@ -113,7 +112,6 @@ public class ApplicationSwing extends JFrame {
             }
             this.createSquares();
             this.reset();
-            chessBoard.printPreviousMove(chess.actualMove());
             launchStockFishEngine();
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
             if (chess.currentBoard().isWhiteCurrentPlayer()) {
@@ -125,7 +123,6 @@ public class ApplicationSwing extends JFrame {
             }
             this.createSquares();
             this.reset();
-            chessBoard.printPreviousMove(chess.actualMove());
             launchStockFishEngine();
             launchComputerMove();
         } else {
@@ -133,7 +130,6 @@ public class ApplicationSwing extends JFrame {
             playerBlack = new InfoPlayer("Computer 2", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
             this.createSquares();
             this.reset();
-            chessBoard.printPreviousMove(chess.actualMove());
 
             launchStockFishEngine();
             this.isComputerThinking = true;
@@ -231,12 +227,8 @@ public class ApplicationSwing extends JFrame {
     }
 
     private synchronized void reset() {
-        chessBoard.initSelectedPieceTile();
         this.printInformationArea();
-        chessBoard.resetBackgroundTiles();
-        chessBoard.printPieces();
-
-        chessBoard.doLayout();
+        chessBoard.resetBoard();
     }
 
     public synchronized void manageAfterMove(MoveStatus moveDoneStatus) {
