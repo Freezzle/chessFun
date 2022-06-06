@@ -6,62 +6,37 @@ import ch.claudedy.chess.systems.GameType;
 import ch.claudedy.chess.systems.LoaderFromFile;
 import ch.claudedy.chess.systems.StockFish;
 import ch.claudedy.chess.systems.SystemConfig;
+import ch.claudedy.chess.ui.ChessBoard;
 import ch.claudedy.chess.ui.InfoPlayer;
 import ch.claudedy.chess.ui.UIFactory;
 import ch.claudedy.chess.utils.Calculator;
 import ch.claudedy.chess.utils.FenUtils;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ApplicationSwing extends JFrame {
-
-    private static final java.awt.Color BLACK_SQUARE = new java.awt.Color(75, 115, 145);
-    private static final java.awt.Color WHITE_SQUARE = new java.awt.Color(230, 230, 210);
-
-    private static final java.awt.Color PREVIOUS_MOVE_BLACK_SQUARE = new java.awt.Color(100, 180, 100);
-    private static final java.awt.Color PREVIOUS_MOVE_WHITE_SQUARE = new java.awt.Color(130, 200, 130);
-
-    private static final java.awt.Color SELECTED_PIECE_BLACK_SQUARE = new java.awt.Color(100, 155, 180);
-    private static final java.awt.Color SELECTED_PIECE_WHITE_SQUARE = new java.awt.Color(130, 170, 200);
-
-    private static final java.awt.Color ANALYSE_CLICKED_BLACK_SQUARE = new java.awt.Color(200, 100, 90);
-    private static final java.awt.Color ANALYSE_CLICKED_WHITE_SQUARE = new java.awt.Color(235, 125, 100);
-    private static final java.awt.Color LEGAL_MOVE_BLACK_SQUARE = new java.awt.Color(180, 123, 100);
-    private static final java.awt.Color LEGAL_MOVE_WHITE_SQUARE = new java.awt.Color(240, 192, 180);
-
-    private static final int LEFT_CLICK = 1;
-    private static final int RIGHT_CLICK = 3;
-
-    private static final Map<String, ImageIcon> piecesImages = new HashMap<>();
 
     private StockFish stockFish;
 
     // CHESS (TRUTH)
+    @Getter
     private Chess chess;
 
     private InfoPlayer playerWhite;
     private InfoPlayer playerBlack;
 
+    @Getter
     private boolean isComputerThinking = false;
 
     // VIEWS (ONLY VIEW PURPOSE)
     private final JLayeredPane layeredPane;
-    private JPanel chessBoard;
+    private ChessBoard chessBoard;
     private JPanel informationWhiteArea;
     private JPanel informationBlackArea;
-
-    private final Map<String, Integer> squaresBoardUI = new HashMap<>();
-
-    // CHOICE ABOUT PLAYER
-    private Tile selectedPieceTile;
 
     public static void main(String[] args) {
         // Configuration of the Swing Application
@@ -127,7 +102,7 @@ public class ApplicationSwing extends JFrame {
             playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
             this.createSquares();
             this.reset();
-            this.printPreviousMove(chess.actualMove());
+            chessBoard.printPreviousMove(chess.actualMove());
         } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
             if (chess.currentBoard().isWhiteCurrentPlayer()) {
                 playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
@@ -138,7 +113,7 @@ public class ApplicationSwing extends JFrame {
             }
             this.createSquares();
             this.reset();
-            this.printPreviousMove(chess.actualMove());
+            chessBoard.printPreviousMove(chess.actualMove());
             launchStockFishEngine();
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
             if (chess.currentBoard().isWhiteCurrentPlayer()) {
@@ -150,7 +125,7 @@ public class ApplicationSwing extends JFrame {
             }
             this.createSquares();
             this.reset();
-            this.printPreviousMove(chess.actualMove());
+            chessBoard.printPreviousMove(chess.actualMove());
             launchStockFishEngine();
             launchComputerMove();
         } else {
@@ -158,15 +133,17 @@ public class ApplicationSwing extends JFrame {
             playerBlack = new InfoPlayer("Computer 2", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
             this.createSquares();
             this.reset();
-            this.printPreviousMove(chess.actualMove());
+            chessBoard.printPreviousMove(chess.actualMove());
 
             launchStockFishEngine();
             this.isComputerThinking = true;
             new Thread(() -> {
                 while (!chess.gameStatus().isGameOver()) {
                     if (chess.gameStatus().isGameWaitingMove()) {
+                        this.isComputerThinking = true;
                         String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
                         this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
+                        this.isComputerThinking = false;
                     }
                 }
                 Thread.currentThread().interrupt();
@@ -183,7 +160,7 @@ public class ApplicationSwing extends JFrame {
         }
     }
 
-    private void launchComputerMove() {
+    public void launchComputerMove() {
         this.isComputerThinking = true;
 
         new Thread(() -> {
@@ -210,132 +187,7 @@ public class ApplicationSwing extends JFrame {
         }
 
         // PANEL BOARD
-        chessBoard = UIFactory.createPanel("BOARD", new GridLayout(8, 8), new Dimension(600, 600), new Rectangle(0, 50, 600, 600));
-        chessBoard.addMouseListener(new MouseListener() {
-
-            public void mouseClicked(MouseEvent e) {
-                if (e == null || chess.gameStatus().isGameOver()) {
-                    return;
-                }
-
-                Component tileClicked = getTileUI(e.getX(), e.getY());
-                int buttonClicked = e.getButton();
-
-                if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !isComputerThinking) { // No piece selected and we click left on board (select a piece)
-                        resetBackgroundTiles();
-
-                        if (tileClicked instanceof JPanel) {
-                            return;
-                        }
-
-                        selectedPieceTile = Tile.getEnum(tileClicked.getParent().getName());
-
-                        if (selectedPieceTile == null) {
-                            selectedPieceTile = Tile.getEnum(tileClicked.getName());
-                        }
-
-                        getComponentUI(selectedPieceTile).setBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
-
-                        colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
-                    } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !isComputerThinking) { // Piece already selected and we click left on board again (make move)
-                        Tile destination = Tile.getEnum(tileClicked.getName());
-
-                        if (destination == null) {
-                            destination = Tile.getEnum(tileClicked.getParent().getName());
-                        }
-
-                        MoveStatus status = chess.makeMove(new MoveCommand(selectedPieceTile, destination, null));
-
-                        // If the move was authorized
-                        manageAfterMove(status);
-
-                        if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
-                            launchComputerMove();
-                        }
-                    } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
-                        // color background red
-                        Tile tileSelected = Tile.getEnum(tileClicked.getName());
-                        if (tileSelected == null) {
-                            tileSelected = Tile.getEnum(tileClicked.getParent().getName());
-                        }
-
-                        if (tileSelected.color() == Color.BLACK) {
-                            getComponentUI(tileSelected).setBackground(ANALYSE_CLICKED_BLACK_SQUARE);
-                        } else {
-                            getComponentUI(tileSelected).setBackground(ANALYSE_CLICKED_WHITE_SQUARE);
-                        }
-                    } else { // Reset the board
-                        selectedPieceTile = null;
-                        resetBackgroundTiles();
-                    }
-                }
-            }
-
-            public void mousePressed(MouseEvent e) {
-                if (e == null || chess.gameStatus().isGameOver()) {
-                    return;
-                }
-
-                Component tileClicked = getTileUI(e.getX(), e.getY());
-                int buttonClicked = e.getButton();
-
-                if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !isComputerThinking) { // No piece selected and we click left on board (select a piece)
-                        resetBackgroundTiles();
-
-                        if (tileClicked instanceof JPanel) {
-                            return;
-                        }
-
-                        selectedPieceTile = Tile.getEnum(tileClicked.getParent().getName());
-
-                        if (selectedPieceTile == null) {
-                            selectedPieceTile = Tile.getEnum(tileClicked.getName());
-                        }
-
-                        getComponentUI(selectedPieceTile).setBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
-
-                        colorizeLegalMoves(chess.getLegalMoves(selectedPieceTile));
-                    }
-                }
-            }
-
-
-            public void mouseReleased(MouseEvent e) {
-                if (e == null || chess.gameStatus().isGameOver()) {
-                    return;
-                }
-
-                Component tileClicked = getTileUI(e.getX(), e.getY());
-                int buttonClicked = e.getButton();
-
-                if (tileClicked != null) {
-                    if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !isComputerThinking) { // Piece already selected and we click left on board again (make move)
-                        Tile destination = Tile.getEnum(tileClicked.getName());
-
-                        if (destination == null) {
-                            destination = Tile.getEnum(tileClicked.getParent().getName());
-                        }
-
-                        MoveStatus status = chess.makeMove(new MoveCommand(selectedPieceTile, destination, null));
-
-                        // If the move was authorized
-                        manageAfterMove(status);
-
-                        if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
-                            launchComputerMove();
-                        }
-                    }
-                }
-            }
-
-            public void mouseEntered(MouseEvent e) {
-            }
-
-            public void mouseExited(MouseEvent e) {
-            }
-        });
+        chessBoard = new ChessBoard(this);
         layeredPane.add(chessBoard);
 
         int counter = 0;
@@ -344,8 +196,7 @@ public class ApplicationSwing extends JFrame {
                 JPanel squarePanel = new JPanel(new BorderLayout());
                 Square currentSquare = squares[x][y];
                 squarePanel.setName(currentSquare.tile().name());
-                chessBoard.add(squarePanel, counter);
-                squaresBoardUI.put(currentSquare.tile().name(), counter);
+                chessBoard.addSquare(squarePanel, counter);
                 counter++;
             }
         }
@@ -379,91 +230,13 @@ public class ApplicationSwing extends JFrame {
         informationBlackArea.doLayout();
     }
 
-    private synchronized void printPieces() {
-        // TODO: 02.06.2022 PERFORMANCE TO IMPROVE HERE
-        Square[][] squares = chess.currentBoard().squares();
-
-        for (int y = 7; y >= 0; y--) {
-            for (int x = 0; x <= 7; x++) {
-
-                Square currentSquare = squares[x][y];
-                Component component = getComponentUI(currentSquare.tile());
-                if (component instanceof JPanel) {
-                    JPanel panel = (JPanel) component;
-
-                    if (currentSquare.piece() != null) {
-                        String namePiece = currentSquare.piece().type().getAbrevTechnicalBlack() + "_" + currentSquare.piece().color();
-
-                        if (panel.getComponentCount() != 0 && namePiece.equals(panel.getComponent(0).getName()) && panel.getComponent(0).isVisible()) {
-                            continue;
-                        } else {
-                            if (panel.getComponentCount() != 0) {
-                                panel.getComponent(0).setVisible(false);
-                            }
-                        }
-
-                        ImageIcon imagePiece = piecesImages.get(namePiece);
-                        if (imagePiece == null) {
-                            imagePiece = new ImageIcon(ClassLoader.getSystemResource("images/" + namePiece + ".png"));
-                            piecesImages.put(namePiece, imagePiece);
-                        }
-
-                        JLabel piece = new JLabel(imagePiece);
-                        piece.setName(namePiece);
-                        panel.setFocusable(false);
-                        panel.add(piece, 0);
-                    } else {
-                        if (panel.getComponentCount() != 0) {
-                            panel.getComponent(0).setVisible(false);
-                        }
-                        panel.setFocusable(true);
-                    }
-                }
-            }
-        }
-    }
-
-    private synchronized void initSelectedPieceTile() {
-        if (selectedPieceTile != null) {
-            // Reset color for the selected piece tile
-            getComponentUI(selectedPieceTile).setBackground(getColorTile(selectedPieceTile.color()));
-        }
-
-        selectedPieceTile = null;
-    }
-
-    private synchronized void resetBackgroundTiles() {
-        for (int y = 7; y >= 0; y--) {
-            for (int x = 0; x <= 7; x++) {
-                Tile currentTile = chess.currentBoard().squares()[x][y].tile();
-                getComponentUI(currentTile).setBackground(getColorTile(currentTile.color()));
-            }
-        }
-        this.printPreviousMove(chess.actualMove());
-    }
-
     private synchronized void reset() {
-        this.initSelectedPieceTile();
+        chessBoard.initSelectedPieceTile();
         this.printInformationArea();
-        this.resetBackgroundTiles();
-        this.printPieces();
+        chessBoard.resetBackgroundTiles();
+        chessBoard.printPieces();
 
         chessBoard.doLayout();
-    }
-
-    private synchronized void printPreviousMove(MoveCommand move) {
-
-        // Reset background previous move
-        if (chess.actualMove() != null) {
-            getComponentUI(chess.actualMove().startPosition()).setBackground(getColorTile(chess.actualMove().startPosition().color()));
-            getComponentUI(chess.actualMove().endPosition()).setBackground(getColorTile(chess.actualMove().endPosition().color()));
-        }
-
-        // Colorize the new move backgrounds
-        if (move != null) {
-            getComponentUI(move.startPosition()).setBackground(getColorTileForPreviousMove(move.startPosition().color()));
-            getComponentUI(move.endPosition()).setBackground(getColorTileForPreviousMove(move.endPosition().color()));
-        }
     }
 
     public synchronized void manageAfterMove(MoveStatus moveDoneStatus) {
@@ -477,35 +250,5 @@ public class ApplicationSwing extends JFrame {
         }
 
         this.reset();
-    }
-
-    private Component getTileUI(int x, int y) {
-        return chessBoard.findComponentAt(x, y);
-    }
-
-    private Component getComponentUI(Tile tile) {
-        return chessBoard.getComponent(this.squaresBoardUI.get(tile.name()));
-    }
-
-    private void colorizeLegalMoves(List<Tile> tiles) {
-        tiles.forEach(tile -> {
-            if (tile.color() == Color.BLACK) {
-                getComponentUI(tile).setBackground(LEGAL_MOVE_BLACK_SQUARE);
-            } else {
-                getComponentUI(tile).setBackground(LEGAL_MOVE_WHITE_SQUARE);
-            }
-        });
-    }
-
-    private java.awt.Color getColorTile(Color colorTile) {
-        return colorTile.isSameColor(Color.BLACK) ? BLACK_SQUARE : WHITE_SQUARE;
-    }
-
-    private java.awt.Color getColorTileForPreviousMove(Color colorTile) {
-        return !colorTile.isWhite() ? PREVIOUS_MOVE_BLACK_SQUARE : PREVIOUS_MOVE_WHITE_SQUARE;
-    }
-
-    private java.awt.Color getColorTileForSelectedPiece(Color colorTile) {
-        return !colorTile.isWhite() ? SELECTED_PIECE_BLACK_SQUARE : SELECTED_PIECE_WHITE_SQUARE;
     }
 }
