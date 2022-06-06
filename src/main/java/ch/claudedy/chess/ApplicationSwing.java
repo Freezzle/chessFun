@@ -93,41 +93,17 @@ public class ApplicationSwing extends JFrame {
         // Load the chess board from a file
         chess = LoaderFromFile.readFile(SystemConfig.BOARD);
 
-        if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_PLAYER) {
-            playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
-            playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
-            this.createSquares();
-            this.reset();
-        } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
-            if (chess.currentBoard().isWhiteCurrentPlayer()) {
-                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
-                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
-            } else {
-                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
-            }
-            this.createSquares();
-            this.reset();
-            launchStockFishEngine();
-        } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
-            if (chess.currentBoard().isWhiteCurrentPlayer()) {
-                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
-            } else {
-                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
-                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
-            }
-            this.createSquares();
-            this.reset();
-            launchStockFishEngine();
-            launchComputerMove();
-        } else {
-            playerWhite = new InfoPlayer("Computer 1", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-            playerBlack = new InfoPlayer("Computer 2", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
-            this.createSquares();
-            this.reset();
+        this.initPlayers();
+        this.initLayers();
+        this.reset();
 
+        if (SystemConfig.GAME_TYPE.containsInLessAComputer()) {
             launchStockFishEngine();
+        }
+
+        if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
+            launchComputerMove();
+        } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
             this.isComputerThinking = true;
             new Thread(() -> {
                 while (!chess.gameStatus().isGameOver()) {
@@ -141,6 +117,32 @@ public class ApplicationSwing extends JFrame {
                 Thread.currentThread().interrupt();
                 System.exit(0);
             }).start();
+        }
+    }
+
+    private void initPlayers() {
+        if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_PLAYER) {
+            playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
+            playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
+        } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
+            if (chess.currentBoard().isWhiteCurrentPlayer()) {
+                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+            } else {
+                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+            }
+        } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
+            if (chess.currentBoard().isWhiteCurrentPlayer()) {
+                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+            } else {
+                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+            }
+        } else {
+            playerWhite = new InfoPlayer("Computer 1", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+            playerBlack = new InfoPlayer("Computer 2", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
         }
     }
 
@@ -162,7 +164,7 @@ public class ApplicationSwing extends JFrame {
         }).start();
     }
 
-    private synchronized void createSquares() {
+    private synchronized void initLayers() {
         if (this.layeredPane.getComponentCount() != 0) {
             this.layeredPane.removeAll();
         }
@@ -244,7 +246,7 @@ public class ApplicationSwing extends JFrame {
         // If the move was authorized
         if (moveDoneStatus.isOk()) { // MOVE OK
             if (chess.gameStatus().isGameOver()) { // GAME OVER
-                if (SystemConfig.GAME_TYPE.containsAComputer()) {
+                if (SystemConfig.GAME_TYPE.containsInLessAComputer()) {
                     stockFish.stopEngine();
                 }
             }

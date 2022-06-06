@@ -81,7 +81,7 @@ public class ChessBoard extends JPanel {
                         // If the move was authorized
                         app.manageAfterMove(status);
 
-                        if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
+                        if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
                             app.launchComputerMove();
                         }
                     } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
@@ -154,7 +154,7 @@ public class ChessBoard extends JPanel {
                         // If the move was authorized
                         app.manageAfterMove(status);
 
-                        if (status.isOk() && SystemConfig.GAME_TYPE.containsAComputer()) {
+                        if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
                             app.launchComputerMove();
                         }
                     }
