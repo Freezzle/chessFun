@@ -330,19 +330,11 @@ public class ApplicationSwing extends JFrame {
                 }
             }
 
-
-            public void mouseMoved(MouseEvent e) {
-            }
-
             public void mouseEntered(MouseEvent e) {
             }
 
             public void mouseExited(MouseEvent e) {
             }
-
-            public void mouseDragged(MouseEvent e) {
-            }
-
         });
         layeredPane.add(chessBoard);
 
