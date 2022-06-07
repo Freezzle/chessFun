@@ -77,6 +77,7 @@ public class SquareUI extends JPanel {
     public void changeBackground(java.awt.Color color) {
         setBackground(color);
         this.isPainted = true;
+        this.isAnalysed = false;
     }
 
     public void resetColor() {
@@ -86,20 +87,20 @@ public class SquareUI extends JPanel {
 
         this.setBackground(defaultColor);
         this.isPainted = false;
+        this.isAnalysed = false;
     }
 
     public void clickForAnalyse() {
         if (!this.isAnalysed) {
-            this.isAnalysed = true;
-            this.isPainted = true;
             if (tile.color() == Color.BLACK) {
-                this.setBackground(ANALYSE_CLICKED_BLACK_SQUARE);
+                this.changeBackground(ANALYSE_CLICKED_BLACK_SQUARE);
             } else {
-                this.setBackground(ANALYSE_CLICKED_WHITE_SQUARE);
+                this.changeBackground(ANALYSE_CLICKED_WHITE_SQUARE);
             }
+            this.isAnalysed = true;
         } else {
             this.resetColor();
+            this.isAnalysed = false;
         }
-
     }
 }
