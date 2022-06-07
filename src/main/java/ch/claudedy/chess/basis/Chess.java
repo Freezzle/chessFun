@@ -168,7 +168,6 @@ public class Chess {
 
         // Get all the moves from the piece
         List<PossibleMove> moves = piece.getMoves(this.currentBoard, start);
-        String fenBoardClone = FenUtils.boardToFen(this.currentBoard);
 
         // Remove all move to go on the enemy king (can't eat him)
         moves = moves.stream().filter(move -> move.type() != MoveType.THREAT_ENEMY_KING).collect(Collectors.toList());
@@ -179,7 +178,7 @@ public class Chess {
         }
 
         List<PossibleMove> legals = new ArrayList<>();
-
+        String fenBoardClone = FenUtils.boardToFen(this.currentBoard);
         for (PossibleMove currentMove : moves) {
             // Filter the moves to get only those who always make our king in safe mode
             Chess chessFake = new Chess(fenBoardClone, actualMove);
@@ -222,7 +221,7 @@ public class Chess {
         }
 
         // The possible moves doesnt contains the given move
-        List<PossibleMove> allMoves = startSquare.piece().getMoves(currentBoard, startSquare.tile());
+        List<PossibleMove> allMoves = getLegalMoves(startSquare.tile());
         if (allMoves.stream().noneMatch(m -> m.destination() == endSquare.tile())) {
             return MoveStatus.PIECE_ILLEGAL_MOVE;
         }
