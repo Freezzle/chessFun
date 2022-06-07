@@ -17,7 +17,7 @@ public class SquareUI extends JPanel {
     private static final java.awt.Color WHITE_SQUARE = new java.awt.Color(255, 255, 255);
 
     private static final java.awt.Color ANALYSE_CLICKED_BLACK_SQUARE = new java.awt.Color(200, 100, 90);
-    private static final java.awt.Color ANALYSE_CLICKED_WHITE_SQUARE = new java.awt.Color(235, 125, 100);
+    private static final java.awt.Color ANALYSE_CLICKED_WHITE_SQUARE = new java.awt.Color(215, 105, 95);
 
     private final Map<String, ImageIcon> piecesImages = new HashMap<>();
 

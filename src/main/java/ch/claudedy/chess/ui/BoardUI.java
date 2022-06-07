@@ -21,16 +21,16 @@ public class BoardUI extends JPanel {
     private static final int RIGHT_CLICK = 3;
 
     private static final java.awt.Color THREATED_BLACK_SQUARE = new java.awt.Color(200, 100, 90);
-    private static final java.awt.Color THREATED_WHITE_SQUARE = new java.awt.Color(235, 125, 100);
+    private static final java.awt.Color THREATED_WHITE_SQUARE = new java.awt.Color(215, 105, 95);
 
     private static final java.awt.Color THREATED_KING_BLACK_SQUARE = new java.awt.Color(255, 80, 70);
-    private static final java.awt.Color THREATED_KING_WHITE_SQUARE = new java.awt.Color(255, 115, 90);
+    private static final java.awt.Color THREATED_KING_WHITE_SQUARE = new java.awt.Color(255, 90, 80);
 
     private static final java.awt.Color PREVIOUS_MOVE_BLACK_SQUARE = new java.awt.Color(100, 180, 100);
     private static final java.awt.Color PREVIOUS_MOVE_WHITE_SQUARE = new java.awt.Color(130, 200, 130);
 
-    private static final java.awt.Color SELECTED_PIECE_BLACK_SQUARE = new java.awt.Color(100, 155, 180);
-    private static final java.awt.Color SELECTED_PIECE_WHITE_SQUARE = new java.awt.Color(130, 170, 200);
+    private static final java.awt.Color SELECTED_PIECE_BLACK_SQUARE = new java.awt.Color(150, 150, 150, 255);
+    private static final java.awt.Color SELECTED_PIECE_WHITE_SQUARE = new java.awt.Color(220, 220, 220);
 
     private static final java.awt.Color LEGAL_MOVE_BLACK_SQUARE = new java.awt.Color(240, 240, 80, 255);
     private static final java.awt.Color LEGAL_MOVE_WHITE_SQUARE = new java.awt.Color(255, 255, 150);

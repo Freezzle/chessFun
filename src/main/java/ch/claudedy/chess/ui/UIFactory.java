@@ -16,9 +16,8 @@ public class UIFactory {
     }
 
     public static JPanel createPanel(String name, GridLayout layout, Dimension dimension, Rectangle bounds) {
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(layout);
         panel.setName(name);
-        panel.setLayout(layout);
         panel.setPreferredSize(dimension);
         panel.setBounds(bounds);
 
