@@ -189,16 +189,16 @@ public class ChessBoard extends JPanel {
     }
 
     private void showKingChecked() {
-        Tile tileWhiteKing = app.chess().getTileKing(app.chess().currentBoard(), Color.WHITE);
-        if (app.chess().isTileChecked(app.chess().currentBoard(), Color.WHITE, tileWhiteKing)) {
+        Tile tileWhiteKing = app.chess().currentBoard().getTileKing(Color.WHITE);
+        if (app.chess().currentBoard().isTileChecked(Color.WHITE, tileWhiteKing)) {
             if (tileWhiteKing.color() == Color.BLACK) {
                 getComponentUI(tileWhiteKing).setBackground(THREATED_BLACK_SQUARE);
             } else {
                 getComponentUI(tileWhiteKing).setBackground(THREATED_WHITE_SQUARE);
             }
         }
-        Tile tileBlackKing = app.chess().getTileKing(app.chess().currentBoard(), Color.BLACK);
-        if (app.chess().isTileChecked(app.chess().currentBoard(), Color.BLACK, tileBlackKing)) {
+        Tile tileBlackKing = app.chess().currentBoard().getTileKing(Color.BLACK);
+        if (app.chess().currentBoard().isTileChecked(Color.BLACK, tileBlackKing)) {
             if (tileWhiteKing.color() == Color.BLACK) {
                 getComponentUI(tileBlackKing).setBackground(THREATED_BLACK_SQUARE);
             } else {

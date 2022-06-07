@@ -220,4 +220,41 @@ public class Board {
             this.canbqRoque = false;
         }
     }
+
+    public boolean isKingChecked(Color colorKing) {
+        // Search our king
+        return isTileChecked(colorKing, getTileKing(colorKing));
+    }
+
+    public Tile getTileKing(Color colorKing) {
+        Tile kingTile = null;
+        for (int x = 0; x <= 7; x++) {
+            for (int y = 0; y <= 7; y++) {
+                Piece piece = squares()[x][y].piece();
+                if (piece != null && piece.type() == PieceType.KING && piece.color() == colorKing) {
+                    kingTile = squares()[x][y].tile();
+                }
+            }
+        }
+        return kingTile;
+    }
+
+    public boolean isTileChecked(Color allyColor, Tile tileToCheck) {
+        // Get all enemy pieces, and see if one is hitting our king
+        boolean isTileChecked = false;
+        for (int x = 0; x <= 7; x++) {
+            for (int y = 0; y <= 7; y++) {
+                Piece piece = squares()[x][y].piece();
+                if (piece != null && piece.color() != allyColor) {
+                    List<PossibleMove> threatens = piece.getMoves(this, squares()[x][y].tile());
+                    if (threatens.stream().anyMatch(threat -> threat.destination() == tileToCheck)) {
+                        isTileChecked = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return isTileChecked;
+    }
 }
