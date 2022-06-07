@@ -100,7 +100,7 @@ public class Chess {
                 for (int y = 0; y <= 7; y++) {
                     Piece piece = currentBoard.squares()[x][y].piece();
                     if (piece != null && piece.color() == this.currentBoard.currentPlayer()) {
-                        List<Tile> legalMoves = this.getLegalMoves(currentBoard.squares()[x][y].tile());
+                        List<PossibleMove> legalMoves = this.getLegalMoves(currentBoard.squares()[x][y].tile());
                         if (!legalMoves.isEmpty()) {
                             aPieceCanMove = true;
                             break;
@@ -159,7 +159,7 @@ public class Chess {
         this.historicalBoards.remove(this.historicalBoards.size() - 1);
     }
 
-    public List<Tile> getLegalMoves(Tile start) {
+    public List<PossibleMove> getLegalMoves(Tile start) {
         // Check if the start position contains a piece
         Piece piece = currentBoard.getSquare(start).piece();
         if (piece == null) {
@@ -167,22 +167,29 @@ public class Chess {
         }
 
         // Get all the moves from the piece
-        List<Tile> moves = piece.getMoves(this.currentBoard, start);
-
-        List<Tile> movesLegal = new ArrayList<>();
-
-        // Filter the moves to get only those who always make our king in safe mode
+        List<PossibleMove> moves = piece.getMoves(this.currentBoard, start);
         String fenBoardClone = FenUtils.boardToFen(this.currentBoard);
-        moves.forEach(move -> {
-            Chess chessFake = new Chess(fenBoardClone, actualMove);
-            chessFake.currentBoard().movePiece(start, move, null);
-            boolean kingChecked = this.isKingChecked(chessFake.currentBoard(), piece.color());
-            if (!kingChecked) {
-                movesLegal.add(move);
-            }
-        });
 
-        return movesLegal;
+        // Remove all move to go on the enemy king (can't eat him)
+        moves = moves.stream().filter(move -> move.type() != MoveType.THREAT_ENEMY_KING).collect(Collectors.toList());
+
+        // Remove all possibilites to castle when the piece is the king and is checked
+        if (piece.type() == PieceType.KING && this.isKingChecked(currentBoard, piece.color())) {
+            moves = moves.stream().filter(move -> move.type() != MoveType.CASTLE).collect(Collectors.toList());
+        }
+
+        List<PossibleMove> legals = new ArrayList<>();
+
+        for (PossibleMove currentMove : moves) {
+            // Filter the moves to get only those who always make our king in safe mode
+            Chess chessFake = new Chess(fenBoardClone, actualMove);
+            chessFake.currentBoard().movePiece(start, currentMove.destination(), null);
+            if (!this.isKingChecked(chessFake.currentBoard(), piece.color())) {
+                legals.add(currentMove);
+            }
+        }
+
+        return legals;
     }
 
     private MoveStatus isThatMoveLegal(MoveCommand move) {
@@ -215,8 +222,8 @@ public class Chess {
         }
 
         // The possible moves doesnt contains the given move
-        List<Tile> allMoves = startSquare.piece().getMoves(currentBoard, startSquare.tile());
-        if (!allMoves.contains(endSquare.tile())) {
+        List<PossibleMove> allMoves = startSquare.piece().getMoves(currentBoard, startSquare.tile());
+        if (allMoves.stream().noneMatch(m -> m.destination() == endSquare.tile())) {
             return MoveStatus.PIECE_ILLEGAL_MOVE;
         }
 
@@ -257,8 +264,8 @@ public class Chess {
             for (int y = 0; y <= 7; y++) {
                 Piece piece = board.squares()[x][y].piece();
                 if (piece != null && piece.color() != allyColor) {
-                    List<Tile> threatens = piece.getThreatens(board, board.squares()[x][y].tile());
-                    if (threatens.contains(tileToCheck)) {
+                    List<PossibleMove> threatens = piece.getMoves(board, board.squares()[x][y].tile());
+                    if (threatens.stream().anyMatch(threat -> threat.destination() == tileToCheck)) {
                         isTileChecked = true;
                         break;
                     }

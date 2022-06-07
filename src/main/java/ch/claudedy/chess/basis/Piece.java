@@ -29,91 +29,61 @@ public class Piece implements Comparable<Piece> {
         this.letter = piece;
     }
 
-    public List<Tile> getThreatens(Board board, Tile source) {
-        List<Tile> moves = new ArrayList<>();
-        Square[][] squares = board.squares();
-
-        int x = source.x();
-        int y = source.y();
-
-        if (type.canMoveDiagonally()) {
-            addDiagonaleMoves(moves, squares, x, y, true);
-        }
-
-        if (type.canMoveLinearly()) {
-            addLinearMoves(moves, squares, x, y, true);
-        }
-
-        if (type.canMoveInLShape()) {
-            addLMoves(moves, squares, x, y, true);
-        }
-
-        if (type.canOnlyMoveOneCase()) {
-            addKingMoves(moves, board, x, y, true);
-        }
-
-        if (type.canMoveOnlyForward()) {
-            addPawnMoves(moves, board, x, y, true);
-        }
-
-        return moves;
-    }
-
     public boolean isWhitePiece() {
         return this.color.isWhite();
     }
 
-    public List<Tile> getMoves(Board board, Tile source) {
-        List<Tile> moves = new ArrayList<>();
+    public List<PossibleMove> getMoves(Board board, Tile source) {
+        List<PossibleMove> moves = new ArrayList<>();
         Square[][] squares = board.squares();
 
         int x = source.x();
         int y = source.y();
 
         if (type.canMoveDiagonally()) {
-            addDiagonaleMoves(moves, squares, x, y, false);
+            addDiagonaleMoves(moves, squares, x, y);
         }
 
         if (type.canMoveLinearly()) {
-            addLinearMoves(moves, squares, x, y, false);
+            addLinearMoves(moves, squares, x, y);
         }
 
         if (type.canMoveInLShape()) {
-            addLMoves(moves, squares, x, y, false);
+            addLMoves(moves, squares, x, y);
         }
 
         if (type.canOnlyMoveOneCase()) {
-            addKingMoves(moves, board, x, y, false);
+            addKingMoves(moves, board, x, y);
         }
 
         if (type.canMoveOnlyForward()) {
-            addPawnMoves(moves, board, x, y, false);
+            addPawnMoves(moves, board, x, y);
         }
 
         return moves;
     }
 
-    private void addPawnMoves(List<Tile> moves, Board board, int x, int y, boolean includeKingThreat) {
+    private void addPawnMoves(List<PossibleMove> moves, Board board, int x, int y) {
         int changerPromotion = isWhitePiece() ? 1 : -1;
 
         // PROMOTION
         if (y + (changerPromotion) == 7 || y + (changerPromotion) == 0) {
             Square square = board.squares()[x][y + (changerPromotion)];
             if (square.piece() == null) {
-                moves.add(Tile.getEnum(x, y + changerPromotion));
+                moves.add(new PossibleMove(Tile.getEnum(x, y + changerPromotion), MoveType.PROMOTE));
             }
         }
 
         // STANDARD
         int changer1StepMove = isWhitePiece() ? 1 : -1;
         if (y + (changer1StepMove) > 0 && y + (changer1StepMove) < 7 && board.squares()[x][y + (changer1StepMove)].piece() == null) {
-            moves.add(Tile.getEnum(x, y + changer1StepMove));
+            moves.add(new PossibleMove(Tile.getEnum(x, y + changer1StepMove), MoveType.MOVE));
 
             int changer2StepMove = isWhitePiece() ? 2 : -2;
             if (this.color == Color.WHITE && board.squares()[x][1] == board.squares()[x][y] || this.color == Color.BLACK && board.squares()[x][6] == board.squares()[x][y]) {
                 // BIG MOVE FOR FIRST TIME
                 if (board.squares()[x][y + (changer2StepMove)].piece() == null) {
-                    moves.add(Tile.getEnum(x, y + changer2StepMove));
+                    moves.add(new PossibleMove(Tile.getEnum(x, y + changer2StepMove), MoveType.MOVE));
                 }
             }
         }
@@ -122,9 +92,16 @@ public class Piece implements Comparable<Piece> {
         int changerAttack = isWhitePiece() ? 1 : -1;
         if (x + 1 <= 7) {
             Square square = board.squares()[x + 1][y + changerAttack];
+
             Piece piece = square.piece();
-            if ((piece != null && piece.color != this.color && (piece.type != PieceType.KING || piece.type == PieceType.KING && includeKingThreat)) || (piece == null && board.enPassant() == square.tile())) {
-                moves.add(Tile.getEnum(x + 1, y + changerAttack));
+            if (piece == null && board.enPassant() == square.tile()) {
+                moves.add(new PossibleMove(square.tile(), MoveType.EN_PASSANT));
+            } else if (piece != null && piece.color != this.color) {
+                if (piece.type == PieceType.KING) {
+                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT_ENEMY_KING));
+                } else {
+                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT));
+                }
             }
         }
 
@@ -132,66 +109,73 @@ public class Piece implements Comparable<Piece> {
         if (x - 1 >= 0) {
             Square square = board.squares()[x - 1][y + changerAttack];
             Piece piece = square.piece();
-            if ((piece != null && piece.color != this.color && (piece.type != PieceType.KING || piece.type == PieceType.KING && includeKingThreat)) || (piece == null && board.enPassant() == square.tile())) {
-                moves.add(Tile.getEnum(x - 1, y + changerAttack));
+
+            if (piece == null && board.enPassant() == square.tile()) {
+                moves.add(new PossibleMove(square.tile(), MoveType.EN_PASSANT));
+            } else if (piece != null && piece.color != this.color) {
+                if (piece.type == PieceType.KING) {
+                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT_ENEMY_KING));
+                } else {
+                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT));
+                }
             }
         }
     }
 
-    private void addLMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean includeKingThreat) {
+    private void addLMoves(List<PossibleMove> moves, Square[][] squares, int x, int y) {
         Square sourceSquare = squares[x][y];
 
         if (x + 2 <= 7 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y + 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y + 1]);
 
         if (x + 1 <= 7 && y + 2 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y + 2], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y + 2]);
 
         if (x - 2 >= 0 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y + 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y + 1]);
 
         if (x - 1 >= 0 && y + 2 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y + 2], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y + 2]);
 
         if (x - 1 >= 0 && y - 2 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y - 2], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 1][y - 2]);
 
         if (x - 2 >= 0 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y - 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x - 2][y - 1]);
 
         if (x + 1 <= 7 && y - 2 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y - 2], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 1][y - 2]);
 
         if (x + 2 <= 7 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y - 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, squares[x + 2][y - 1]);
     }
 
-    private void addKingMoves(List<Tile> moves, Board board, int x, int y, boolean includeKingThreat) {
+    private void addKingMoves(List<PossibleMove> moves, Board board, int x, int y) {
         Square sourceSquare = board.squares()[x][y];
 
         if (x + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y]);
 
         if (x + 1 <= 7 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y + 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y + 1]);
 
         if (y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y + 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y + 1]);
 
         if (x - 1 >= 0 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y + 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y + 1]);
 
         if (x - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y]);
 
         if (x - 1 >= 0 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y - 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y - 1]);
 
         if (y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y - 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y - 1]);
 
         if (x + 1 <= 7 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y - 1], includeKingThreat);
+            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y - 1]);
 
 
         int ySide = isWhitePiece() ? 0 : 7;
@@ -211,7 +195,7 @@ public class Piece implements Comparable<Piece> {
             }
 
             if (canQueenCastling) {
-                moves.add(Tile.getEnum(2, ySide));
+                moves.add(new PossibleMove(Tile.getEnum(2, ySide), MoveType.CASTLE));
             }
         }
 
@@ -230,20 +214,19 @@ public class Piece implements Comparable<Piece> {
             }
 
             if (canKingCastling) {
-                moves.add(Tile.getEnum(6, ySide));
+                moves.add(new PossibleMove(Tile.getEnum(6, ySide), MoveType.CASTLE));
             }
         }
     }
 
-    private void addLinearMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean includeKingThreat) {
+    private void addLinearMoves(List<PossibleMove> moves, Square[][] squares, int x, int y) {
         Square sourceSquare = squares[x][y];
 
         if (x < 7) {
             // RIGHT
             for (int i = x + 1; i <= 7; i++) {
-                Square destinationSquare = squares[i][y];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-                if (!hasAdded || destinationSquare.piece() != null) {
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[i][y]);
+                if (mustStop(moveTypeAdded)) {
                     break;
                 }
             }
@@ -252,9 +235,8 @@ public class Piece implements Comparable<Piece> {
         if (x > 0) {
             // LEFT
             for (int i = x - 1; i >= 0; i--) {
-                Square destinationSquare = squares[i][y];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-                if (!hasAdded || destinationSquare.piece() != null) {
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[i][y]);
+                if (mustStop(moveTypeAdded)) {
                     break;
                 }
             }
@@ -263,9 +245,8 @@ public class Piece implements Comparable<Piece> {
         if (y < 7) {
             // UP
             for (int i = y + 1; i <= 7; i++) {
-                Square destinationSquare = squares[x][i];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-                if (!hasAdded || destinationSquare.piece() != null) {
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x][i]);
+                if (mustStop(moveTypeAdded)) {
                     break;
                 }
             }
@@ -274,16 +255,15 @@ public class Piece implements Comparable<Piece> {
         if (y > 0) {
             // DOWN
             for (int i = y - 1; i >= 0; i--) {
-                Square destinationSquare = squares[x][i];
-                boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-                if (!hasAdded || destinationSquare.piece() != null) {
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x][i]);
+                if (mustStop(moveTypeAdded)) {
                     break;
                 }
             }
         }
     }
 
-    private void addDiagonaleMoves(List<Tile> moves, Square[][] squares, int x, int y, boolean includeKingThreat) {
+    private void addDiagonaleMoves(List<PossibleMove> moves, Square[][] squares, int x, int y) {
         Square sourceSquare = squares[x][y];
 
         // RIGHT UP
@@ -292,9 +272,8 @@ public class Piece implements Comparable<Piece> {
                 break;
             }
 
-            Square destinationSquare = squares[x + i][y + i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-            if (!hasAdded || destinationSquare.piece() != null) {
+            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y + i]);
+            if (mustStop(moveTypeAdded)) {
                 break;
             }
         }
@@ -305,9 +284,8 @@ public class Piece implements Comparable<Piece> {
                 break;
             }
 
-            Square destinationSquare = squares[x - i][y - i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-            if (!hasAdded || destinationSquare.piece() != null) {
+            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y - i]);
+            if (mustStop(moveTypeAdded)) {
                 break;
             }
         }
@@ -318,9 +296,8 @@ public class Piece implements Comparable<Piece> {
                 break;
             }
 
-            Square destinationSquare = squares[x + i][y - i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-            if (!hasAdded || destinationSquare.piece() != null) {
+            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y - i]);
+            if (mustStop(moveTypeAdded)) {
                 break;
             }
         }
@@ -331,34 +308,43 @@ public class Piece implements Comparable<Piece> {
                 break;
             }
 
-            Square destinationSquare = squares[x - i][y + i];
-            boolean hasAdded = addMoveIfNecessary(moves, sourceSquare, destinationSquare, includeKingThreat);
-            if (!hasAdded || destinationSquare.piece() != null) {
+            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y + i]);
+            if (mustStop(moveTypeAdded)) {
                 break;
             }
         }
     }
 
-    public boolean addMoveIfNecessary(List<Tile> moves, Square from, Square to, boolean includeKingThreat) {
+    public MoveType addMoveIfNecessary(List<PossibleMove> moves, Square from, Square to) {
         if (to == null || from == null) {
-            return false;
+            return null;
         }
 
         Piece sourcePiece = from.piece();
         Piece destPiece = to.piece();
 
+        PossibleMove possibleMove;
+
         if (destPiece == null) {
-            moves.add(to.tile());
-            return true;
+            possibleMove = new PossibleMove(to.tile(), MoveType.MOVE);
         } else if (destPiece.color() != sourcePiece.color() && !(destPiece.type == PieceType.KING)) {
-            moves.add(to.tile());
-            return true;
-        } else if (destPiece.color() != sourcePiece.color() && destPiece.type == PieceType.KING && includeKingThreat) {
-            moves.add(to.tile());
-            return true;
+            possibleMove = new PossibleMove(to.tile(), MoveType.THREAT);
+        } else if (destPiece.color() != sourcePiece.color() && destPiece.type == PieceType.KING) {
+            possibleMove = new PossibleMove(to.tile(), MoveType.THREAT_ENEMY_KING);
+        } else {
+            possibleMove = null;
         }
 
-        return false;
+        if (possibleMove != null) {
+            moves.add(possibleMove);
+            return possibleMove.type();
+        }
+
+        return null;
+    }
+
+    public boolean mustStop(MoveType moveTypeAdded) {
+        return moveTypeAdded == null || moveTypeAdded == MoveType.THREAT || moveTypeAdded == MoveType.THREAT_ENEMY_KING;
     }
 
     @Override

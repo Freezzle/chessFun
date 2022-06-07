@@ -152,11 +152,8 @@ public class ApplicationSwing extends JFrame {
     }
 
     private void launchStockFishEngine() {
-        // If there is an computer, launch the stockfish engine
-        if (playerBlack.isComputer() || playerWhite.isComputer()) {
-            stockFish = new StockFish();
-            stockFish.startEngine();
-        }
+        stockFish = new StockFish();
+        stockFish.startEngine();
     }
 
     public void printBestMoveForPlayer() {

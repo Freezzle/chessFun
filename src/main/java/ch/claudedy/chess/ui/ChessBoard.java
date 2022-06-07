@@ -274,12 +274,12 @@ public class ChessBoard extends JPanel {
         return getComponent(this.squaresBoardUI.get(tile.name()));
     }
 
-    private void colorizeLegalMoves(List<Tile> tiles) {
-        tiles.forEach(tile -> {
-            if (tile.color() == Color.BLACK) {
-                getComponentUI(tile).setBackground(LEGAL_MOVE_BLACK_SQUARE);
+    private void colorizeLegalMoves(List<PossibleMove> possibleMoves) {
+        possibleMoves.forEach(move -> {
+            if (move.destination().color() == Color.BLACK) {
+                getComponentUI(move.destination()).setBackground(LEGAL_MOVE_BLACK_SQUARE);
             } else {
-                getComponentUI(tile).setBackground(LEGAL_MOVE_WHITE_SQUARE);
+                getComponentUI(move.destination()).setBackground(LEGAL_MOVE_WHITE_SQUARE);
             }
         });
     }
