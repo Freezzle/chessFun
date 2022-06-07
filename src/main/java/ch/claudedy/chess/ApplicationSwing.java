@@ -6,7 +6,7 @@ import ch.claudedy.chess.systems.GameType;
 import ch.claudedy.chess.systems.LoaderFromFile;
 import ch.claudedy.chess.systems.StockFish;
 import ch.claudedy.chess.systems.SystemConfig;
-import ch.claudedy.chess.ui.ChessBoard;
+import ch.claudedy.chess.ui.BoardUI;
 import ch.claudedy.chess.ui.InfoPlayer;
 import ch.claudedy.chess.ui.UIFactory;
 import ch.claudedy.chess.utils.Calculator;
@@ -32,7 +32,7 @@ public class ApplicationSwing extends JFrame {
     private boolean isComputerThinking = false;
 
     // UI
-    private ChessBoard chessBoard;
+    private BoardUI boardUI;
     private JPanel informationWhiteArea;
     private JPanel informationBlackArea;
     private InfoPlayer playerWhite;
@@ -178,13 +178,13 @@ public class ApplicationSwing extends JFrame {
             mainLayer.add(informationBlackArea);
 
 
-            chessBoard = new ChessBoard(this);
-            mainLayer.add(chessBoard);
+            boardUI = new BoardUI(this);
+            mainLayer.add(boardUI);
 
             int counter = 0;
             for (int y = 7; y >= 0; y--) {
                 for (int x = 0; x <= 7; x++) {
-                    chessBoard.createSquare(squares[x][y], counter);
+                    boardUI.createSquare(squares[x][y], counter);
                     counter++;
                 }
             }
@@ -196,13 +196,13 @@ public class ApplicationSwing extends JFrame {
             mainLayer.add(informationWhiteArea);
 
 
-            chessBoard = new ChessBoard(this);
-            mainLayer.add(chessBoard);
+            boardUI = new BoardUI(this);
+            mainLayer.add(boardUI);
 
             int counter = 0;
             for (int y = 0; y <= 7; y++) {
                 for (int x = 7; x >= 0; x--) {
-                    chessBoard.createSquare(squares[x][y], counter);
+                    boardUI.createSquare(squares[x][y], counter);
                     counter++;
                 }
             }
@@ -233,7 +233,7 @@ public class ApplicationSwing extends JFrame {
 
     private synchronized void reset() {
         this.updateInformationArea();
-        chessBoard.resetBoard();
+        boardUI.resetBoard();
     }
 
     public synchronized void manageAfterMove(MoveStatus moveDoneStatus) {
