@@ -304,7 +304,7 @@ public class ChessBoard extends JPanel {
     private void colorizeLegalMoves(List<PossibleMove> possibleMoves) {
         possibleMoves.forEach(move -> {
             if (move.destination().color() == Color.BLACK) {
-                if (move.type() == MoveType.THREAT) {
+                if (move.type() == MoveType.THREAT || move.type() == MoveType.EN_PASSANT) {
                     getComponentUI(move.destination()).setBackground(THREATED_BLACK_SQUARE);
                 } else if (move.type() == MoveType.THREAT_ENEMY_KING) {
                     getComponentUI(move.destination()).setBackground(THREATED_KING_BLACK_SQUARE);
@@ -314,6 +314,8 @@ public class ChessBoard extends JPanel {
             } else {
                 if (move.type() == MoveType.THREAT || move.type() == MoveType.EN_PASSANT) {
                     getComponentUI(move.destination()).setBackground(THREATED_WHITE_SQUARE);
+                } else if (move.type() == MoveType.THREAT_ENEMY_KING) {
+                    getComponentUI(move.destination()).setBackground(THREATED_KING_WHITE_SQUARE);
                 } else {
                     getComponentUI(move.destination()).setBackground(LEGAL_MOVE_WHITE_SQUARE);
                 }
