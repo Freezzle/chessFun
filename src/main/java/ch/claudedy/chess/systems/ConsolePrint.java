@@ -102,6 +102,5 @@ public class ConsolePrint {
 
         System.out.println("Status : " + chess.gameStatus());
         System.out.println();
-        System.out.println();
     }
 }

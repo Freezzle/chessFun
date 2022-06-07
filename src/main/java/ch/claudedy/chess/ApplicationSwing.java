@@ -101,8 +101,9 @@ public class ApplicationSwing extends JFrame {
         this.initLayers();
         this.reset();
 
-        if (SystemConfig.GAME_TYPE.containsInLessAComputer()) {
+        if (SystemConfig.GAME_TYPE.containsInLessAComputer() || SystemConfig.WANT_BESTMOVE_FOR_PLAYER) {
             launchStockFishEngine();
+            printBestMoveForPlayer();
         }
 
         if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
@@ -158,12 +159,19 @@ public class ApplicationSwing extends JFrame {
         }
     }
 
+    public void printBestMoveForPlayer() {
+        if (SystemConfig.WANT_BESTMOVE_FOR_PLAYER) {
+            System.out.println(stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH));
+        }
+    }
+
     public void launchComputerMove() {
         this.isComputerThinking = true;
 
         new Thread(() -> {
             String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
             this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
+            printBestMoveForPlayer();
             this.isComputerThinking = false;
         }).start();
     }

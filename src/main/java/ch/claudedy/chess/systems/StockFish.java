@@ -84,7 +84,6 @@ public class StockFish {
                         throw new RuntimeException("Unexpected token: " + line);
                     }
                     output.add(line);
-                    System.out.println(line);
                     if (breakCondition == null || breakCondition.test(line)) {
                         // At this point we are no longer interested to read any more
                         // output from the engine, we consider that the engine responded
