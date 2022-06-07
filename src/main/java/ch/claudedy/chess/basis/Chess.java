@@ -244,7 +244,7 @@ public class Chess {
         return isTileChecked(board, colorKing, getTileKing(board, colorKing));
     }
 
-    private Tile getTileKing(Board board, Color colorKing) {
+    public Tile getTileKing(Board board, Color colorKing) {
         Tile kingTile = null;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
@@ -257,7 +257,7 @@ public class Chess {
         return kingTile;
     }
 
-    private boolean isTileChecked(Board board, Color allyColor, Tile tileToCheck) {
+    public boolean isTileChecked(Board board, Color allyColor, Tile tileToCheck) {
         // Get all enemy pieces, and see if one is hitting our king
         boolean isTileChecked = false;
         for (int x = 0; x <= 7; x++) {

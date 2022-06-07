@@ -101,9 +101,8 @@ public class ApplicationSwing extends JFrame {
         this.initLayers();
         this.reset();
 
-        if (SystemConfig.GAME_TYPE.containsInLessAComputer() || SystemConfig.WANT_BESTMOVE_FOR_PLAYER) {
+        if (SystemConfig.GAME_TYPE.containsInLessAComputer()) {
             launchStockFishEngine();
-            printBestMoveForPlayer();
         }
 
         if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
@@ -156,19 +155,12 @@ public class ApplicationSwing extends JFrame {
         stockFish.startEngine();
     }
 
-    public void printBestMoveForPlayer() {
-        if (SystemConfig.WANT_BESTMOVE_FOR_PLAYER) {
-            System.out.println(stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH));
-        }
-    }
-
     public void launchComputerMove() {
         this.isComputerThinking = true;
 
         new Thread(() -> {
             String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
             this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
-            printBestMoveForPlayer();
             this.isComputerThinking = false;
         }).start();
     }
@@ -220,7 +212,7 @@ public class ApplicationSwing extends JFrame {
         }
     }
 
-    private synchronized void printInformationArea() {
+    private synchronized void updateInformationArea() {
         if (informationWhiteArea.getComponentCount() != 0) {
             informationWhiteArea.removeAll();
         }
@@ -240,7 +232,7 @@ public class ApplicationSwing extends JFrame {
     }
 
     private synchronized void reset() {
-        this.printInformationArea();
+        this.updateInformationArea();
         chessBoard.resetBoard();
     }
 

@@ -2,7 +2,6 @@ package ch.claudedy.chess.systems;
 
 public class SystemConfig {
     public static final boolean PRINT_CONSOLE = true;
-    public static final boolean WANT_BESTMOVE_FOR_PLAYER = true;
     public static final GameType GAME_TYPE = GameType.PLAYER_V_PLAYER;
     public static final String ELO_COMPUTER = "2800";
     public static final long MOVETIME_STOCKFISH = 1200l;

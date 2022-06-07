@@ -20,8 +20,14 @@ public class ChessBoard extends JPanel {
     private static final int LEFT_CLICK = 1;
     private static final int RIGHT_CLICK = 3;
 
-    private static final java.awt.Color BLACK_SQUARE = new java.awt.Color(75, 115, 145);
-    private static final java.awt.Color WHITE_SQUARE = new java.awt.Color(230, 230, 210);
+    private static final java.awt.Color BLACK_SQUARE = new java.awt.Color(190, 190, 190, 255);
+    private static final java.awt.Color WHITE_SQUARE = new java.awt.Color(255, 255, 255);
+
+    private static final java.awt.Color THREATED_BLACK_SQUARE = new java.awt.Color(200, 100, 90);
+    private static final java.awt.Color THREATED_WHITE_SQUARE = new java.awt.Color(235, 125, 100);
+
+    private static final java.awt.Color THREATED_KING_BLACK_SQUARE = new java.awt.Color(255, 80, 70);
+    private static final java.awt.Color THREATED_KING_WHITE_SQUARE = new java.awt.Color(255, 115, 90);
 
     private static final java.awt.Color PREVIOUS_MOVE_BLACK_SQUARE = new java.awt.Color(100, 180, 100);
     private static final java.awt.Color PREVIOUS_MOVE_WHITE_SQUARE = new java.awt.Color(130, 200, 130);
@@ -31,8 +37,9 @@ public class ChessBoard extends JPanel {
 
     private static final java.awt.Color ANALYSE_CLICKED_BLACK_SQUARE = new java.awt.Color(200, 100, 90);
     private static final java.awt.Color ANALYSE_CLICKED_WHITE_SQUARE = new java.awt.Color(235, 125, 100);
-    private static final java.awt.Color LEGAL_MOVE_BLACK_SQUARE = new java.awt.Color(180, 123, 100);
-    private static final java.awt.Color LEGAL_MOVE_WHITE_SQUARE = new java.awt.Color(240, 192, 180);
+
+    private static final java.awt.Color LEGAL_MOVE_BLACK_SQUARE = new java.awt.Color(230, 230, 100, 255);
+    private static final java.awt.Color LEGAL_MOVE_WHITE_SQUARE = new java.awt.Color(255, 255, 100);
 
     private final Map<String, ImageIcon> piecesImages = new HashMap<>();
     private final Map<String, Integer> squaresBoardUI = new HashMap<>();
@@ -57,9 +64,9 @@ public class ChessBoard extends JPanel {
 
                 if (tileClicked != null) {
                     if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // No piece selected and we click left on board (select a piece)
-                        resetBackgroundTiles();
 
                         if (tileClicked instanceof JPanel) {
+                            resetBackgroundTiles();
                             return;
                         }
 
@@ -116,9 +123,9 @@ public class ChessBoard extends JPanel {
 
                 if (tileClicked != null) {
                     if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // No piece selected and we click left on board (select a piece)
-                        resetBackgroundTiles();
 
                         if (tileClicked instanceof JPanel) {
+                            resetBackgroundTiles();
                             return;
                         }
 
@@ -176,8 +183,28 @@ public class ChessBoard extends JPanel {
         initSelectedPieceTile();
         resetBackgroundTiles();
         printPieces();
+        showKingChecked();
 
-        doLayout();
+        repaint();
+    }
+
+    private void showKingChecked() {
+        Tile tileWhiteKing = app.chess().getTileKing(app.chess().currentBoard(), Color.WHITE);
+        if (app.chess().isTileChecked(app.chess().currentBoard(), Color.WHITE, tileWhiteKing)) {
+            if (tileWhiteKing.color() == Color.BLACK) {
+                getComponentUI(tileWhiteKing).setBackground(THREATED_BLACK_SQUARE);
+            } else {
+                getComponentUI(tileWhiteKing).setBackground(THREATED_WHITE_SQUARE);
+            }
+        }
+        Tile tileBlackKing = app.chess().getTileKing(app.chess().currentBoard(), Color.BLACK);
+        if (app.chess().isTileChecked(app.chess().currentBoard(), Color.BLACK, tileBlackKing)) {
+            if (tileWhiteKing.color() == Color.BLACK) {
+                getComponentUI(tileBlackKing).setBackground(THREATED_BLACK_SQUARE);
+            } else {
+                getComponentUI(tileBlackKing).setBackground(THREATED_WHITE_SQUARE);
+            }
+        }
     }
 
     public void createSquare(Square squareChess, Integer counter) {
@@ -277,9 +304,19 @@ public class ChessBoard extends JPanel {
     private void colorizeLegalMoves(List<PossibleMove> possibleMoves) {
         possibleMoves.forEach(move -> {
             if (move.destination().color() == Color.BLACK) {
-                getComponentUI(move.destination()).setBackground(LEGAL_MOVE_BLACK_SQUARE);
+                if (move.type() == MoveType.THREAT) {
+                    getComponentUI(move.destination()).setBackground(THREATED_BLACK_SQUARE);
+                } else if (move.type() == MoveType.THREAT_ENEMY_KING) {
+                    getComponentUI(move.destination()).setBackground(THREATED_KING_BLACK_SQUARE);
+                } else {
+                    getComponentUI(move.destination()).setBackground(LEGAL_MOVE_BLACK_SQUARE);
+                }
             } else {
-                getComponentUI(move.destination()).setBackground(LEGAL_MOVE_WHITE_SQUARE);
+                if (move.type() == MoveType.THREAT || move.type() == MoveType.EN_PASSANT) {
+                    getComponentUI(move.destination()).setBackground(THREATED_WHITE_SQUARE);
+                } else {
+                    getComponentUI(move.destination()).setBackground(LEGAL_MOVE_WHITE_SQUARE);
+                }
             }
         });
     }
