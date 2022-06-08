@@ -3,54 +3,40 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-* Write something
+This project has just been created to build a mini chess game with the usage of the stockfish engine.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-### Built With
-
-* Write something
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-<!-- GETTING STARTED -->
-## Getting Started
-
-* Write something
 
 <!-- PREREQUISITES -->
 ### Prerequisites
 
-* Write something
+empty
 
 <!-- INSTALLATION -->
 ### Installation
 
-* Write something
+empty
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-* Write something
+empty
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Write something
-- [ ] Write something
+- [x] empty
+- [ ] empty
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+Claude Dylan - [@dylanparagliding](https://instagram.com/dylanparagliding) - dylan.claude.work@gmail.com
 
 <p align="right">(<a href="#top">back to top</a>)</p>
