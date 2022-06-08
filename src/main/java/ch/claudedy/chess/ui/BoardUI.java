@@ -40,60 +40,68 @@ public class BoardUI extends JPanel {
     private Tile selectedPieceTile;
 
     public BoardUI(ApplicationSwing application) {
+        this.app = application;
+        
         this.setName("BOARD");
         this.setLayout(new GridLayout(8, 8));
         this.setPreferredSize(new Dimension(600, 600));
         this.setBounds(new Rectangle(0, 50, 600, 600));
-        this.app = application;
         this.addMouseListener(new MouseListener() {
 
+            // MOUSE CLICKED
             public void mouseClicked(MouseEvent e) {
                 if (e == null || app.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
+                // Search the clicked tile on the board itself
                 Component tileClicked = getTileUI(e.getX(), e.getY());
                 int buttonClicked = e.getButton();
 
                 if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // No piece selected and we click left on board (select a piece)
-
+                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
+                        // If the click was on a empty tile (cause piece is a JLabel)
                         if (tileClicked instanceof JPanel) {
                             resetBackgroundTiles();
                             return;
                         }
 
+                        // We take the parent name (the tile of the piece)
                         selectedPieceTile = Tile.getEnum(tileClicked.getParent().getName());
 
                         if (selectedPieceTile == null) {
                             selectedPieceTile = Tile.getEnum(tileClicked.getName());
                         }
 
+                        // Color the tile of the piece
                         getComponentUI(selectedPieceTile).changeBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
-
+                        
+                        // Show the legal moves for the selected piece
                         colorizeLegalMoves(app.chess().getLegalMoves(selectedPieceTile));
-                    } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // Piece already selected and we click left on board again (make move)
+                    } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
                         Tile destination = Tile.getEnum(tileClicked.getName());
 
                         if (destination == null) {
                             destination = Tile.getEnum(tileClicked.getParent().getName());
                         }
 
+                        // Make the move
                         MoveStatus status = app.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
-                        // If the move was authorized
+                        // Manage the move done
                         app.manageAfterMove(status);
 
+                        // If we play against a computer, we launch the computer move
                         if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
                             app.launchComputerMove();
                         }
-                    } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
-                        // color background red
+                    } else if (e.getButton() == RIGHT_CLICK) { // There is no selected piece and we click right (print square to analyse board)
                         Tile tileSelected = Tile.getEnum(tileClicked.getName());
                         if (tileSelected == null) {
                             tileSelected = Tile.getEnum(tileClicked.getParent().getName());
                         }
-
+                        
+                        // Let's manage the click on the tile (to set a background etc..)
                         getComponentUI(tileSelected).clickForAnalyse();
                     } else { // Reset the board
                         selectedPieceTile = null;
@@ -107,25 +115,29 @@ public class BoardUI extends JPanel {
                     return;
                 }
 
+                // Search the clicked tile on the board itself
                 Component tileClicked = getTileUI(e.getX(), e.getY());
                 int buttonClicked = e.getButton();
 
                 if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // No piece selected and we click left on board (select a piece)
-
+                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
+                        // If the click was on a empty tile (cause piece is a JLabel)
                         if (tileClicked instanceof JPanel) {
                             resetBackgroundTiles();
                             return;
                         }
 
+                        // We take the parent name (the tile of the piece)
                         selectedPieceTile = Tile.getEnum(tileClicked.getParent().getName());
 
                         if (selectedPieceTile == null) {
                             selectedPieceTile = Tile.getEnum(tileClicked.getName());
                         }
 
+                        // Color the tile of the piece
                         getComponentUI(selectedPieceTile).changeBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
-
+                        
+                        // Show the legal moves for the selected piece
                         colorizeLegalMoves(app.chess().getLegalMoves(selectedPieceTile));
                     }
                 } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
@@ -145,22 +157,25 @@ public class BoardUI extends JPanel {
                     return;
                 }
 
+                // Search the clicked tile on the board itself
                 Component tileClicked = getTileUI(e.getX(), e.getY());
                 int buttonClicked = e.getButton();
 
                 if (tileClicked != null) {
-                    if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // Piece already selected and we click left on board again (make move)
+                    if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
                         Tile destination = Tile.getEnum(tileClicked.getName());
 
                         if (destination == null) {
                             destination = Tile.getEnum(tileClicked.getParent().getName());
                         }
 
+                        // Make the move
                         MoveStatus status = app.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
-                        // If the move was authorized
+                        // Manage the move done
                         app.manageAfterMove(status);
 
+                        // If we play against a computer, we launch the computer move
                         if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
                             app.launchComputerMove();
                         }
@@ -186,6 +201,7 @@ public class BoardUI extends JPanel {
     }
 
     private void showKingChecked() {
+        // Search the WHITE KING and if he is in check, we color his tile
         Tile tileWhiteKing = app.chess().currentBoard().getTileKing(Color.WHITE);
         if (app.chess().currentBoard().isTileChecked(Color.WHITE, tileWhiteKing)) {
             if (tileWhiteKing.color() == Color.BLACK) {
@@ -194,6 +210,8 @@ public class BoardUI extends JPanel {
                 getComponentUI(tileWhiteKing).changeBackground(THREATED_KING_WHITE_SQUARE);
             }
         }
+        
+        // Search the BLACK KING and if he is in check, we color his tile
         Tile tileBlackKing = app.chess().currentBoard().getTileKing(Color.BLACK);
         if (app.chess().currentBoard().isTileChecked(Color.BLACK, tileBlackKing)) {
             if (tileWhiteKing.color() == Color.BLACK) {
@@ -227,6 +245,7 @@ public class BoardUI extends JPanel {
                 getComponentUI(currentTile).resetColor();
             }
         }
+        
         this.printPreviousMove(app.chess().actualMove());
     }
 
