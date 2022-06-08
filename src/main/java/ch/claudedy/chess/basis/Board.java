@@ -49,9 +49,6 @@ public class Board {
     }
 
     public void movePiece(Tile start, Tile end, Character promote) {
-        // Reset EnPassant
-        this.enPassant = null;
-
         Square startSquare = this.squares[start.x()][start.y()];
         Square endSquare = this.squares[end.x()][end.y()];
 
@@ -60,6 +57,9 @@ public class Board {
         if (pieceToMove == null) {
             return;
         }
+        
+        // Reset EnPassant
+        this.enPassant = null;
 
         // Special cases
         manageKingMove(end, pieceToMove);
