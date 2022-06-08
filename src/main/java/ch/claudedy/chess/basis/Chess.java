@@ -28,7 +28,7 @@ public class Chess {
     }
 
     public MoveStatus makeMove(MoveCommand move) {
-        if (!this.gameStatus.isGameWaitingMove()) {
+        if (this.gameStatus.isGameExecuting()) {
             return MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE;
         }
 
@@ -36,12 +36,13 @@ public class Chess {
             return MoveStatus.GAME_ALREADY_OVER;
         }
 
+        // Change the status to notify we are executing the new move
         this.gameStatus = GameStatus.EXECUTING;
 
         // Check if the move is authorized
         MoveStatus statusMoveDone = this.isThatMoveLegal(move);
 
-        if (statusMoveDone == MoveStatus.OK) {
+        if (statusMoveDone.isOk()) {
             // Create a copy of the board before to make action
             this.historicalBoards.add(new HistoricalBoardFen().fen(FenUtils.boardToFen(this.currentBoard)).previousMove(this.actualMove));
 
