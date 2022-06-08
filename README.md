@@ -15,14 +15,20 @@ empty
 <!-- INSTALLATION -->
 ### Installation
 
-empty
+```sh
+maven clean install
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-empty
+You have two choices to launch the game :
+* ApplicationSwing.java
+  * A Swing application with a visual perspective and mouse usage.
+* ApplicationConsole.java
+  * A Console application with a ascii perspictive and keyboard usage.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
