@@ -10,4 +10,8 @@ public enum GameStatus {
     public boolean isGameWaitingMove() {
         return this == WAITING_MOVE;
     }
+    
+    public boolean isGameExecuting() {
+        return this == EXECUTING;
+    }
 }
