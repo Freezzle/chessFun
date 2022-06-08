@@ -36,7 +36,7 @@ public class Board {
         }
     }
 
-    public boolean isWhiteCurrentPlayer() {
+    public boolean isWhiteTurn() {
         return this.currentPlayer.isWhite();
     }
 
