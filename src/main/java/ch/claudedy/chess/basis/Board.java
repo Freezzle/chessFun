@@ -53,10 +53,6 @@ public class Board {
         Square endSquare = this.squares[end.x()][end.y()];
 
         Piece pieceToMove = startSquare.piece();
-
-        if (pieceToMove == null) {
-            return;
-        }
         
         // Reset EnPassant
         this.enPassant = null;
