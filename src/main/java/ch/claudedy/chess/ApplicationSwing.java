@@ -130,7 +130,7 @@ public class ApplicationSwing extends JFrame {
             playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
             playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
         } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
-            if (chess.currentBoard().isWhiteCurrentPlayer()) {
+            if (chess.currentBoard().isWhiteTurn()) {
                 playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
                 playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
             } else {
@@ -138,7 +138,7 @@ public class ApplicationSwing extends JFrame {
                 playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
             }
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
-            if (chess.currentBoard().isWhiteCurrentPlayer()) {
+            if (chess.currentBoard().isWhiteTurn()) {
                 playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
                 playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
             } else {
@@ -223,11 +223,11 @@ public class ApplicationSwing extends JFrame {
 
         Board currentBoard = chess.currentBoard();
 
-        UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.name() + " (" + playerWhite.elo() + ")" + (currentBoard.isWhiteCurrentPlayer() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
+        UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.name() + " (" + playerWhite.elo() + ")" + (currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
         UIFactory.createTextField(informationWhiteArea, "ENNEMY_BLACK_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.BLACK), java.awt.Color.WHITE, java.awt.Color.BLACK);
         informationWhiteArea.doLayout();
 
-        UIFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.name() + " (" + playerBlack.elo() + ")" + (!currentBoard.isWhiteCurrentPlayer() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
+        UIFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.name() + " (" + playerBlack.elo() + ")" + (!currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
         UIFactory.createTextField(informationBlackArea, "ENNEMY_WHITE_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.WHITE), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
         informationBlackArea.doLayout();
     }
