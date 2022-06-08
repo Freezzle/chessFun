@@ -45,7 +45,7 @@ public class Board {
     }
 
     public void switchPlayer() {
-        this.currentPlayer = isWhiteCurrentPlayer() ? Color.BLACK : Color.WHITE;
+        this.currentPlayer = isWhiteTurn() ? Color.BLACK : Color.WHITE;
     }
 
     public void movePiece(Tile start, Tile end, Character promote) {
@@ -63,7 +63,7 @@ public class Board {
         managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
 
         // Increment a full move
-        if (!isWhiteCurrentPlayer()) {
+        if (!isWhiteTurn()) {
             this.moves++;
         }
 
