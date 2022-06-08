@@ -44,7 +44,7 @@ public class FenUtils {
 
 
         // b | w
-        if (board.isWhiteCurrentPlayer()) {
+        if (board.isWhiteTurn()) {
             fen.append("w");
         } else {
             fen.append("b");
