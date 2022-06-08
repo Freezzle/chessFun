@@ -37,6 +37,6 @@ empty
 <!-- CONTACT -->
 ## Contact
 
-Claude Dylan - [@dylanparagliding](https://instagram.com/dylanparagliding) - dylan.claude.work@gmail.com
+Claude Dylan - [instagram](https://instagram.com/dylanparagliding) - dylan.claude.work@gmail.com
 
 <p align="right">(<a href="#top">back to top</a>)</p>
