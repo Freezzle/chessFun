@@ -22,14 +22,17 @@ import java.awt.event.WindowListener;
 @Accessors(fluent = true)
 public class ApplicationSwing extends JFrame {
 
-    // VIEWS (ONLY VIEW PURPOSE)
+    // Main layer of the application
     private final JLayeredPane mainLayer;
-    private StockFish stockFish;
 
+    // Main logic of the game
     @Getter
     private Chess chess;
+    
+    // Computer
     @Getter
     private boolean isComputerThinking = false;
+    private StockFish stockFish;
 
     // UI
     private BoardUI boardUI;
@@ -39,18 +42,16 @@ public class ApplicationSwing extends JFrame {
     private InfoPlayer playerBlack;
 
     public ApplicationSwing() {
-        //  Create a root layer
         mainLayer = new JLayeredPane();
         mainLayer.setPreferredSize(new Dimension(600, 700));
         mainLayer.setBounds(new Rectangle(0, 0, 600, 700));
         getContentPane().add(mainLayer);
 
-        // Launch the game (initm, etc...)
+        // Launch the game (init, etc...)
         startNewGame();
     }
 
     public static void main(String[] args) {
-        // Configuration of the Swing Application
         ApplicationSwing frame = new ApplicationSwing();
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         frame.pack();
@@ -94,7 +95,7 @@ public class ApplicationSwing extends JFrame {
     }
 
     private synchronized void startNewGame() {
-        // Load the chess board from a file
+        // Load the chess game from a file
         chess = LoaderFromFile.readFile(SystemConfig.BOARD);
 
         this.initPlayers();
@@ -172,11 +173,10 @@ public class ApplicationSwing extends JFrame {
 
         Square[][] squares = chess.currentBoard().squares();
 
-        // PANEL INFO TOP
+        // View from white SIDE
         if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
             mainLayer.add(informationBlackArea);
-
 
             boardUI = new BoardUI(this);
             mainLayer.add(boardUI);
@@ -192,6 +192,7 @@ public class ApplicationSwing extends JFrame {
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
             mainLayer.add(informationWhiteArea);
         } else {
+            // View from black SIDE
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
             mainLayer.add(informationWhiteArea);
 
