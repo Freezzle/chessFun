@@ -1,6 +1,5 @@
 package ch.claudedy.chess.ui;
 
-import ch.claudedy.chess.ApplicationSwing;
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.*;
 import ch.claudedy.chess.systems.SystemConfig;
@@ -36,12 +35,12 @@ public class BoardUI extends JPanel {
     private static final java.awt.Color LEGAL_MOVE_WHITE_SQUARE = new java.awt.Color(255, 255, 150);
 
     private final Map<String, Integer> squaresBoardUI = new HashMap<>();
-    private final ApplicationSwing app;
+    private final ChessUI chessUI;
     private Tile selectedPieceTile;
 
-    public BoardUI(ApplicationSwing application) {
-        this.app = application;
-        
+    public BoardUI(ChessUI chessUI) {
+        this.chessUI = chessUI;
+
         this.setName("BOARD");
         this.setLayout(new GridLayout(8, 8));
         this.setPreferredSize(new Dimension(600, 600));
@@ -50,7 +49,7 @@ public class BoardUI extends JPanel {
 
             // MOUSE CLICKED
             public void mouseClicked(MouseEvent e) {
-                if (e == null || app.chess().gameStatus().isGameOver()) {
+                if (e == null || BoardUI.this.chessUI.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -59,7 +58,7 @@ public class BoardUI extends JPanel {
                 int buttonClicked = e.getButton();
 
                 if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
+                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
                         // If the click was on a empty tile (cause piece is a JLabel)
                         if (tileClicked instanceof JPanel) {
                             resetBackgroundTiles();
@@ -75,10 +74,10 @@ public class BoardUI extends JPanel {
 
                         // Color the tile of the piece
                         getComponentUI(selectedPieceTile).changeBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
-                        
+
                         // Show the legal moves for the selected piece
-                        colorizeLegalMoves(app.chess().getLegalMoves(selectedPieceTile));
-                    } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
+                        colorizeLegalMoves(BoardUI.this.chessUI.chess().getLegalMoves(selectedPieceTile));
+                    } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
                         Tile destination = Tile.getEnum(tileClicked.getName());
 
                         if (destination == null) {
@@ -86,21 +85,21 @@ public class BoardUI extends JPanel {
                         }
 
                         // Make the move
-                        MoveStatus status = app.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
+                        MoveStatus status = BoardUI.this.chessUI.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
                         // Manage the move done
-                        app.manageAfterMove(status);
+                        BoardUI.this.chessUI.manageAfterMove(status);
 
                         // If we play against a computer, we launch the computer move
                         if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
-                            app.launchComputerMove();
+                            BoardUI.this.chessUI.launchComputerMove();
                         }
                     } else if (e.getButton() == RIGHT_CLICK) { // There is no selected piece and we click right (print square to analyse board)
                         Tile tileSelected = Tile.getEnum(tileClicked.getName());
                         if (tileSelected == null) {
                             tileSelected = Tile.getEnum(tileClicked.getParent().getName());
                         }
-                        
+
                         // Let's manage the click on the tile (to set a background etc..)
                         getComponentUI(tileSelected).clickForAnalyse();
                     } else { // Reset the board
@@ -111,7 +110,7 @@ public class BoardUI extends JPanel {
             }
 
             public void mousePressed(MouseEvent e) {
-                if (e == null || app.chess().gameStatus().isGameOver()) {
+                if (e == null || BoardUI.this.chessUI.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -120,7 +119,7 @@ public class BoardUI extends JPanel {
                 int buttonClicked = e.getButton();
 
                 if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
+                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
                         // If the click was on a empty tile (cause piece is a JLabel)
                         if (tileClicked instanceof JPanel) {
                             resetBackgroundTiles();
@@ -136,9 +135,9 @@ public class BoardUI extends JPanel {
 
                         // Color the tile of the piece
                         getComponentUI(selectedPieceTile).changeBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
-                        
+
                         // Show the legal moves for the selected piece
-                        colorizeLegalMoves(app.chess().getLegalMoves(selectedPieceTile));
+                        colorizeLegalMoves(BoardUI.this.chessUI.chess().getLegalMoves(selectedPieceTile));
                     }
                 } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
                     // color background red
@@ -153,7 +152,7 @@ public class BoardUI extends JPanel {
 
 
             public void mouseReleased(MouseEvent e) {
-                if (e == null || app.chess().gameStatus().isGameOver()) {
+                if (e == null || BoardUI.this.chessUI.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -162,7 +161,7 @@ public class BoardUI extends JPanel {
                 int buttonClicked = e.getButton();
 
                 if (tileClicked != null) {
-                    if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !app.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
+                    if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
                         Tile destination = Tile.getEnum(tileClicked.getName());
 
                         if (destination == null) {
@@ -170,14 +169,14 @@ public class BoardUI extends JPanel {
                         }
 
                         // Make the move
-                        MoveStatus status = app.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
+                        MoveStatus status = BoardUI.this.chessUI.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
                         // Manage the move done
-                        app.manageAfterMove(status);
+                        BoardUI.this.chessUI.manageAfterMove(status);
 
                         // If we play against a computer, we launch the computer move
                         if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
-                            app.launchComputerMove();
+                            BoardUI.this.chessUI.launchComputerMove();
                         }
                     }
                 }
@@ -202,18 +201,18 @@ public class BoardUI extends JPanel {
 
     private void showKingChecked() {
         // Search the WHITE KING and if he is in check, we color his tile
-        Tile tileWhiteKing = app.chess().currentBoard().getTileKing(Color.WHITE);
-        if (app.chess().currentBoard().isTileChecked(Color.WHITE, tileWhiteKing)) {
+        Tile tileWhiteKing = chessUI.chess().currentBoard().getTileKing(Color.WHITE);
+        if (chessUI.chess().currentBoard().isTileChecked(Color.WHITE, tileWhiteKing)) {
             if (tileWhiteKing.color() == Color.BLACK) {
                 getComponentUI(tileWhiteKing).changeBackground(THREATED_KING_BLACK_SQUARE);
             } else {
                 getComponentUI(tileWhiteKing).changeBackground(THREATED_KING_WHITE_SQUARE);
             }
         }
-        
+
         // Search the BLACK KING and if he is in check, we color his tile
-        Tile tileBlackKing = app.chess().currentBoard().getTileKing(Color.BLACK);
-        if (app.chess().currentBoard().isTileChecked(Color.BLACK, tileBlackKing)) {
+        Tile tileBlackKing = chessUI.chess().currentBoard().getTileKing(Color.BLACK);
+        if (chessUI.chess().currentBoard().isTileChecked(Color.BLACK, tileBlackKing)) {
             if (tileWhiteKing.color() == Color.BLACK) {
                 getComponentUI(tileBlackKing).changeBackground(THREATED_KING_BLACK_SQUARE);
             } else {
@@ -241,21 +240,21 @@ public class BoardUI extends JPanel {
     private synchronized void resetBackgroundTiles() {
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
-                Tile currentTile = app.chess().currentBoard().squares()[x][y].tile();
+                Tile currentTile = chessUI.chess().currentBoard().squares()[x][y].tile();
                 getComponentUI(currentTile).resetColor();
             }
         }
-        
-        this.printPreviousMove(app.chess().actualMove());
+
+        this.printPreviousMove(chessUI.chess().actualMove());
     }
 
 
     private synchronized void printPreviousMove(MoveCommand move) {
 
         // Reset background previous move
-        if (app.chess().actualMove() != null) {
-            getComponentUI(app.chess().actualMove().startPosition()).resetColor();
-            getComponentUI(app.chess().actualMove().endPosition()).resetColor();
+        if (chessUI.chess().actualMove() != null) {
+            getComponentUI(chessUI.chess().actualMove().startPosition()).resetColor();
+            getComponentUI(chessUI.chess().actualMove().endPosition()).resetColor();
         }
 
         // Colorize the new move backgrounds
@@ -266,7 +265,7 @@ public class BoardUI extends JPanel {
     }
 
     private synchronized void printPieces() {
-        Square[][] squares = app.chess().currentBoard().squares();
+        Square[][] squares = chessUI.chess().currentBoard().squares();
 
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
