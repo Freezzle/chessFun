@@ -49,7 +49,8 @@ public class BoardUI extends JPanel {
 
             // MOUSE CLICKED
             public void mouseClicked(MouseEvent e) {
-                if (e == null || BoardUI.this.chessUI.chess().gameStatus().isGameOver()) {
+                System.out.println("mouseClicked");
+                if (e == null || chessUI.chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -58,7 +59,7 @@ public class BoardUI extends JPanel {
                 int buttonClicked = e.getButton();
 
                 if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
+                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !chessUI.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
                         // If the click was on a empty tile (cause piece is a JLabel)
                         if (tileClicked instanceof JPanel) {
                             resetBackgroundTiles();
@@ -76,8 +77,8 @@ public class BoardUI extends JPanel {
                         getComponentUI(selectedPieceTile).changeBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
 
                         // Show the legal moves for the selected piece
-                        colorizeLegalMoves(BoardUI.this.chessUI.chess().getLegalMoves(selectedPieceTile));
-                    } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
+                        colorizeLegalMoves(chessUI.chess().getLegalMoves(selectedPieceTile));
+                    } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !chessUI.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
                         Tile destination = Tile.getEnum(tileClicked.getName());
 
                         if (destination == null) {
@@ -85,14 +86,14 @@ public class BoardUI extends JPanel {
                         }
 
                         // Make the move
-                        MoveStatus status = BoardUI.this.chessUI.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
+                        MoveStatus status = chessUI.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
 
                         // Manage the move done
-                        BoardUI.this.chessUI.manageAfterMove(status);
+                        chessUI.manageAfterMove(status);
 
                         // If we play against a computer, we launch the computer move
                         if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
-                            BoardUI.this.chessUI.launchComputerMove();
+                            chessUI.launchComputerMove();
                         }
                     } else if (e.getButton() == RIGHT_CLICK) { // There is no selected piece and we click right (print square to analyse board)
                         Tile tileSelected = Tile.getEnum(tileClicked.getName());
@@ -110,76 +111,10 @@ public class BoardUI extends JPanel {
             }
 
             public void mousePressed(MouseEvent e) {
-                if (e == null || BoardUI.this.chessUI.chess().gameStatus().isGameOver()) {
-                    return;
-                }
-
-                // Search the clicked tile on the board itself
-                Component tileClicked = getTileUI(e.getX(), e.getY());
-                int buttonClicked = e.getButton();
-
-                if (tileClicked != null) {
-                    if (selectedPieceTile == null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is no selected piece and we click left on board (select a piece)
-                        // If the click was on a empty tile (cause piece is a JLabel)
-                        if (tileClicked instanceof JPanel) {
-                            resetBackgroundTiles();
-                            return;
-                        }
-
-                        // We take the parent name (the tile of the piece)
-                        selectedPieceTile = Tile.getEnum(tileClicked.getParent().getName());
-
-                        if (selectedPieceTile == null) {
-                            selectedPieceTile = Tile.getEnum(tileClicked.getName());
-                        }
-
-                        // Color the tile of the piece
-                        getComponentUI(selectedPieceTile).changeBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
-
-                        // Show the legal moves for the selected piece
-                        colorizeLegalMoves(BoardUI.this.chessUI.chess().getLegalMoves(selectedPieceTile));
-                    }
-                } else if (e.getButton() == RIGHT_CLICK) { // No piece selected and we click right (print square in red)
-                    // color background red
-                    Tile tileSelected = Tile.getEnum(tileClicked.getName());
-                    if (tileSelected == null) {
-                        tileSelected = Tile.getEnum(tileClicked.getParent().getName());
-                    }
-
-                    getComponentUI(tileSelected).clickForAnalyse();
-                }
             }
 
 
             public void mouseReleased(MouseEvent e) {
-                if (e == null || BoardUI.this.chessUI.chess().gameStatus().isGameOver()) {
-                    return;
-                }
-
-                // Search the clicked tile on the board itself
-                Component tileClicked = getTileUI(e.getX(), e.getY());
-                int buttonClicked = e.getButton();
-
-                if (tileClicked != null) {
-                    if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !BoardUI.this.chessUI.isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
-                        Tile destination = Tile.getEnum(tileClicked.getName());
-
-                        if (destination == null) {
-                            destination = Tile.getEnum(tileClicked.getParent().getName());
-                        }
-
-                        // Make the move
-                        MoveStatus status = BoardUI.this.chessUI.chess().makeMove(new MoveCommand(selectedPieceTile, destination, null));
-
-                        // Manage the move done
-                        BoardUI.this.chessUI.manageAfterMove(status);
-
-                        // If we play against a computer, we launch the computer move
-                        if (status.isOk() && SystemConfig.GAME_TYPE.containsInLessAComputer()) {
-                            BoardUI.this.chessUI.launchComputerMove();
-                        }
-                    }
-                }
             }
 
             public void mouseEntered(MouseEvent e) {
