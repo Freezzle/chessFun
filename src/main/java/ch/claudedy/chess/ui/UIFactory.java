@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class UIFactory {
-    public static void createTextField(JPanel parent, String name, String text, java.awt.Color background, java.awt.Color foreground) {
+    public static void createTextField(JPanel parent, String name, String text, Color background, Color foreground) {
         JTextField panel = new JTextField(text);
         panel.setName(name);
         panel.setFont(new Font("Arial", Font.BOLD, 12));

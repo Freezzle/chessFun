@@ -1,13 +1,13 @@
 package ch.claudedy.chess.ui;
 
+import ch.claudedy.chess.basis.Board;
 import ch.claudedy.chess.basis.Color;
-import ch.claudedy.chess.basis.*;
+import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.systems.GameType;
-import ch.claudedy.chess.systems.LoaderFromFile;
-import ch.claudedy.chess.systems.StockFish;
 import ch.claudedy.chess.systems.SystemConfig;
+import ch.claudedy.chess.ui.event.MoveDoneListener;
+import ch.claudedy.chess.ui.event.MoveFailedListener;
 import ch.claudedy.chess.utils.Calculator;
-import ch.claudedy.chess.utils.FenUtils;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -20,20 +20,13 @@ public class ChessUI extends JFrame {
     // Main layer of the application
     private final JLayeredPane mainLayer;
 
-    // Main logic of the game
-    @Getter
-    private Chess chess;
-
-    // Computer
-    @Getter
-    private boolean isComputerThinking = false;
-    private StockFish stockFish;
-
-    // UI
+    // UI Child
     private BoardUI boardUI;
     private JPanel informationWhiteArea;
     private JPanel informationBlackArea;
+    @Getter
     private InfoPlayer playerWhite;
+    @Getter
     private InfoPlayer playerBlack;
 
     public ChessUI() {
@@ -47,42 +40,40 @@ public class ChessUI extends JFrame {
     }
 
     private synchronized void startNewGame() {
-        // Load the chess game from a file
-        chess = LoaderFromFile.readFile(SystemConfig.BOARD);
+        ChessDelegate.startNewGame();
 
         this.initPlayers();
         this.initLayers();
         this.reset();
 
-        if (SystemConfig.GAME_TYPE.containsInLessAComputer()) {
-            launchStockFishEngine();
-        }
+        this.manageComputerGame();
+    }
 
+    private void manageComputerGame() {
         if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
             launchComputerMove();
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
-            this.isComputerThinking = true;
-            new Thread(() -> {
-                while (!chess.gameStatus().isGameOver()) {
-                    if (chess.gameStatus().isGameWaitingMove()) {
-                        this.isComputerThinking = true;
-                        String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-                        this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
-                        this.isComputerThinking = false;
-                    }
-                }
-                Thread.currentThread().interrupt();
-                System.exit(0);
-            }).start();
+            launchComputerMove();
         }
     }
 
+    public void launchComputerMove() {
+        AIDelegate.computerIsThinking(true);
+        new Thread(() -> {
+            MoveCommand move = AIDelegate.getMove();
+            boardUI.makeMoveUI(move.startPosition(), move.endPosition());
+            AIDelegate.computerIsThinking(false);
+        }).start();
+    }
+
     private void initPlayers() {
+        boolean whiteTurn = ChessDelegate.currentBoard().isWhiteTurn();
+
         if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_PLAYER) {
             playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
             playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
         } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
-            if (chess.currentBoard().isWhiteTurn()) {
+            if (whiteTurn) {
                 playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
                 playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
             } else {
@@ -90,7 +81,7 @@ public class ChessUI extends JFrame {
                 playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
             }
         } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
-            if (chess.currentBoard().isWhiteTurn()) {
+            if (whiteTurn) {
                 playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
                 playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
             } else {
@@ -103,43 +94,20 @@ public class ChessUI extends JFrame {
         }
     }
 
-    private void launchStockFishEngine() {
-        stockFish = new StockFish();
-        stockFish.startEngine();
-    }
-
-    public void launchComputerMove() {
-        this.isComputerThinking = true;
-
-        new Thread(() -> {
-            String bestMove = stockFish.getBestMove(FenUtils.boardToFen(chess.currentBoard()), SystemConfig.MOVETIME_STOCKFISH);
-            this.manageAfterMove(chess.makeMove(MoveCommand.convert(bestMove)));
-            this.isComputerThinking = false;
-        }).start();
-    }
-
-    private synchronized void initLayers() {
+    private void initLayers() {
         if (this.mainLayer.getComponentCount() != 0) {
             this.mainLayer.removeAll();
         }
-
-        Square[][] squares = chess.currentBoard().squares();
 
         // View from white SIDE
         if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
             mainLayer.add(informationBlackArea);
 
-            boardUI = new BoardUI(this);
+            boardUI = new BoardUI(true);
+            boardUI.addMoveDoneListener(new MoveDoneListener(this));
+            boardUI.addMoveFailedListener(new MoveFailedListener(this));
             mainLayer.add(boardUI);
-
-            int counter = 0;
-            for (int y = 7; y >= 0; y--) {
-                for (int x = 0; x <= 7; x++) {
-                    boardUI.createSquare(squares[x][y], counter);
-                    counter++;
-                }
-            }
 
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
             mainLayer.add(informationWhiteArea);
@@ -148,24 +116,17 @@ public class ChessUI extends JFrame {
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
             mainLayer.add(informationWhiteArea);
 
-
-            boardUI = new BoardUI(this);
+            boardUI = new BoardUI(false);
+            boardUI.addMoveDoneListener(new MoveDoneListener(this));
+            boardUI.addMoveFailedListener(new MoveFailedListener(this));
             mainLayer.add(boardUI);
-
-            int counter = 0;
-            for (int y = 0; y <= 7; y++) {
-                for (int x = 7; x >= 0; x--) {
-                    boardUI.createSquare(squares[x][y], counter);
-                    counter++;
-                }
-            }
 
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
             mainLayer.add(informationBlackArea);
         }
     }
 
-    private synchronized void updateInformationArea() {
+    private void updateInformationArea() {
         if (informationWhiteArea.getComponentCount() != 0) {
             informationWhiteArea.removeAll();
         }
@@ -173,7 +134,7 @@ public class ChessUI extends JFrame {
             informationBlackArea.removeAll();
         }
 
-        Board currentBoard = chess.currentBoard();
+        Board currentBoard = ChessDelegate.currentBoard();
 
         UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.name() + " (" + playerWhite.elo() + ")" + (currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
         UIFactory.createTextField(informationWhiteArea, "ENNEMY_BLACK_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.BLACK), java.awt.Color.WHITE, java.awt.Color.BLACK);
@@ -184,21 +145,8 @@ public class ChessUI extends JFrame {
         informationBlackArea.doLayout();
     }
 
-    private synchronized void reset() {
+    public void reset() {
         this.updateInformationArea();
         boardUI.resetBoard();
-    }
-
-    public synchronized void manageAfterMove(MoveStatus moveDoneStatus) {
-        // If the move was authorized
-        if (moveDoneStatus.isOk()) { // MOVE OK
-            if (chess.gameStatus().isGameOver()) { // GAME OVER
-                if (SystemConfig.GAME_TYPE.containsInLessAComputer()) {
-                    stockFish.stopEngine();
-                }
-            }
-        }
-
-        this.reset();
     }
 }
