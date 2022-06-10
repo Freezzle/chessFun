@@ -54,9 +54,6 @@ public class Board implements Serializable {
         Square endSquare = this.squares[end.x()][end.y()];
 
         Piece pieceToMove = startSquare.piece();
-        
-        // Reset EnPassant
-        this.enPassant = null;
 
         // Special cases
         manageKingMove(end, pieceToMove);
@@ -137,6 +134,9 @@ public class Board implements Serializable {
                 } else {
                     getSquare(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
                 }
+            } else {
+                // Reset EnPassant
+                this.enPassant = null;
             }
         } else if (endSquare.tile().y() == 7 && pieceToMove.isWhitePiece()) {
             // MOVE -> Promotion for WHITE to the top of the board
