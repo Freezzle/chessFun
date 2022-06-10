@@ -2,8 +2,8 @@ package ch.claudedy.chess.ui;
 
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.*;
-import ch.claudedy.chess.ui.event.MoveDoneListener;
-import ch.claudedy.chess.ui.event.MoveFailedListener;
+import ch.claudedy.chess.ui.listener.MoveDoneListener;
+import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;

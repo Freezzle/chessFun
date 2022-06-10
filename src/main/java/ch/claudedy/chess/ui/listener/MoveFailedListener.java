@@ -1,9 +1,9 @@
-package ch.claudedy.chess.ui.event;
+package ch.claudedy.chess.ui.listener;
 
 import ch.claudedy.chess.basis.MoveStatus;
 import ch.claudedy.chess.ui.ChessUI;
 
-public class MoveFailedListener implements MoveFailedEvent {
+public class MoveFailedListener {
 
     private final ChessUI chessUI;
 

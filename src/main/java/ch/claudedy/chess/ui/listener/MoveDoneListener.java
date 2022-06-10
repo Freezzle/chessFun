@@ -1,10 +1,10 @@
-package ch.claudedy.chess.ui.event;
+package ch.claudedy.chess.ui.listener;
 
 import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.ui.ChessDelegate;
 import ch.claudedy.chess.ui.ChessUI;
 
-public class MoveDoneListener implements MoveDoneEvent {
+public class MoveDoneListener {
 
     private final ChessUI chessUI;
 
