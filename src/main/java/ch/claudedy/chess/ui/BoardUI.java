@@ -49,7 +49,6 @@ public class BoardUI extends JPanel {
 
             // MOUSE CLICKED
             public void mouseClicked(MouseEvent e) {
-                System.out.println("mouseClicked");
                 if (e == null || chessUI.chess().gameStatus().isGameOver()) {
                     return;
                 }
