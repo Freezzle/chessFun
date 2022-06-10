@@ -4,13 +4,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Accessors(fluent = true)
 @Getter
 @EqualsAndHashCode
-public class Piece implements Comparable<Piece> {
+public class Piece implements Comparable<Piece>, Serializable {
     private Color color;
     private PieceType type;
     private Character letter;

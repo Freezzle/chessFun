@@ -3,11 +3,12 @@ package ch.claudedy.chess.basis;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 @Accessors(fluent = true)
 @Getter
-public enum Tile {
+public enum Tile implements Serializable {
     A1('A', '1', 0, 0, Color.BLACK),
     A2('A', '2', 0, 1, Color.WHITE),
     A3('A', '3', 0, 2, Color.BLACK),

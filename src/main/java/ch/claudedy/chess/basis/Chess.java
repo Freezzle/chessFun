@@ -6,6 +6,7 @@ import ch.claudedy.chess.utils.FenUtils;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Accessors(fluent = true)
 @Getter
-public class Chess {
+public class Chess implements Serializable {
 
     private final List<HistoricalBoardFen> historicalBoards;
     private MoveCommand actualMove;

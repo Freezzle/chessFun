@@ -1,6 +1,8 @@
 package ch.claudedy.chess.basis;
 
-public enum GameStatus {
+import java.io.Serializable;
+
+public enum GameStatus implements Serializable {
     WAITING_MOVE, EXECUTING, CHECKMATED, STALEMATED, RULES_50, IMPOSSIBILITY_CHECKMATE, REPETITION_RULE;
 
     public boolean isGameOver() {

@@ -3,11 +3,12 @@ package ch.claudedy.chess.basis;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 @Accessors(fluent = true)
 @Getter
-public enum PieceType {
+public enum PieceType implements Serializable {
     ROOK("r", 'R', 'r', 5),
     KNIGHT("n", 'N', 'n', 3),
     BISHOP("b", 'B', 'b', 3),

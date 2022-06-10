@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 @Accessors(fluent = true)
 @Getter
 @AllArgsConstructor
-public class MoveCommand {
+public class MoveCommand implements Serializable {
     private final Tile startPosition;
     private final Tile endPosition;
     private final Character promote;

@@ -1,6 +1,8 @@
 package ch.claudedy.chess.basis;
 
-public enum Color {
+import java.io.Serializable;
+
+public enum Color implements Serializable {
     WHITE,
     BLACK;
 

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class Board {
+public class Board implements Serializable {
     private final Square[][] squares;
     private Color currentPlayer;
 

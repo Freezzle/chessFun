@@ -4,8 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 @Accessors(fluent = true)
-public class HistoricalBoardFen {
+public class HistoricalBoardFen implements Serializable {
 
     @Getter
     private String fen;

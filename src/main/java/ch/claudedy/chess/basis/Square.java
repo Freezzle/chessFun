@@ -3,9 +3,11 @@ package ch.claudedy.chess.basis;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 @Accessors(fluent = true)
 @Getter
-public class Square {
+public class Square implements Serializable {
     private final Tile tile;
     private Piece piece;
 
