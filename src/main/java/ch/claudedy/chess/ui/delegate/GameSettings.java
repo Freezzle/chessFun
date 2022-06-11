@@ -17,10 +17,6 @@ public class GameSettings {
 
     @Getter
     @Setter
-    private boolean chooseComputer = SystemConfig.GAME_TYPE.containsInLessAComputer();
-
-    @Getter
-    @Setter
     private boolean isPlayerOneComputer = SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER || SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER;
 
     @Getter
