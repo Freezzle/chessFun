@@ -18,48 +18,42 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ApplicationServerOnline {
     private static final List<ServiceThread> playersSearching = new ArrayList<>();
     private static final Map<String, GameInfo> playersInGame = new HashMap<>();
+    private static final Logger LOG = Logger.getLogger(ApplicationServerOnline.class.getName());
 
     public static void main(String[] args) throws IOException {
-
+        LOG.log(Level.INFO, "Launching the server");
         ServerSocket serverListener = null;
-
-        System.out.println("Server is waiting to accept user...");
-        int clientNumber = 0;
-
-        // Try to open a server socket on port 7777
-        // Note that we can't choose a port less than 1023 if we are not
-        // privileged users (root)
 
         try {
             serverListener = new ServerSocket(8888);
-        } catch (IOException e) {
-            System.out.println(e);
+        } catch (Exception e) {
+            LOG.log(Level.SEVERE, "Cannot get the server socket", e);
             System.exit(1);
         }
 
         try {
             while (true) {
-                // Accept client connection request
-                // Get new Socket at Server.
+                LOG.log(Level.INFO, "Waiting to accept new client");
                 Socket socketForClient = serverListener.accept();
+                String uuidClient = UUID.randomUUID().toString();
+
+                LOG.log(Level.INFO, "New client connected -> " + uuidClient);
 
                 ObjectOutputStream os = new ObjectOutputStream(socketForClient.getOutputStream());
                 ObjectInputStream is = new ObjectInputStream(socketForClient.getInputStream());
 
-                ServiceThread client = new ServiceThread(socketForClient, is, os);
+                ServiceThread client = new ServiceThread(socketForClient, is, os, uuidClient);
                 client.start();
             }
         } finally {
             serverListener.close();
         }
-    }
-
-    private static void log(String message) {
-        System.out.println(message);
     }
 
     @Accessors(fluent = true)
@@ -75,36 +69,41 @@ public class ApplicationServerOnline {
         @Getter
         private InfoPlayer infoPlayerNetwork = null;
 
-        public ServiceThread(Socket socket, ObjectInputStream input, ObjectOutputStream output) {
+        @Getter
+        private final String uuidClient;
+
+        public ServiceThread(Socket socket, ObjectInputStream input, ObjectOutputStream output, String uuidClient) {
             this.is = input;
             this.os = output;
             this.socket = socket;
+            this.uuidClient = uuidClient;
 
-            // Log
-            log("New connection with client at " + socket.getLocalAddress());
+            LOG.log(Level.INFO, "Configuration client done -> " + uuidClient);
         }
 
         @Override
         public void run() {
             try {
+                LOG.log(Level.INFO, "Running client -> " + uuidClient);
                 while (true) {
-                    // Read data to the server (sent from client).
                     Object command = is.readObject();
 
                     if (command instanceof MoveClientCommand) {
+                        LOG.log(Level.INFO, "Command MoveClientCommand from client -> " + uuidClient);
+
                         GameInfo gameInfo = playersInGame.get(uuidGame());
                         gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
                         os.flush();
                     } else if (command instanceof DisconnectClientCommand) {
-                        log("Client disconnected");
+                        LOG.log(Level.INFO, "Client disconnected -> " + uuidClient);
                         os.flush();
                         break;
                     } else if (command instanceof SearchingGameCommand) {
+                        LOG.log(Level.INFO, "Command SearhcingGameCommand from client -> " + uuidClient);
                         infoPlayerNetwork = ((SearchingGameCommand) command).infoPlayer();
 
                         if (playersSearching.size() >= 1) {
                             String uuidGame = UUID.randomUUID().toString();
-
                             ServiceThread opponent = playersSearching.get(0);
 
                             infoPlayerNetwork().color(Color.WHITE);
@@ -120,6 +119,7 @@ public class ApplicationServerOnline {
                             opponent.os.flush();
 
                             playersSearching.remove(opponent);
+                            LOG.log(Level.INFO, "Game created for clients -> " + opponent.uuidClient + " AND " + uuidClient);
                         } else {
                             playersSearching.add(this);
                         }
