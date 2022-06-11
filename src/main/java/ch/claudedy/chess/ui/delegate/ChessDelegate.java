@@ -1,4 +1,4 @@
-package ch.claudedy.chess.ui;
+package ch.claudedy.chess.ui.delegate;
 
 import ch.claudedy.chess.basis.Board;
 import ch.claudedy.chess.basis.Chess;
@@ -6,10 +6,8 @@ import ch.claudedy.chess.systems.LoaderFromFile;
 import ch.claudedy.chess.systems.SystemConfig;
 import lombok.experimental.Accessors;
 
-import javax.swing.*;
-
 @Accessors(fluent = true)
-public class ChessDelegate extends JFrame {
+public class ChessDelegate {
 
     private static ChessDelegate instance;
     private Chess chess;

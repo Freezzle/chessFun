@@ -1,6 +1,6 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.ui.screen.ChessUI;
+import ch.claudedy.chess.ui.screen.MainUI;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;
@@ -8,17 +8,16 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 @Accessors(fluent = true)
-public class ApplicationSwing extends JFrame {
+public class ApplicationSwing2 extends JFrame {
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        frame.pack();
-        frame.setResizable(true);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        frame.add(new ChessUI());
-        frame.addWindowListener(new WindowListener() {
+        MainUI main = new MainUI();
+        main.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        main.pack();
+        main.setResizable(true);
+        main.setLocationRelativeTo(null);
+        main.setVisible(true);
+        main.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
             }

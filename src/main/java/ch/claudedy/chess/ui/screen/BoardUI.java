@@ -1,7 +1,9 @@
-package ch.claudedy.chess.ui;
+package ch.claudedy.chess.ui.screen;
 
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.*;
+import ch.claudedy.chess.ui.delegate.AIDelegate;
+import ch.claudedy.chess.ui.delegate.ChessDelegate;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import lombok.experimental.Accessors;

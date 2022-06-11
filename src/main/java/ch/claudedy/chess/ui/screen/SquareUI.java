@@ -1,4 +1,4 @@
-package ch.claudedy.chess.ui;
+package ch.claudedy.chess.ui.screen;
 
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.Piece;

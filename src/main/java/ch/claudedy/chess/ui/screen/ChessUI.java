@@ -1,10 +1,15 @@
-package ch.claudedy.chess.ui;
+package ch.claudedy.chess.ui.screen;
 
 import ch.claudedy.chess.basis.Board;
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.systems.GameType;
 import ch.claudedy.chess.systems.SystemConfig;
+import ch.claudedy.chess.ui.InfoPlayer;
+import ch.claudedy.chess.ui.UIFactory;
+import ch.claudedy.chess.ui.delegate.AIDelegate;
+import ch.claudedy.chess.ui.delegate.ChessDelegate;
+import ch.claudedy.chess.ui.delegate.GameSettings;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import ch.claudedy.chess.utils.Calculator;
@@ -15,10 +20,7 @@ import javax.swing.*;
 import java.awt.*;
 
 @Accessors(fluent = true)
-public class ChessUI extends JFrame {
-
-    // Main layer of the application
-    private final JLayeredPane mainLayer;
+public class ChessUI extends JPanel {
 
     // UI Child
     private BoardUI boardUI;
@@ -30,16 +32,10 @@ public class ChessUI extends JFrame {
     private InfoPlayer playerBlack;
 
     public ChessUI() {
-        mainLayer = new JLayeredPane();
-        mainLayer.setPreferredSize(new Dimension(600, 700));
-        mainLayer.setBounds(new Rectangle(0, 0, 600, 700));
-        getContentPane().add(mainLayer);
+        setName("CHESS");
+        setPreferredSize(new Dimension(600, 700));
+        setBounds(new Rectangle(0, 0, 600, 700));
 
-        // Launch the game (init, etc...)
-        startNewGame();
-    }
-
-    private synchronized void startNewGame() {
         ChessDelegate.startNewGame();
 
         this.initPlayers();
@@ -50,9 +46,9 @@ public class ChessUI extends JFrame {
     }
 
     private void manageComputerGame() {
-        if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
+        if (GameSettings.getInstance().gameType() == GameType.COMPUTER_V_PLAYER) {
             launchComputerMove();
-        } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER) {
+        } else if (GameSettings.getInstance().gameType() == GameType.COMPUTER_V_COMPUTER) {
             launchComputerMove();
         }
     }
@@ -69,10 +65,10 @@ public class ChessUI extends JFrame {
     private void initPlayers() {
         boolean whiteTurn = ChessDelegate.currentBoard().isWhiteTurn();
 
-        if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_PLAYER) {
+        if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_PLAYER) {
             playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
             playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
-        } else if (SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER) {
+        } else if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_COMPUTER) {
             if (whiteTurn) {
                 playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
                 playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
@@ -80,7 +76,7 @@ public class ChessUI extends JFrame {
                 playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
                 playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
             }
-        } else if (SystemConfig.GAME_TYPE == GameType.COMPUTER_V_PLAYER) {
+        } else if (GameSettings.getInstance().gameType() == GameType.COMPUTER_V_PLAYER) {
             if (whiteTurn) {
                 playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
                 playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
@@ -95,34 +91,34 @@ public class ChessUI extends JFrame {
     }
 
     private void initLayers() {
-        if (this.mainLayer.getComponentCount() != 0) {
-            this.mainLayer.removeAll();
+        if (getComponentCount() != 0) {
+            removeAll();
         }
 
         // View from white SIDE
         if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
-            mainLayer.add(informationBlackArea);
+            add(informationBlackArea);
 
             boardUI = new BoardUI(true);
             boardUI.addMoveDoneListener(new MoveDoneListener(this));
             boardUI.addMoveFailedListener(new MoveFailedListener(this));
-            mainLayer.add(boardUI);
+            add(boardUI);
 
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
-            mainLayer.add(informationWhiteArea);
+            add(informationWhiteArea);
         } else {
             // View from black SIDE
             informationWhiteArea = UIFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
-            mainLayer.add(informationWhiteArea);
+            add(informationWhiteArea);
 
             boardUI = new BoardUI(false);
             boardUI.addMoveDoneListener(new MoveDoneListener(this));
             boardUI.addMoveFailedListener(new MoveFailedListener(this));
-            mainLayer.add(boardUI);
+            add(boardUI);
 
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
-            mainLayer.add(informationBlackArea);
+            add(informationBlackArea);
         }
     }
 

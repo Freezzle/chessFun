@@ -1,7 +1,7 @@
 package ch.claudedy.chess.ui.listener;
 
 import ch.claudedy.chess.basis.MoveStatus;
-import ch.claudedy.chess.ui.ChessUI;
+import ch.claudedy.chess.ui.screen.ChessUI;
 
 public class MoveFailedListener {
 

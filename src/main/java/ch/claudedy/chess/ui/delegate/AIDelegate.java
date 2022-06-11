@@ -1,4 +1,4 @@
-package ch.claudedy.chess.ui;
+package ch.claudedy.chess.ui.delegate;
 
 import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.systems.StockFish;
@@ -6,10 +6,8 @@ import ch.claudedy.chess.systems.SystemConfig;
 import ch.claudedy.chess.utils.FenUtils;
 import lombok.experimental.Accessors;
 
-import javax.swing.*;
-
 @Accessors(fluent = true)
-public class AIDelegate extends JFrame {
+public class AIDelegate {
 
     private static AIDelegate instance;
     private StockFish stockFish;
@@ -32,7 +30,7 @@ public class AIDelegate extends JFrame {
     }
 
     public static boolean isComputerThinking() {
-        if (SystemConfig.GAME_TYPE.containsInLessAComputer()) {
+        if (GameSettings.getInstance().gameType().containsInLessAComputer()) {
             return getInstance().isThinking;
         }
         return false;
