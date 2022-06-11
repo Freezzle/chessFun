@@ -46,15 +46,14 @@ public class MainUI extends JFrame {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!NetworkDelegate.getInstance().hasGameStarted()) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-
                 if (GameSettings.getInstance().launchOnline()) {
-                    mainLayer.remove(chooseUI);
+                    while (!NetworkDelegate.getInstance().hasGameStarted()) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+
                     chessUI = new ChessUI();
                     NetworkDelegate.getInstance().game(chessUI);
                     mainLayer.add(chessUI, 0);
