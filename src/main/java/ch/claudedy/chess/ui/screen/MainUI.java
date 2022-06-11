@@ -3,6 +3,7 @@ package ch.claudedy.chess.ui.screen;
 import ch.claudedy.chess.systems.GameType;
 import ch.claudedy.chess.ui.delegate.AIDelegate;
 import ch.claudedy.chess.ui.delegate.GameSettings;
+import ch.claudedy.chess.ui.delegate.NetworkDelegate;
 import ch.claudedy.chess.ui.listener.GameChoosenListener;
 import lombok.experimental.Accessors;
 
@@ -32,24 +33,39 @@ public class MainUI extends JFrame {
     }
 
     public void initGame() {
-        boolean playerOneComputer = GameSettings.getInstance().isPlayerOneComputer();
-        boolean playerTwoComputer = GameSettings.getInstance().isPlayerTwoComputer();
+        if (GameSettings.getInstance().launchOnline()) {
+            mainLayer.remove(chooseUI);
+            NetworkDelegate.getInstance().startConnection();
+            while (!NetworkDelegate.getInstance().hasGameStarted()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                }
+            }
 
-        if (!playerOneComputer && !playerTwoComputer) {
-            GameSettings.getInstance().gameType(GameType.PLAYER_V_PLAYER);
-        } else if (playerOneComputer && !playerTwoComputer) {
-            GameSettings.getInstance().gameType(GameType.COMPUTER_V_PLAYER);
-            AIDelegate.startStockfish();
-        } else if (!playerOneComputer && playerTwoComputer) {
-            GameSettings.getInstance().gameType(GameType.PLAYER_V_COMPUTER);
-            AIDelegate.startStockfish();
+            chessUI = new ChessUI();
+            NetworkDelegate.getInstance().game(chessUI);
+            mainLayer.add(chessUI, 0);
         } else {
-            GameSettings.getInstance().gameType(GameType.COMPUTER_V_COMPUTER);
-            AIDelegate.startStockfish();
-        }
+            boolean playerOneComputer = GameSettings.getInstance().isPlayerOneComputer();
+            boolean playerTwoComputer = GameSettings.getInstance().isPlayerTwoComputer();
 
-        mainLayer.remove(chooseUI);
-        chessUI = new ChessUI();
-        mainLayer.add(chessUI, 0);
+            if (!playerOneComputer && !playerTwoComputer) {
+                GameSettings.getInstance().gameType(GameType.PLAYER_V_PLAYER);
+            } else if (playerOneComputer && !playerTwoComputer) {
+                GameSettings.getInstance().gameType(GameType.COMPUTER_V_PLAYER);
+                AIDelegate.startStockfish();
+            } else if (!playerOneComputer && playerTwoComputer) {
+                GameSettings.getInstance().gameType(GameType.PLAYER_V_COMPUTER);
+                AIDelegate.startStockfish();
+            } else {
+                GameSettings.getInstance().gameType(GameType.COMPUTER_V_COMPUTER);
+                AIDelegate.startStockfish();
+            }
+
+            mainLayer.remove(chooseUI);
+            chessUI = new ChessUI();
+            mainLayer.add(chessUI, 0);
+        }
     }
 }

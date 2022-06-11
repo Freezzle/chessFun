@@ -23,6 +23,11 @@ public class GameSettings {
     @Setter
     private boolean isPlayerTwoComputer = SystemConfig.GAME_TYPE == GameType.COMPUTER_V_COMPUTER || SystemConfig.GAME_TYPE == GameType.PLAYER_V_COMPUTER;
 
+    @Getter
+    @Setter
+    private boolean launchOnline = true;
+
+
     private GameSettings() {
     }
 

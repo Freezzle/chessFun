@@ -4,6 +4,7 @@ import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.*;
 import ch.claudedy.chess.ui.delegate.AIDelegate;
 import ch.claudedy.chess.ui.delegate.ChessDelegate;
+import ch.claudedy.chess.ui.delegate.NetworkDelegate;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import lombok.experimental.Accessors;
@@ -76,7 +77,7 @@ public class BoardUI extends JPanel {
                             destination = Tile.getEnum(tileClicked.getParent().getName());
                         }
 
-                        makeMoveUI(selectedPieceTile, destination);
+                        makeMoveUI(selectedPieceTile, destination, true);
                     } else if (e.getButton() == RIGHT_CLICK) { // There is no selected piece and we click right (print square to analyse board)
                         Tile tileSelected = Tile.getEnum(tileClicked.getName());
                         if (tileSelected == null) {
@@ -126,16 +127,20 @@ public class BoardUI extends JPanel {
         }
     }
 
-    public void makeMoveUI(Tile start, Tile destination) {
+    public void makeMoveUI(Tile start, Tile destination, boolean fromLocalCommand) {
+        if (NetworkDelegate.getInstance().isModeOnline() && fromLocalCommand && !ChessDelegate.currentBoard().currentPlayer().isSameColor(NetworkDelegate.getInstance().colorPlayer())) {
+            moveFailedListeners.forEach(listener -> listener.onMoveFailedListener(MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE));
+            return;
+        }
+
         // Make the move
         MoveCommand moveCommand = new MoveCommand(start, destination, null);
         MoveStatus status = ChessDelegate.chess().makeMove(new MoveCommand(start, destination, null));
         if (status.isOk()) {
-            moveDoneListeners.forEach(listener -> listener.onMoveDoneListener(moveCommand));
+            moveDoneListeners.forEach(listener -> listener.onMoveDoneListener(moveCommand, fromLocalCommand));
         } else {
             moveFailedListeners.forEach(listener -> listener.onMoveFailedListener(status));
         }
-
     }
 
     public void resetBoard() {

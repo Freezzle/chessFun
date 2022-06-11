@@ -10,6 +10,7 @@ import ch.claudedy.chess.ui.UIFactory;
 import ch.claudedy.chess.ui.delegate.AIDelegate;
 import ch.claudedy.chess.ui.delegate.ChessDelegate;
 import ch.claudedy.chess.ui.delegate.GameSettings;
+import ch.claudedy.chess.ui.delegate.NetworkDelegate;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import ch.claudedy.chess.utils.Calculator;
@@ -23,6 +24,7 @@ import java.awt.*;
 public class ChessUI extends JPanel {
 
     // UI Child
+    @Getter
     private BoardUI boardUI;
     private JPanel informationWhiteArea;
     private JPanel informationBlackArea;
@@ -57,36 +59,47 @@ public class ChessUI extends JPanel {
         AIDelegate.computerIsThinking(true);
         new Thread(() -> {
             MoveCommand move = AIDelegate.getMove();
-            boardUI.makeMoveUI(move.startPosition(), move.endPosition());
+            boardUI.makeMoveUI(move.startPosition(), move.endPosition(), true);
             AIDelegate.computerIsThinking(false);
         }).start();
     }
 
     private void initPlayers() {
-        boolean whiteTurn = ChessDelegate.currentBoard().isWhiteTurn();
-
-        if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_PLAYER) {
-            playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
-            playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
-        } else if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_COMPUTER) {
-            if (whiteTurn) {
-                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
-                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+        if (NetworkDelegate.getInstance().isModeOnline()) {
+            Color color = NetworkDelegate.getInstance().colorPlayer();
+            if (color.isWhite()) {
+                playerWhite = new InfoPlayer("Me", "1000", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Other", "1000", Color.BLACK, false);
             } else {
-                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
-            }
-        } else if (GameSettings.getInstance().gameType() == GameType.COMPUTER_V_PLAYER) {
-            if (whiteTurn) {
-                playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-                playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
-            } else {
-                playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
-                playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+                playerWhite = new InfoPlayer("Other", "1000", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Me", "1000", Color.BLACK, false);
             }
         } else {
-            playerWhite = new InfoPlayer("Computer 1", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-            playerBlack = new InfoPlayer("Computer 2", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+            boolean whiteTurn = ChessDelegate.currentBoard().isWhiteTurn();
+
+            if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_PLAYER) {
+                playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
+            } else if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_COMPUTER) {
+                if (whiteTurn) {
+                    playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
+                    playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+                } else {
+                    playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+                    playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+                }
+            } else if (GameSettings.getInstance().gameType() == GameType.COMPUTER_V_PLAYER) {
+                if (whiteTurn) {
+                    playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+                    playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+                } else {
+                    playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
+                    playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+                }
+            } else {
+                playerWhite = new InfoPlayer("Computer 1", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
+                playerBlack = new InfoPlayer("Computer 2", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+            }
         }
     }
 
@@ -96,7 +109,7 @@ public class ChessUI extends JPanel {
         }
 
         // View from white SIDE
-        if (!playerWhite.isComputer() || (playerWhite.isComputer() && playerBlack.isComputer())) {
+        if ((!NetworkDelegate.getInstance().isModeOnline() && !playerWhite.isComputer()) || (playerWhite.isComputer() && playerBlack.isComputer()) || (NetworkDelegate.getInstance().isModeOnline() && NetworkDelegate.getInstance().colorPlayer().isWhite())) {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
             add(informationBlackArea);
 

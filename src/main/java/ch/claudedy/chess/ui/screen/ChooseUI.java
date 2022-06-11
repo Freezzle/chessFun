@@ -50,10 +50,21 @@ public class ChooseUI extends JPanel {
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                GameSettings.getInstance().launchOnline(false);
                 listeners.forEach(listener -> listener.onGameChoosenListener());
             }
         });
         add(start);
+
+        JButton onlinePlay = new JButton("Start online");
+        onlinePlay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GameSettings.getInstance().launchOnline(true);
+                listeners.forEach(listener -> listener.onGameChoosenListener());
+            }
+        });
+        add(onlinePlay);
     }
 
     private String[] getListData(boolean isPlayerOne) {
