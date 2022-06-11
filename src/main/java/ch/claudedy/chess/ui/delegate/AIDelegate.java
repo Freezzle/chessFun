@@ -19,10 +19,13 @@ public class AIDelegate {
     public static StockFish stockFish() {
         if (getInstance().stockFish == null) {
             getInstance().stockFish = new StockFish();
-            getInstance().stockFish.startEngine();
         }
 
         return getInstance().stockFish;
+    }
+
+    public static void startStockfish() {
+        stockFish().startEngine();
     }
 
     public static MoveCommand getMove() {

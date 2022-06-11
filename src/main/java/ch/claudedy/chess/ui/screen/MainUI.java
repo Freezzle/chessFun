@@ -1,6 +1,7 @@
 package ch.claudedy.chess.ui.screen;
 
 import ch.claudedy.chess.systems.GameType;
+import ch.claudedy.chess.ui.delegate.AIDelegate;
 import ch.claudedy.chess.ui.delegate.GameSettings;
 import ch.claudedy.chess.ui.listener.GameChoosenListener;
 import lombok.experimental.Accessors;
@@ -38,10 +39,13 @@ public class MainUI extends JFrame {
             GameSettings.getInstance().gameType(GameType.PLAYER_V_PLAYER);
         } else if (playerOneComputer && !playerTwoComputer) {
             GameSettings.getInstance().gameType(GameType.COMPUTER_V_PLAYER);
+            AIDelegate.startStockfish();
         } else if (!playerOneComputer && playerTwoComputer) {
             GameSettings.getInstance().gameType(GameType.PLAYER_V_COMPUTER);
+            AIDelegate.startStockfish();
         } else {
             GameSettings.getInstance().gameType(GameType.COMPUTER_V_COMPUTER);
+            AIDelegate.startStockfish();
         }
 
         mainLayer.remove(chooseUI);
