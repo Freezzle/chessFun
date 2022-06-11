@@ -17,12 +17,12 @@ public class MoveDoneListener {
     public void onMoveDoneListener(MoveCommand move, boolean fromLocalCommand) {
         this.chessUI.reset();
 
-        if (ChessDelegate.chess().gameStatus().isGameOver()) {
-            return;
-        }
-
         if (NetworkDelegate.getInstance().isModeOnline() && fromLocalCommand) {
             NetworkDelegate.getInstance().client().send(new MoveClientCommand().move(move));
+        }
+
+        if (ChessDelegate.chess().gameStatus().isGameOver()) {
+            return;
         }
 
         if (this.chessUI.playerWhite().isComputer() && ChessDelegate.isWhiteTurn() || this.chessUI.playerBlack().isComputer() && !ChessDelegate.isWhiteTurn()) {
