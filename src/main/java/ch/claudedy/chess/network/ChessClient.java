@@ -14,11 +14,11 @@ public class ChessClient {
     private ObjectInputStream input;
     private ObjectOutputStream output;
 
-    public ChessClient() {
-        try {
-            InetAddress ip = InetAddress.getByName("localhost");
-            Socket socket = new Socket(ip, 8888);
+    public ChessClient() throws IOException {
+        InetAddress ip = InetAddress.getByName("localhost");
+        Socket socket = new Socket(ip, 8888);
 
+        try {
             output = new ObjectOutputStream(socket.getOutputStream());
             input = new ObjectInputStream(socket.getInputStream());
 
@@ -32,7 +32,7 @@ public class ChessClient {
                             CommandServer response = (CommandServer) input.readObject();
 
                             if (response instanceof StartGameCommand) {
-                                NetworkDelegate.getInstance().colorPlayer(((StartGameCommand) response).colorPlayer());
+                                NetworkDelegate.getInstance().infoPlayer(((StartGameCommand) response).player()).infoOpponent(((StartGameCommand) response).playerOpponent());
                                 NetworkDelegate.getInstance().setGameStarted(true);
                             } else if (response instanceof MoveServerCommand) {
                                 MoveCommand move = ((MoveServerCommand) response).move();

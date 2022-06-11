@@ -1,6 +1,7 @@
 package ch.claudedy.chess.ui.screen;
 
 import ch.claudedy.chess.ui.delegate.GameSettings;
+import ch.claudedy.chess.ui.delegate.NetworkDelegate;
 import ch.claudedy.chess.ui.listener.GameChoosenListener;
 import lombok.experimental.Accessors;
 
@@ -18,10 +19,16 @@ public class ChooseUI extends JPanel {
 
     List<GameChoosenListener> listeners = new ArrayList<>();
 
+    JButton onlinePlay;
+
     public ChooseUI() {
         setName("CHOOSE");
         setPreferredSize(new Dimension(600, 700));
         setBounds(new Rectangle(0, 0, 600, 700));
+
+        JTextField name = new JTextField(GameSettings.getInstance().name());
+        name.setName("NAME");
+        add(name);
 
         JList<String> playerOneList = new JList<>(getListData(true));
         playerOneList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -45,26 +52,47 @@ public class ChooseUI extends JPanel {
         });
         add(playerTwoList);
 
-
         JButton start = new JButton("Start the game");
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 GameSettings.getInstance().launchOnline(false);
+                GameSettings.getInstance().name(name.getText());
                 listeners.forEach(listener -> listener.onGameChoosenListener());
             }
         });
         add(start);
 
-        JButton onlinePlay = new JButton("Start online");
+        onlinePlay = new JButton("Start online");
+        onlinePlay.setEnabled(false);
         onlinePlay.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 GameSettings.getInstance().launchOnline(true);
+                GameSettings.getInstance().name(name.getText());
                 listeners.forEach(listener -> listener.onGameChoosenListener());
             }
         });
         add(onlinePlay);
+
+        checkForServer();
+    }
+
+    private void checkForServer() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(500);
+                        NetworkDelegate.getInstance().startConnection();
+                        onlinePlay.setEnabled(true);
+                        break;
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }).start();
     }
 
     private String[] getListData(boolean isPlayerOne) {

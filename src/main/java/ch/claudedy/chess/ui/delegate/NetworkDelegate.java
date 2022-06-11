@@ -1,11 +1,13 @@
 package ch.claudedy.chess.ui.delegate;
 
-import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.network.ChessClient;
+import ch.claudedy.chess.ui.InfoPlayer;
 import ch.claudedy.chess.ui.screen.ChessUI;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.io.IOException;
 
 @Accessors(fluent = true)
 public class NetworkDelegate {
@@ -17,7 +19,10 @@ public class NetworkDelegate {
     private boolean gameStarted = false;
     @Setter
     @Getter
-    private Color colorPlayer;
+    private InfoPlayer infoPlayer;
+    @Setter
+    @Getter
+    private InfoPlayer infoOpponent;
 
     @Setter
     @Getter
@@ -26,7 +31,7 @@ public class NetworkDelegate {
     private NetworkDelegate() {
     }
 
-    public void startConnection() {
+    public void startConnection() throws IOException {
         if (instance.client == null) {
             instance.client = new ChessClient();
         }

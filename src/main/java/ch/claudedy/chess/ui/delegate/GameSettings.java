@@ -27,6 +27,10 @@ public class GameSettings {
     @Setter
     private boolean launchOnline = true;
 
+    @Getter
+    @Setter
+    private String name = "Dylan";
+
 
     private GameSettings() {
     }

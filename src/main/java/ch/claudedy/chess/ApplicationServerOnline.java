@@ -1,17 +1,22 @@
-package ch.claudedy.chess.network;
+package ch.claudedy.chess;
 
 import ch.claudedy.chess.basis.Color;
+import ch.claudedy.chess.network.*;
+import ch.claudedy.chess.ui.InfoPlayer;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.*;
 
-public class ChessServer {
-
-    private static ServiceThread whitePlayer;
-    private static ServiceThread blackPlayer;
+public class ApplicationServerOnline {
+    private static final List<ServiceThread> playersSearching = new ArrayList<>();
+    private static final Map<String, GameInfo> playersInGame = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
 
@@ -40,20 +45,8 @@ public class ChessServer {
                 ObjectOutputStream os = new ObjectOutputStream(socketForClient.getOutputStream());
                 ObjectInputStream is = new ObjectInputStream(socketForClient.getInputStream());
 
-                if (clientNumber == 0) {
-                    whitePlayer = new ServiceThread(socketForClient, Color.WHITE, is, os);
-                    whitePlayer.start();
-                } else {
-                    blackPlayer = new ServiceThread(socketForClient, Color.BLACK, is, os);
-                    blackPlayer.start();
-
-                    whitePlayer.os.writeObject(new StartGameCommand().colorPlayer(Color.WHITE));
-                    blackPlayer.os.writeObject(new StartGameCommand().colorPlayer(Color.BLACK));
-                    whitePlayer.os.flush();
-                    blackPlayer.os.flush();
-
-                }
-                clientNumber++;
+                ServiceThread client = new ServiceThread(socketForClient, is, os);
+                client.start();
             }
         } finally {
             serverListener.close();
@@ -64,21 +57,26 @@ public class ChessServer {
         System.out.println(message);
     }
 
-    private static class ServiceThread extends Thread {
+    @Accessors(fluent = true)
+    public static class ServiceThread extends Thread {
 
-        private final Color colorPlayer;
         private final Socket socket;
         private final ObjectInputStream is;
         private final ObjectOutputStream os;
+        @Getter
+        @Setter
+        private String uuidGame = null;
+        @Setter
+        @Getter
+        private InfoPlayer infoPlayer = null;
 
-        public ServiceThread(Socket socket, Color colorPlayer, ObjectInputStream input, ObjectOutputStream output) {
+        public ServiceThread(Socket socket, ObjectInputStream input, ObjectOutputStream output) {
             this.is = input;
             this.os = output;
-            this.colorPlayer = colorPlayer;
             this.socket = socket;
 
             // Log
-            log("New connection with client# " + this.colorPlayer + " at " + socket.getLocalAddress());
+            log("New connection with client at " + socket.getLocalAddress());
         }
 
         @Override
@@ -89,16 +87,37 @@ public class ChessServer {
                     Object command = is.readObject();
 
                     if (command instanceof MoveClientCommand) {
-                        if (colorPlayer.isWhite()) {
-                            blackPlayer.os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
-                        } else {
-                            whitePlayer.os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
-                        }
+                        GameInfo gameInfo = playersInGame.get(uuidGame());
+                        gameInfo.getOpponent(infoPlayer.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
                         os.flush();
                     } else if (command instanceof DisconnectClientCommand) {
                         log("Client disconnected");
                         os.flush();
                         break;
+                    } else if (command instanceof SearchingGameCommand) {
+                        infoPlayer = ((SearchingGameCommand) command).player();
+
+                        if (playersSearching.size() >= 1) {
+                            String uuidGame = UUID.randomUUID().toString();
+
+                            ServiceThread opponent = playersSearching.get(0);
+
+                            infoPlayer().color(Color.WHITE);
+                            uuidGame(uuidGame);
+                            opponent.infoPlayer().color(Color.BLACK);
+                            opponent.uuidGame(uuidGame);
+
+                            playersInGame.put(uuidGame, new GameInfo().whitePlayer(this).blackPlayer(opponent));
+
+                            os.writeObject(new StartGameCommand().player(infoPlayer).playerOpponent(opponent.infoPlayer()));
+                            opponent.os.writeObject(new StartGameCommand().player(opponent.infoPlayer).playerOpponent(infoPlayer()));
+                            os.flush();
+                            opponent.os.flush();
+
+                            playersSearching.remove(opponent);
+                        } else {
+                            playersSearching.add(this);
+                        }
                     }
                 }
 

@@ -1,6 +1,8 @@
 package ch.claudedy.chess.ui.screen;
 
+import ch.claudedy.chess.network.SearchingGameCommand;
 import ch.claudedy.chess.systems.GameType;
+import ch.claudedy.chess.ui.InfoPlayer;
 import ch.claudedy.chess.ui.delegate.AIDelegate;
 import ch.claudedy.chess.ui.delegate.GameSettings;
 import ch.claudedy.chess.ui.delegate.NetworkDelegate;
@@ -35,7 +37,8 @@ public class MainUI extends JFrame {
     public void initGame() {
         if (GameSettings.getInstance().launchOnline()) {
             mainLayer.remove(chooseUI);
-            NetworkDelegate.getInstance().startConnection();
+            NetworkDelegate.getInstance().client().send(new SearchingGameCommand().player(new InfoPlayer().isComputer(false).name(GameSettings.getInstance().name())));
+
             while (!NetworkDelegate.getInstance().hasGameStarted()) {
                 try {
                     Thread.sleep(1000);

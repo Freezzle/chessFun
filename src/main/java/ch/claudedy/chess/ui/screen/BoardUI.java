@@ -128,7 +128,7 @@ public class BoardUI extends JPanel {
     }
 
     public void makeMoveUI(Tile start, Tile destination, boolean fromLocalCommand) {
-        if (NetworkDelegate.getInstance().isModeOnline() && fromLocalCommand && !ChessDelegate.currentBoard().currentPlayer().isSameColor(NetworkDelegate.getInstance().colorPlayer())) {
+        if (NetworkDelegate.getInstance().isModeOnline() && fromLocalCommand && !ChessDelegate.currentBoard().currentPlayer().isSameColor(NetworkDelegate.getInstance().infoPlayer().color())) {
             moveFailedListeners.forEach(listener -> listener.onMoveFailedListener(MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE));
             return;
         }

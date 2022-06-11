@@ -4,7 +4,6 @@ import ch.claudedy.chess.basis.Board;
 import ch.claudedy.chess.basis.Color;
 import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.systems.GameType;
-import ch.claudedy.chess.systems.SystemConfig;
 import ch.claudedy.chess.ui.InfoPlayer;
 import ch.claudedy.chess.ui.UIFactory;
 import ch.claudedy.chess.ui.delegate.AIDelegate;
@@ -66,39 +65,42 @@ public class ChessUI extends JPanel {
 
     private void initPlayers() {
         if (NetworkDelegate.getInstance().isModeOnline()) {
-            Color color = NetworkDelegate.getInstance().colorPlayer();
+            InfoPlayer myInfo = NetworkDelegate.getInstance().infoPlayer();
+            InfoPlayer myOpponentInfo = NetworkDelegate.getInstance().infoOpponent();
+
+            Color color = myInfo.color();
             if (color.isWhite()) {
-                playerWhite = new InfoPlayer("Me", "1000", Color.WHITE, false);
-                playerBlack = new InfoPlayer("Other", "1000", Color.BLACK, false);
+                playerWhite = new InfoPlayer(myInfo.name(), myInfo.color(), false);
+                playerBlack = new InfoPlayer(myOpponentInfo.name(), myOpponentInfo.color(), false);
             } else {
-                playerWhite = new InfoPlayer("Other", "1000", Color.WHITE, false);
-                playerBlack = new InfoPlayer("Me", "1000", Color.BLACK, false);
+                playerWhite = new InfoPlayer(myOpponentInfo.name(), myOpponentInfo.color(), false);
+                playerBlack = new InfoPlayer(myInfo.name(), myInfo.color(), false);
             }
         } else {
             boolean whiteTurn = ChessDelegate.currentBoard().isWhiteTurn();
 
             if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_PLAYER) {
-                playerWhite = new InfoPlayer("Player 1", "1000", Color.WHITE, false);
-                playerBlack = new InfoPlayer("Player 2", "1000", Color.BLACK, false);
+                playerWhite = new InfoPlayer("Player 1", Color.WHITE, false);
+                playerBlack = new InfoPlayer("Player 2", Color.BLACK, false);
             } else if (GameSettings.getInstance().gameType() == GameType.PLAYER_V_COMPUTER) {
                 if (whiteTurn) {
-                    playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
-                    playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+                    playerWhite = new InfoPlayer("Player", Color.WHITE, false);
+                    playerBlack = new InfoPlayer("Computer", Color.BLACK, true);
                 } else {
-                    playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-                    playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+                    playerWhite = new InfoPlayer("Computer", Color.WHITE, true);
+                    playerBlack = new InfoPlayer("Player", Color.BLACK, false);
                 }
             } else if (GameSettings.getInstance().gameType() == GameType.COMPUTER_V_PLAYER) {
                 if (whiteTurn) {
-                    playerWhite = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-                    playerBlack = new InfoPlayer("Player", "1000", Color.BLACK, false);
+                    playerWhite = new InfoPlayer("Computer", Color.WHITE, true);
+                    playerBlack = new InfoPlayer("Player", Color.BLACK, false);
                 } else {
-                    playerWhite = new InfoPlayer("Player", "1000", Color.WHITE, false);
-                    playerBlack = new InfoPlayer("Computer", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+                    playerWhite = new InfoPlayer("Player", Color.WHITE, false);
+                    playerBlack = new InfoPlayer("Computer", Color.BLACK, true);
                 }
             } else {
-                playerWhite = new InfoPlayer("Computer 1", SystemConfig.ELO_COMPUTER, Color.WHITE, true);
-                playerBlack = new InfoPlayer("Computer 2", SystemConfig.ELO_COMPUTER, Color.BLACK, true);
+                playerWhite = new InfoPlayer("Computer 1", Color.WHITE, true);
+                playerBlack = new InfoPlayer("Computer 2", Color.BLACK, true);
             }
         }
     }
@@ -109,7 +111,7 @@ public class ChessUI extends JPanel {
         }
 
         // View from white SIDE
-        if ((!NetworkDelegate.getInstance().isModeOnline() && !playerWhite.isComputer()) || (playerWhite.isComputer() && playerBlack.isComputer()) || (NetworkDelegate.getInstance().isModeOnline() && NetworkDelegate.getInstance().colorPlayer().isWhite())) {
+        if ((!NetworkDelegate.getInstance().isModeOnline() && !playerWhite.isComputer()) || (playerWhite.isComputer() && playerBlack.isComputer()) || (NetworkDelegate.getInstance().isModeOnline() && NetworkDelegate.getInstance().infoPlayer().color().isWhite())) {
             informationBlackArea = UIFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
             add(informationBlackArea);
 
@@ -145,11 +147,11 @@ public class ChessUI extends JPanel {
 
         Board currentBoard = ChessDelegate.currentBoard();
 
-        UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.name() + " (" + playerWhite.elo() + ")" + (currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
+        UIFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.name() + (currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
         UIFactory.createTextField(informationWhiteArea, "ENNEMY_BLACK_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.BLACK), java.awt.Color.WHITE, java.awt.Color.BLACK);
         informationWhiteArea.doLayout();
 
-        UIFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.name() + " (" + playerBlack.elo() + ")" + (!currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
+        UIFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.name() + (!currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
         UIFactory.createTextField(informationBlackArea, "ENNEMY_WHITE_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.WHITE), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
         informationBlackArea.doLayout();
     }

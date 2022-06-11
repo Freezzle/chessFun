@@ -6,7 +6,6 @@ import lombok.experimental.Accessors;
 
 @Accessors(fluent = true)
 @Data
-public class StartGameCommand implements CommandServer {
+public class SearchingGameCommand implements CommandClient {
     private InfoPlayer player;
-    private InfoPlayer playerOpponent;
 }
