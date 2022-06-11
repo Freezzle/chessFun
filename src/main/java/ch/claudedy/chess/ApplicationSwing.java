@@ -1,6 +1,6 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.ui.screen.MainUI;
+import ch.claudedy.chess.ui.screen.AppScreen;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;
@@ -11,7 +11,7 @@ import java.awt.event.WindowListener;
 public class ApplicationSwing extends JFrame {
 
     public static void main(String[] args) {
-        MainUI main = new MainUI();
+        AppScreen main = new AppScreen();
         main.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         main.pack();
         main.setResizable(true);

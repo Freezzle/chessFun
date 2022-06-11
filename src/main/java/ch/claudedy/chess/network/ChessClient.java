@@ -1,8 +1,12 @@
 package ch.claudedy.chess.network;
 
-import ch.claudedy.chess.basis.MoveCommand;
-import ch.claudedy.chess.ui.delegate.GameManager;
-import ch.claudedy.chess.ui.delegate.NetworkManager;
+import ch.claudedy.chess.model.MoveCommand;
+import ch.claudedy.chess.network.command.client.CommandClient;
+import ch.claudedy.chess.network.command.server.CommandServer;
+import ch.claudedy.chess.network.command.server.MoveServerCommand;
+import ch.claudedy.chess.network.command.server.StartGameCommand;
+import ch.claudedy.chess.ui.manager.GameManager;
+import ch.claudedy.chess.ui.manager.NetworkManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

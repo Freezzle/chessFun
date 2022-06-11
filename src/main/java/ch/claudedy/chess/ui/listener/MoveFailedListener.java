@@ -1,17 +1,17 @@
 package ch.claudedy.chess.ui.listener;
 
-import ch.claudedy.chess.basis.MoveStatus;
-import ch.claudedy.chess.ui.screen.ChessUI;
+import ch.claudedy.chess.model.MoveStatus;
+import ch.claudedy.chess.ui.screen.ChessScreen;
 
 public class MoveFailedListener {
 
-    private final ChessUI chessUI;
+    private final ChessScreen chessScreen;
 
-    public MoveFailedListener(ChessUI chessUI) {
-        this.chessUI = chessUI;
+    public MoveFailedListener(ChessScreen chessScreen) {
+        this.chessScreen = chessScreen;
     }
 
     public void onMoveFailedListener(MoveStatus status) {
-        this.chessUI.reset();
+        this.chessScreen.reset();
     }
 }

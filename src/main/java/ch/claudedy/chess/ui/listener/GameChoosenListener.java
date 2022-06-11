@@ -1,13 +1,13 @@
 package ch.claudedy.chess.ui.listener;
 
-import ch.claudedy.chess.ui.delegate.GameManager;
-import ch.claudedy.chess.ui.screen.MainUI;
+import ch.claudedy.chess.ui.manager.GameManager;
+import ch.claudedy.chess.ui.screen.AppScreen;
 
 public class GameChoosenListener {
 
-    private final MainUI main;
+    private final AppScreen main;
 
-    public GameChoosenListener(MainUI main) {
+    public GameChoosenListener(AppScreen main) {
         this.main = main;
     }
 

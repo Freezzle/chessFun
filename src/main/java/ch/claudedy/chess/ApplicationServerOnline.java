@@ -1,8 +1,13 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.basis.Color;
-import ch.claudedy.chess.network.*;
-import ch.claudedy.chess.ui.InfoPlayer;
+import ch.claudedy.chess.model.Color;
+import ch.claudedy.chess.network.command.client.DisconnectClientCommand;
+import ch.claudedy.chess.network.command.client.MoveClientCommand;
+import ch.claudedy.chess.network.command.client.SearchingGameCommand;
+import ch.claudedy.chess.network.command.server.MoveServerCommand;
+import ch.claudedy.chess.network.command.server.StartGameCommand;
+import ch.claudedy.chess.ui.screen.model.InfoPlayer;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -68,7 +73,7 @@ public class ApplicationServerOnline {
         private String uuidGame = null;
         @Setter
         @Getter
-        private InfoPlayer infoPlayer = null;
+        private InfoPlayer infoPlayerNetwork = null;
 
         public ServiceThread(Socket socket, ObjectInputStream input, ObjectOutputStream output) {
             this.is = input;
@@ -88,29 +93,29 @@ public class ApplicationServerOnline {
 
                     if (command instanceof MoveClientCommand) {
                         GameInfo gameInfo = playersInGame.get(uuidGame());
-                        gameInfo.getOpponent(infoPlayer.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
+                        gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
                         os.flush();
                     } else if (command instanceof DisconnectClientCommand) {
                         log("Client disconnected");
                         os.flush();
                         break;
                     } else if (command instanceof SearchingGameCommand) {
-                        infoPlayer = ((SearchingGameCommand) command).player();
+                        infoPlayerNetwork = ((SearchingGameCommand) command).infoPlayer();
 
                         if (playersSearching.size() >= 1) {
                             String uuidGame = UUID.randomUUID().toString();
 
                             ServiceThread opponent = playersSearching.get(0);
 
-                            infoPlayer().color(Color.WHITE);
+                            infoPlayerNetwork().color(Color.WHITE);
                             uuidGame(uuidGame);
-                            opponent.infoPlayer().color(Color.BLACK);
+                            opponent.infoPlayerNetwork().color(Color.BLACK);
                             opponent.uuidGame(uuidGame);
 
                             playersInGame.put(uuidGame, new GameInfo().whitePlayer(this).blackPlayer(opponent));
 
-                            os.writeObject(new StartGameCommand().player(infoPlayer).playerOpponent(opponent.infoPlayer()));
-                            opponent.os.writeObject(new StartGameCommand().player(opponent.infoPlayer).playerOpponent(infoPlayer()));
+                            os.writeObject(new StartGameCommand().player(infoPlayerNetwork).playerOpponent(opponent.infoPlayerNetwork()));
+                            opponent.os.writeObject(new StartGameCommand().player(opponent.infoPlayerNetwork).playerOpponent(infoPlayerNetwork()));
                             os.flush();
                             opponent.os.flush();
 
@@ -130,6 +135,17 @@ public class ApplicationServerOnline {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @Accessors(fluent = true)
+    @Data
+    static class GameInfo {
+        private ApplicationServerOnline.ServiceThread whitePlayer;
+        private ApplicationServerOnline.ServiceThread blackPlayer;
+
+        public ApplicationServerOnline.ServiceThread getOpponent(Color colorPlayer) {
+            return colorPlayer.isWhite() ? blackPlayer : whitePlayer;
         }
     }
 }

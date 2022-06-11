@@ -1,9 +1,9 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.basis.Chess;
-import ch.claudedy.chess.basis.MoveCommand;
-import ch.claudedy.chess.basis.MoveStatus;
-import ch.claudedy.chess.systems.ConsolePrint;
+import ch.claudedy.chess.model.Chess;
+import ch.claudedy.chess.model.MoveCommand;
+import ch.claudedy.chess.model.MoveStatus;
+import ch.claudedy.chess.system.ConsolePrint;
 
 import java.io.BufferedReader;
 import java.io.IOException;
