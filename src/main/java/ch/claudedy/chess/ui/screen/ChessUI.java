@@ -68,13 +68,12 @@ public class ChessUI extends JPanel {
             InfoPlayer myInfo = NetworkDelegate.getInstance().infoPlayer();
             InfoPlayer myOpponentInfo = NetworkDelegate.getInstance().infoOpponent();
 
-            Color color = myInfo.color();
-            if (color.isWhite()) {
-                playerWhite = new InfoPlayer(myInfo.name(), myInfo.color(), false);
-                playerBlack = new InfoPlayer(myOpponentInfo.name(), myOpponentInfo.color(), false);
+            if (myInfo.color().isWhite()) {
+                playerWhite = myInfo;
+                playerBlack = myOpponentInfo;
             } else {
-                playerWhite = new InfoPlayer(myOpponentInfo.name(), myOpponentInfo.color(), false);
-                playerBlack = new InfoPlayer(myInfo.name(), myInfo.color(), false);
+                playerWhite = myOpponentInfo;
+                playerBlack = myInfo;
             }
         } else {
             boolean whiteTurn = ChessDelegate.currentBoard().isWhiteTurn();
