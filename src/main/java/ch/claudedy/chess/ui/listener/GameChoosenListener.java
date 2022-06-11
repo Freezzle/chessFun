@@ -1,6 +1,6 @@
 package ch.claudedy.chess.ui.listener;
 
-import ch.claudedy.chess.ui.delegate.NetworkDelegate;
+import ch.claudedy.chess.ui.delegate.GameManager;
 import ch.claudedy.chess.ui.screen.MainUI;
 
 public class GameChoosenListener {
@@ -12,11 +12,11 @@ public class GameChoosenListener {
     }
 
     public void onGameChoosenListener() {
-
-        if (NetworkDelegate.getInstance().isModeOnline()) {
+        if (GameManager.instance().modeOnline()) {
             this.main.printWaitingPlayer();
+            this.main.initGameOnline();
+        } else {
+            this.main.initGameLocal();
         }
-
-        this.main.initGame();
     }
 }

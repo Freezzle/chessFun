@@ -1,7 +1,8 @@
 package ch.claudedy.chess.network;
 
 import ch.claudedy.chess.basis.MoveCommand;
-import ch.claudedy.chess.ui.delegate.NetworkDelegate;
+import ch.claudedy.chess.ui.delegate.GameManager;
+import ch.claudedy.chess.ui.delegate.NetworkManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,11 +33,11 @@ public class ChessClient {
                             CommandServer response = (CommandServer) input.readObject();
 
                             if (response instanceof StartGameCommand) {
-                                NetworkDelegate.getInstance().infoPlayer(((StartGameCommand) response).player()).infoOpponent(((StartGameCommand) response).playerOpponent());
-                                NetworkDelegate.getInstance().setGameStarted(true);
+                                NetworkManager.instance().infoPlayer(((StartGameCommand) response).player()).infoOpponent(((StartGameCommand) response).playerOpponent());
+                                GameManager.instance().setGameStarted(true);
                             } else if (response instanceof MoveServerCommand) {
                                 MoveCommand move = ((MoveServerCommand) response).move();
-                                NetworkDelegate.getInstance().game().boardUI().makeMoveUI(move.startPosition(), move.endPosition(), false);
+                                NetworkManager.instance().game().boardUI().makeMoveUI(move.startPosition(), move.endPosition(), false);
                             }
 
                             System.out.println(response);

@@ -1,7 +1,7 @@
 package ch.claudedy.chess.ui.screen;
 
-import ch.claudedy.chess.ui.delegate.GameSettings;
-import ch.claudedy.chess.ui.delegate.NetworkDelegate;
+import ch.claudedy.chess.ui.delegate.GameManager;
+import ch.claudedy.chess.ui.delegate.NetworkManager;
 import ch.claudedy.chess.ui.listener.GameChoosenListener;
 import lombok.experimental.Accessors;
 
@@ -26,8 +26,9 @@ public class ChooseUI extends JPanel {
         setPreferredSize(new Dimension(600, 700));
         setBounds(new Rectangle(0, 0, 600, 700));
 
-        JTextField name = new JTextField(GameSettings.getInstance().name());
+        JTextField name = new JTextField(GameManager.instance().player().name());
         name.setName("NAME");
+        name.setPreferredSize(new Dimension(100, 25));
         add(name);
 
         JList<String> playerOneList = new JList<>(getListData(true));
@@ -36,7 +37,7 @@ public class ChooseUI extends JPanel {
         playerOneList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                GameSettings.getInstance().isPlayerOneComputer(playerOneList.getSelectedValue().equals("COMPUTER"));
+                GameManager.instance().isPlayerOneComputer(playerOneList.getSelectedValue().equals("COMPUTER"));
             }
         });
         add(playerOneList);
@@ -47,7 +48,7 @@ public class ChooseUI extends JPanel {
         playerTwoList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                GameSettings.getInstance().isPlayerTwoComputer(playerTwoList.getSelectedValue().equals("COMPUTER"));
+                GameManager.instance().isPlayerTwoComputer(playerTwoList.getSelectedValue().equals("COMPUTER"));
             }
         });
         add(playerTwoList);
@@ -56,8 +57,8 @@ public class ChooseUI extends JPanel {
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                GameSettings.getInstance().launchOnline(false);
-                GameSettings.getInstance().name(name.getText());
+                GameManager.instance().modeOnline(false);
+                GameManager.instance().player().name(name.getText());
                 listeners.forEach(listener -> listener.onGameChoosenListener());
             }
         });
@@ -68,8 +69,8 @@ public class ChooseUI extends JPanel {
         onlinePlay.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                GameSettings.getInstance().launchOnline(true);
-                GameSettings.getInstance().name(name.getText());
+                GameManager.instance().modeOnline(true);
+                GameManager.instance().player().name(name.getText());
                 listeners.forEach(listener -> listener.onGameChoosenListener());
             }
         });
@@ -85,7 +86,7 @@ public class ChooseUI extends JPanel {
                 while (true) {
                     try {
                         Thread.sleep(500);
-                        NetworkDelegate.getInstance().startConnection();
+                        NetworkManager.instance().startConnection();
                         onlinePlay.setEnabled(true);
                         break;
                     } catch (Exception e) {
@@ -97,9 +98,9 @@ public class ChooseUI extends JPanel {
 
     private String[] getListData(boolean isPlayerOne) {
         if (isPlayerOne) {
-            return GameSettings.getInstance().isPlayerOneComputer() ? new String[]{"COMPUTER", "HUMAN"} : new String[]{"HUMAN", "COMPUTER"};
+            return GameManager.instance().isPlayerOneComputer() ? new String[]{"COMPUTER", "HUMAN"} : new String[]{"HUMAN", "COMPUTER"};
         } else {
-            return GameSettings.getInstance().isPlayerTwoComputer() ? new String[]{"COMPUTER", "HUMAN"} : new String[]{"HUMAN", "COMPUTER"};
+            return GameManager.instance().isPlayerTwoComputer() ? new String[]{"COMPUTER", "HUMAN"} : new String[]{"HUMAN", "COMPUTER"};
         }
     }
 

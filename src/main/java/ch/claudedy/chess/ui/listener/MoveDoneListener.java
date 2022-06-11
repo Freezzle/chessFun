@@ -2,8 +2,9 @@ package ch.claudedy.chess.ui.listener;
 
 import ch.claudedy.chess.basis.MoveCommand;
 import ch.claudedy.chess.network.MoveClientCommand;
-import ch.claudedy.chess.ui.delegate.ChessDelegate;
-import ch.claudedy.chess.ui.delegate.NetworkDelegate;
+import ch.claudedy.chess.ui.delegate.ChessManager;
+import ch.claudedy.chess.ui.delegate.GameManager;
+import ch.claudedy.chess.ui.delegate.NetworkManager;
 import ch.claudedy.chess.ui.screen.ChessUI;
 
 public class MoveDoneListener {
@@ -17,15 +18,15 @@ public class MoveDoneListener {
     public void onMoveDoneListener(MoveCommand move, boolean fromLocalCommand) {
         this.chessUI.reset();
 
-        if (NetworkDelegate.getInstance().isModeOnline() && fromLocalCommand) {
-            NetworkDelegate.getInstance().client().send(new MoveClientCommand().move(move));
+        if (GameManager.instance().modeOnline() && fromLocalCommand) {
+            NetworkManager.instance().client().send(new MoveClientCommand().move(move));
         }
 
-        if (ChessDelegate.chess().gameStatus().isGameOver()) {
+        if (ChessManager.instance().chess().gameStatus().isGameOver()) {
             return;
         }
 
-        if (this.chessUI.playerWhite().isComputer() && ChessDelegate.isWhiteTurn() || this.chessUI.playerBlack().isComputer() && !ChessDelegate.isWhiteTurn()) {
+        if (this.chessUI.playerWhite().isComputer() && ChessManager.instance().isWhiteTurn() || this.chessUI.playerBlack().isComputer() && !ChessManager.instance().isWhiteTurn()) {
             this.chessUI.launchComputerMove();
         }
     }
