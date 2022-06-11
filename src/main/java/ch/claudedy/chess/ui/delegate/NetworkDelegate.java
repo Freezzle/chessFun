@@ -38,7 +38,7 @@ public class NetworkDelegate {
     }
 
     public boolean isModeOnline() {
-        return instance.client != null;
+        return GameSettings.getInstance().launchOnline();
     }
 
     public void setGameStarted(boolean gameStarted) {

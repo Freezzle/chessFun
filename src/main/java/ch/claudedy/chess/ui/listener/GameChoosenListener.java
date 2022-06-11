@@ -11,6 +11,7 @@ public class GameChoosenListener {
     }
 
     public void onGameChoosenListener() {
+        this.main.printWaitingPlayer();
         this.main.initGame();
     }
 }
