@@ -227,7 +227,7 @@ public class Piece implements Comparable<Piece>, Serializable {
     private void addLinearMoves(List<PossibleMove> moves, Square[][] squares, int x, int y) {
         Square sourceSquare = squares[x][y];
 
-        if (x < 7) {
+        if (x != 7) {
             // RIGHT
             for (int i = x + 1; i <= 7; i++) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[i][y]);
@@ -237,7 +237,7 @@ public class Piece implements Comparable<Piece>, Serializable {
             }
         }
 
-        if (x > 0) {
+        if (x != 0) {
             // LEFT
             for (int i = x - 1; i >= 0; i--) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[i][y]);
@@ -247,7 +247,7 @@ public class Piece implements Comparable<Piece>, Serializable {
             }
         }
 
-        if (y < 7) {
+        if (y != 7) {
             // UP
             for (int i = y + 1; i <= 7; i++) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x][i]);
@@ -257,7 +257,7 @@ public class Piece implements Comparable<Piece>, Serializable {
             }
         }
 
-        if (y > 0) {
+        if (y != 0) {
             // DOWN
             for (int i = y - 1; i >= 0; i--) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x][i]);
@@ -272,50 +272,58 @@ public class Piece implements Comparable<Piece>, Serializable {
         Square sourceSquare = squares[x][y];
 
         // RIGHT UP
-        for (int i = 1; i <= 7; i++) {
-            if (x + i > 7 || y + i > 7) {
-                break;
-            }
+        if (x != 7 && y != 7) {
+            for (int i = 1; i <= 7; i++) {
+                if (x + i > 7 || y + i > 7) {
+                    break;
+                }
 
-            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y + i]);
-            if (mustStop(moveTypeAdded)) {
-                break;
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y + i]);
+                if (mustStop(moveTypeAdded)) {
+                    break;
+                }
             }
         }
 
         // LEFT DOWN
-        for (int i = 1; i <= 7; i++) {
-            if (x - i < 0 || y - i < 0) {
-                break;
-            }
+        if (x != 0 && y != 0) {
+            for (int i = 1; i <= 7; i++) {
+                if (x - i < 0 || y - i < 0) {
+                    break;
+                }
 
-            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y - i]);
-            if (mustStop(moveTypeAdded)) {
-                break;
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y - i]);
+                if (mustStop(moveTypeAdded)) {
+                    break;
+                }
             }
         }
 
         // RIGHT DOWN
-        for (int i = 1; i <= 7; i++) {
-            if (x + i > 7 || y - i < 0) {
-                break;
-            }
+        if (x != 7 && y != 0) {
+            for (int i = 1; i <= 7; i++) {
+                if (x + i > 7 || y - i < 0) {
+                    break;
+                }
 
-            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y - i]);
-            if (mustStop(moveTypeAdded)) {
-                break;
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y - i]);
+                if (mustStop(moveTypeAdded)) {
+                    break;
+                }
             }
         }
 
         // LEFT UP
-        for (int i = 1; i <= 7; i++) {
-            if (x - i < 0 || y + i > 7) {
-                break;
-            }
+        if (x != 0 && y != 7) {
+            for (int i = 1; i <= 7; i++) {
+                if (x - i < 0 || y + i > 7) {
+                    break;
+                }
 
-            MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y + i]);
-            if (mustStop(moveTypeAdded)) {
-                break;
+                MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y + i]);
+                if (mustStop(moveTypeAdded)) {
+                    break;
+                }
             }
         }
     }
