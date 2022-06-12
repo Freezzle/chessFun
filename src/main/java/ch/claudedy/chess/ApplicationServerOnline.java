@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 public class ApplicationServerOnline {
     private static final List<ServiceThread> playersSearching = new ArrayList<>();
-    private static final Map<String, GameInfo> playersInGame = new HashMap<>();
+    private static final Map<String, GameInfo> gamesRunning = new HashMap<>();
     private static final Logger LOG = Logger.getLogger(ApplicationServerOnline.class.getName());
 
     public static void main(String[] args) throws IOException {
@@ -91,7 +91,7 @@ public class ApplicationServerOnline {
                     if (command instanceof MoveClientCommand) {
                         LOG.log(Level.INFO, "Command MoveClientCommand from client -> " + uuidClient);
 
-                        GameInfo gameInfo = playersInGame.get(uuidGame());
+                        GameInfo gameInfo = gamesRunning.get(uuidGame());
                         gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
                         os.flush();
                     } else if (command instanceof DisconnectClientCommand) {
@@ -111,7 +111,7 @@ public class ApplicationServerOnline {
                             opponent.infoPlayerNetwork().color(Color.BLACK);
                             opponent.uuidGame(uuidGame);
 
-                            playersInGame.put(uuidGame, new GameInfo().whitePlayer(this).blackPlayer(opponent));
+                            gamesRunning.put(uuidGame, new GameInfo().whitePlayer(this).blackPlayer(opponent));
 
                             os.writeObject(new StartGameCommand().player(infoPlayerNetwork).playerOpponent(opponent.infoPlayerNetwork()));
                             opponent.os.writeObject(new StartGameCommand().player(opponent.infoPlayerNetwork).playerOpponent(infoPlayerNetwork()));
