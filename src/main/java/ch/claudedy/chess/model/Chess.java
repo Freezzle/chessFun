@@ -101,9 +101,9 @@ public class Chess implements Serializable {
             boolean aPieceCanMove = false;
             for (int x = 0; x <= 7; x++) {
                 for (int y = 0; y <= 7; y++) {
-                    Piece piece = currentBoard.squares()[x][y].piece();
+                    Piece piece = currentBoard.getSquare(x, y).piece();
                     if (piece != null && piece.color() == this.currentBoard.currentPlayer()) {
-                        List<PossibleMove> legalMoves = this.getLegalMoves(currentBoard.squares()[x][y].tile());
+                        List<PossibleMove> legalMoves = this.getLegalMoves(currentBoard.getSquare(x, y).tile());
                         if (!legalMoves.isEmpty()) {
                             aPieceCanMove = true;
                             break;

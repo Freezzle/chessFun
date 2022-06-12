@@ -44,6 +44,10 @@ public class Board implements Serializable {
         return this.currentPlayer.isWhite();
     }
 
+    public Square getSquare(int x, int y) {
+        return this.squares[x][y];
+    }
+
     public Square getSquare(Tile tile) {
         return this.squares[tile.x()][tile.y()];
     }
@@ -251,9 +255,9 @@ public class Board implements Serializable {
         Tile kingTile = null;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
-                Piece piece = squares()[x][y].piece();
+                Piece piece = squares[x][y].piece();
                 if (piece != null && piece.type() == PieceType.KING && piece.color() == colorKing) {
-                    kingTile = squares()[x][y].tile();
+                    kingTile = squares[x][y].tile();
                 }
             }
         }
@@ -265,9 +269,9 @@ public class Board implements Serializable {
         boolean isTileChecked = false;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
-                Piece piece = squares()[x][y].piece();
+                Piece piece = squares[x][y].piece();
                 if (piece != null && piece.color() != allyColor) {
-                    List<PossibleMove> threatens = piece.getMoves(this, squares()[x][y].tile());
+                    List<PossibleMove> threatens = piece.getMoves(this, squares[x][y].tile());
                     if (threatens.stream().anyMatch(threat -> threat.destination() == tileToCheck)) {
                         isTileChecked = true;
                         break;

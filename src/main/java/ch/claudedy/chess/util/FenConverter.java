@@ -1,7 +1,6 @@
 package ch.claudedy.chess.util;
 
 import ch.claudedy.chess.model.Board;
-import ch.claudedy.chess.model.Square;
 import ch.claudedy.chess.model.enumeration.Color;
 import ch.claudedy.chess.model.enumeration.Tile;
 import lombok.Getter;
@@ -16,19 +15,18 @@ public class FenConverter {
     public static String boardToFen(Board board) {
         // rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR
         StringBuilder fen = new StringBuilder();
-        Square[][] squares = board.squares();
         for (int y = 7; y >= 0; y--) {
             int incCount = 0;
 
             for (int x = 0; x <= 7; x++) {
-                if (squares[x][y].piece() == null) {
+                if (board.getSquare(x, y).piece() == null) {
                     incCount++;
                 } else {
                     if (incCount != 0) {
                         fen.append(incCount);
                         incCount = 0;
                     }
-                    fen.append(squares[x][y].piece().letter());
+                    fen.append(board.getSquare(x, y).piece().letter());
                 }
 
                 if (x == 7 && incCount != 0) {

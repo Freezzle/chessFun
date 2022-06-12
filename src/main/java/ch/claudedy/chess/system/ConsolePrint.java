@@ -39,7 +39,7 @@ public class ConsolePrint {
 
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
-                Square square = chess.currentBoard().squares()[x][y];
+                Square square = chess.currentBoard().getSquare(x, y);
                 Piece piece = square.piece();
 
                 if (x == 0) {
@@ -81,7 +81,7 @@ public class ConsolePrint {
                 }
 
                 System.out.print(" ");
-                System.out.print(chess.currentBoard().squares()[x][y].printSquare());
+                System.out.print(chess.currentBoard().getSquare(x, y).printSquare());
                 System.out.print(" ");
                 System.out.print(RESET);
 

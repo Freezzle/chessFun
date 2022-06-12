@@ -73,7 +73,7 @@ public class Piece implements Comparable<Piece>, Serializable {
 
         // PROMOTION
         if (y + (changerPromotion) == 7 || y + (changerPromotion) == 0) {
-            Square square = board.squares()[x][y + (changerPromotion)];
+            Square square = board.getSquare(x, y + (changerPromotion));
             if (square.piece() == null) {
                 moves.add(new PossibleMove(Tile.getEnum(x, y + changerPromotion), MoveType.PROMOTE));
             }
@@ -81,13 +81,13 @@ public class Piece implements Comparable<Piece>, Serializable {
 
         // STANDARD
         int changer1StepMove = isWhitePiece() ? 1 : -1;
-        if (y + (changer1StepMove) > 0 && y + (changer1StepMove) < 7 && board.squares()[x][y + (changer1StepMove)].piece() == null) {
+        if (y + (changer1StepMove) > 0 && y + (changer1StepMove) < 7 && board.getSquare(x, y + (changer1StepMove)).piece() == null) {
             moves.add(new PossibleMove(Tile.getEnum(x, y + changer1StepMove), MoveType.MOVE));
 
             int changer2StepMove = isWhitePiece() ? 2 : -2;
-            if (this.color == Color.WHITE && board.squares()[x][1] == board.squares()[x][y] || this.color == Color.BLACK && board.squares()[x][6] == board.squares()[x][y]) {
+            if (this.color == Color.WHITE && board.getSquare(x, 1) == board.getSquare(x, y) || this.color == Color.BLACK && board.getSquare(x, 6) == board.getSquare(x, y)) {
                 // BIG MOVE FOR FIRST TIME
-                if (board.squares()[x][y + (changer2StepMove)].piece() == null) {
+                if (board.getSquare(x, y + (changer2StepMove)).piece() == null) {
                     moves.add(new PossibleMove(Tile.getEnum(x, y + changer2StepMove), MoveType.MOVE));
                 }
             }
@@ -96,7 +96,7 @@ public class Piece implements Comparable<Piece>, Serializable {
         // ATTACK MOVE RIGHT
         int changerAttack = isWhitePiece() ? 1 : -1;
         if (x + 1 <= 7 && y + changerAttack <= 7 && y + changerAttack >= 0) {
-            Square square = board.squares()[x + 1][y + changerAttack];
+            Square square = board.getSquare(x + 1, y + changerAttack);
 
             Piece piece = square.piece();
             if (piece == null && board.enPassant() == square.tile()) {
@@ -112,7 +112,7 @@ public class Piece implements Comparable<Piece>, Serializable {
 
         // ATTACK MOVE LEFT
         if (x - 1 >= 0 && y + changerAttack <= 7 && y + changerAttack >= 0) {
-            Square square = board.squares()[x - 1][y + changerAttack];
+            Square square = board.getSquare(x - 1, y + changerAttack);
             Piece piece = square.piece();
 
             if (piece == null && board.enPassant() == square.tile()) {
@@ -156,31 +156,31 @@ public class Piece implements Comparable<Piece>, Serializable {
     }
 
     private void addKingMoves(List<PossibleMove> moves, Board board, int x, int y) {
-        Square sourceSquare = board.squares()[x][y];
+        Square sourceSquare = board.getSquare(x, y);
 
         if (x + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x + 1, y));
 
         if (x + 1 <= 7 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y + 1]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x + 1, y + 1));
 
         if (y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y + 1]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x, y + 1));
 
         if (x - 1 >= 0 && y + 1 <= 7)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y + 1]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x - 1, y + 1));
 
         if (x - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x - 1, y));
 
         if (x - 1 >= 0 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x - 1][y - 1]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x - 1, y - 1));
 
         if (y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x][y - 1]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x, y - 1));
 
         if (x + 1 <= 7 && y - 1 >= 0)
-            addMoveIfNecessary(moves, sourceSquare, board.squares()[x + 1][y - 1]);
+            addMoveIfNecessary(moves, sourceSquare, board.getSquare(x + 1, y - 1));
 
 
         int ySide = isWhitePiece() ? 0 : 7;
@@ -188,9 +188,9 @@ public class Piece implements Comparable<Piece>, Serializable {
         // CASTLING QUEEN SIDE
         if ((isWhitePiece() && board.canwQRoque()) || !isWhitePiece() && board.canbqRoque()) {
             boolean canQueenCastling = true;
-            if (board.squares()[0][ySide].piece() != null && board.squares()[0][ySide].piece().type == PieceType.ROOK) {
+            if (board.getSquare(0, ySide).piece() != null && board.getSquare(0, ySide).piece().type == PieceType.ROOK) {
                 for (int i = 1; i <= x - 1; i++) {
-                    if (board.squares()[i][ySide].piece() != null) {
+                    if (board.getSquare(i, ySide).piece() != null) {
                         canQueenCastling = false;
                         break;
                     }
@@ -207,9 +207,9 @@ public class Piece implements Comparable<Piece>, Serializable {
         // CASTLING KING SIDE
         if ((isWhitePiece() && board.canwKRoque()) || !isWhitePiece() && board.canbkRoque()) {
             boolean canKingCastling = true;
-            if (board.squares()[7][ySide].piece() != null && board.squares()[7][ySide].piece().type == PieceType.ROOK) {
+            if (board.getSquare(7, ySide).piece() != null && board.getSquare(7, ySide).piece().type == PieceType.ROOK) {
                 for (int i = x + 1; i <= 7 - 1; i++) {
-                    if (board.squares()[i][ySide].piece() != null) {
+                    if (board.getSquare(i, ySide).piece() != null) {
                         canKingCastling = false;
                         break;
                     }

@@ -16,7 +16,7 @@ public class ApplicationTest {
         long startTime = System.currentTimeMillis();
         Chess chess = new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", null);
 
-        deep(chess, 3);
+        deep(chess, 4);
         System.out.println("Time : " + Long.valueOf(System.currentTimeMillis() - startTime).toString() + "ms for number moves : " + counter);
     }
 

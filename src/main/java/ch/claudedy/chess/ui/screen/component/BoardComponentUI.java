@@ -150,7 +150,7 @@ public class BoardComponentUI extends JPanel {
             int counter = 0;
             for (int y = 7; y >= 0; y--) {
                 for (int x = 0; x <= 7; x++) {
-                    createSquare(GameManager.instance().currentBoard().squares()[x][y], counter);
+                    createSquare(GameManager.instance().currentBoard().getSquare(x, y), counter);
                     counter++;
                 }
             }
@@ -158,7 +158,7 @@ public class BoardComponentUI extends JPanel {
             int counter = 0;
             for (int y = 0; y <= 7; y++) {
                 for (int x = 7; x >= 0; x--) {
-                    createSquare(currentBoard.squares()[x][y], counter);
+                    createSquare(currentBoard.getSquare(x, y), counter);
                     counter++;
                 }
             }
@@ -226,7 +226,7 @@ public class BoardComponentUI extends JPanel {
     private synchronized void resetBackgroundTiles() {
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
-                getComponentUI(GameManager.instance().currentBoard().squares()[x][y].tile()).resetColor();
+                getComponentUI(GameManager.instance().currentBoard().getSquare(x, y).tile()).resetColor();
             }
         }
 
@@ -255,11 +255,11 @@ public class BoardComponentUI extends JPanel {
     }
 
     private synchronized void printPieces() {
-        Square[][] squares = GameManager.instance().currentBoard().squares();
+        Board board = GameManager.instance().currentBoard();
 
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
-                Square currentSquare = squares[x][y];
+                Square currentSquare = board.getSquare(x, y);
                 getComponentUI(currentSquare.tile()).updatePiece(currentSquare.piece());
             }
         }
