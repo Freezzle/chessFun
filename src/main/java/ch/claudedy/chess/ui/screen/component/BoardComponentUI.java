@@ -89,7 +89,7 @@ public class BoardComponentUI extends JPanel {
 
                         Piece piece = GameManager.instance().chess().currentBoard().getSquare(selectedPieceTile).piece();
 
-                        if (!piece.color().isSameColor(GameManager.instance().currentBoard().currentPlayer())) {
+                        if (piece != null && !piece.color().isSameColor(GameManager.instance().currentBoard().currentPlayer())) {
                             return;
                         }
 

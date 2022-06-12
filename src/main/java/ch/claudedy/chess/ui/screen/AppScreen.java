@@ -43,7 +43,7 @@ public class AppScreen extends JFrame {
     public void startWaitingGameOnline() {
         NetworkManager.instance().client().send(new SearchingGameCommand().infoPlayer(GameManager.instance().player()));
 
-        mainLayer.remove(chooseTypeGameScreen);
+        mainLayer.removeAll();
         onlineWaitingScreen = new OnlineWaitingScreen();
         mainLayer.add(onlineWaitingScreen, 0);
     }
@@ -68,7 +68,7 @@ public class AppScreen extends JFrame {
     }
 
     public void startChoosingLocalGame() {
-        mainLayer.remove(chooseTypeGameScreen);
+        mainLayer.removeAll();
         localGameScreen = new LocalGameScreen();
         localGameScreen.addOnGameChoosenListener(new GameChoosenListener(this));
         mainLayer.add(localGameScreen, 0);
@@ -91,7 +91,7 @@ public class AppScreen extends JFrame {
             AIManager.instance().startStockfish();
         }
 
-        mainLayer.remove(chooseTypeGameScreen);
+        mainLayer.removeAll();
         chessScreen = new ChessScreen();
         chessScreen.addGameEndedListener(new GameEndedListener(instance));
         mainLayer.add(chessScreen, 0);

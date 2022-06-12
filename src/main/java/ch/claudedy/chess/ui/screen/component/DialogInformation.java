@@ -14,13 +14,13 @@ public class DialogInformation extends JDialog {
         setLayout(new GridLayout(2, 1));
         setBounds(new Rectangle(500, 300, 400, 300));
 
-        add(new JLabel(textInformation));
+        add(new JLabel(textInformation), CENTER_ALIGNMENT);
 
-        textCounter = new JLabel("You will be redirect in " + counter + "s");
-        add(textCounter);
+        textCounter = new JLabel("Redirecting in " + counter + "s");
+        add(textCounter, CENTER_ALIGNMENT);
     }
 
     public void setCounter(Long counter) {
-        textCounter.setText("You will be redirect in " + counter + "s");
+        textCounter.setText("Redirecting in " + counter + "s");
     }
 }

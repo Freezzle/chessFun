@@ -13,13 +13,17 @@ public class GameEndedListener {
     }
 
     public void onGameEndedListener() {
-        NetworkManager.instance().client(null);
-        NetworkManager.instance().infoPlayer(null);
-        NetworkManager.instance().infoOpponent(null);
-        NetworkManager.instance().game(null);
+        if (GameManager.instance().modeOnline()) {
+            NetworkManager.instance().client(null);
+            NetworkManager.instance().infoPlayer(null);
+            NetworkManager.instance().infoOpponent(null);
+            NetworkManager.instance().game(null);
+        }
 
         GameManager.instance().modeOnline(false);
         GameManager.instance().setGameStarted(false);
+        GameManager.instance().chess(null);
+
         this.main.comeBackMenu();
     }
 }

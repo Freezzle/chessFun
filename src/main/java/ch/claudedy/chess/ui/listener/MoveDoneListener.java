@@ -20,13 +20,13 @@ public class MoveDoneListener {
 
         if (GameManager.instance().modeOnline() && fromLocalCommand) {
             NetworkManager.instance().client().send(new MoveClientCommand().move(move));
-
-            if (GameManager.instance().chess().gameStatus().isGameOver()) {
-                NetworkManager.instance().client().send(new GameEndedClientCommand().status(GameManager.instance().chess().gameStatus()));
-            }
         }
 
-        if (GameManager.instance().chess().gameStatus().isGameOver()) {
+        if (GameManager.instance().modeOnline() && GameManager.instance().chess().gameStatus().isGameOver()) {
+            NetworkManager.instance().client().send(new GameEndedClientCommand().status(GameManager.instance().chess().gameStatus()));
+            return;
+        } else if (!GameManager.instance().modeOnline() && GameManager.instance().chess().gameStatus().isGameOver()) {
+            chessScreen.actionGameEnded(GameManager.instance().chess().gameStatus());
             return;
         }
 

@@ -38,6 +38,7 @@ public class GameManager {
     private boolean gameStarted = false;
 
     @Getter
+    @Setter
     private Chess chess;
 
     private GameManager() {
