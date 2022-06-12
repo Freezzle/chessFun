@@ -2,8 +2,10 @@ package ch.claudedy.chess;
 
 import ch.claudedy.chess.model.enumeration.Color;
 import ch.claudedy.chess.network.command.client.DisconnectClientCommand;
+import ch.claudedy.chess.network.command.client.GameEndedClientCommand;
 import ch.claudedy.chess.network.command.client.MoveClientCommand;
 import ch.claudedy.chess.network.command.client.SearchingGameCommand;
+import ch.claudedy.chess.network.command.server.GameEndedCommand;
 import ch.claudedy.chess.network.command.server.MoveServerCommand;
 import ch.claudedy.chess.network.command.server.OpponentDisconnectedCommand;
 import ch.claudedy.chess.network.command.server.StartGameCommand;
@@ -93,16 +95,24 @@ public class ApplicationServerOnline {
                         LOG.log(Level.INFO, "Client move done -> " + uuidClient);
 
                         GameInfo gameInfo = gamesRunning.get(uuidGame());
-                        if (gameInfo.gameRunning()) {
+                        if (gameInfo != null && gameInfo.gameRunning()) {
                             gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
                             gameInfo.getOpponent(infoPlayerNetwork.color()).os.flush();
                         }
+                    } else if (command instanceof GameEndedClientCommand) {
+                        LOG.log(Level.INFO, "Game ended -> " + uuidClient);
+                        GameInfo gameInfo = gamesRunning.get(uuidGame());
+                        gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new GameEndedCommand().status(((GameEndedClientCommand) command).status()));
+                        gameInfo.getHimSelf(infoPlayerNetwork.color()).os.writeObject(new GameEndedCommand().status(((GameEndedClientCommand) command).status()));
+                        gameInfo.gameRunning(false);
+                        gamesRunning.remove(uuidGame);
                     } else if (command instanceof DisconnectClientCommand) {
                         LOG.log(Level.INFO, "Client disconnected -> " + uuidClient);
 
                         GameInfo gameInfo = gamesRunning.get(uuidGame());
                         gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new OpponentDisconnectedCommand());
                         gameInfo.gameRunning(false);
+                        gamesRunning.remove(uuidGame);
 
                         os.flush();
                         break;

@@ -2,6 +2,7 @@ package ch.claudedy.chess.ui.screen;
 
 import ch.claudedy.chess.model.MoveCommand;
 import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.GameStatus;
 import ch.claudedy.chess.system.GameType;
 import ch.claudedy.chess.ui.listener.GameEndedListener;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
@@ -138,6 +139,29 @@ public class ChessScreen extends JPanel {
             informationBlackArea = new InfoPlayerComponentUI(playerBlack);
             add(informationBlackArea);
         }
+    }
+
+    public void actionGameEnded(GameStatus status) {
+        final Long counter = 10l;
+        DialogInformation dialog = new DialogInformation("Game finished with status -> " + status, counter);
+        dialog.setVisible(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Long counterRunnable = counter;
+                    while (counterRunnable > 0) {
+                        Thread.sleep(1000);
+                        counterRunnable--;
+                        dialog.setCounter(counterRunnable);
+                    }
+                    dialog.setVisible(false);
+                } catch (InterruptedException e) {
+                } finally {
+                    listeners.forEach(listener -> listener.onGameEndedListener());
+                }
+            }
+        }).start();
     }
 
     public void actionOpponentDisconnected() {

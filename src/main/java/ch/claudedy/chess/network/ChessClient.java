@@ -2,10 +2,7 @@ package ch.claudedy.chess.network;
 
 import ch.claudedy.chess.model.MoveCommand;
 import ch.claudedy.chess.network.command.client.CommandClient;
-import ch.claudedy.chess.network.command.server.CommandServer;
-import ch.claudedy.chess.network.command.server.MoveServerCommand;
-import ch.claudedy.chess.network.command.server.OpponentDisconnectedCommand;
-import ch.claudedy.chess.network.command.server.StartGameCommand;
+import ch.claudedy.chess.network.command.server.*;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
 
@@ -46,6 +43,8 @@ public class ChessClient {
                                 NetworkManager.instance().game().boardUI().makeMoveUI(move.startPosition(), move.endPosition(), move.promote(), false);
                             } else if (response instanceof OpponentDisconnectedCommand) {
                                 NetworkManager.instance().game().actionOpponentDisconnected();
+                            } else if (response instanceof GameEndedCommand) {
+                                NetworkManager.instance().game().actionGameEnded(((GameEndedCommand) response).status());
                             }
 
                             System.out.println(response);
