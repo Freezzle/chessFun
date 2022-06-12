@@ -113,6 +113,22 @@ public class Board implements Serializable {
         return pieces;
     }
 
+    public List<Square> getSquaresAlivePieces(Color player) {
+        List<Square> squares = new ArrayList<>();
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                // Empty tiles
+                Piece piece = this.squares[x][y].piece();
+
+                if (piece != null && piece.color() == player) {
+                    squares.add(this.squares[x][y]);
+                }
+            }
+        }
+
+        return squares;
+    }
+
     private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove, Character promote) {
         if (PieceType.PAWN != pieceToMove.type()) {
             this.enPassant = null;
