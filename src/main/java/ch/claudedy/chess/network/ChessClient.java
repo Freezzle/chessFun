@@ -4,6 +4,7 @@ import ch.claudedy.chess.model.MoveCommand;
 import ch.claudedy.chess.network.command.client.CommandClient;
 import ch.claudedy.chess.network.command.server.CommandServer;
 import ch.claudedy.chess.network.command.server.MoveServerCommand;
+import ch.claudedy.chess.network.command.server.OpponentDisconnectedCommand;
 import ch.claudedy.chess.network.command.server.StartGameCommand;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
@@ -18,6 +19,7 @@ public class ChessClient {
 
     private ObjectInputStream input;
     private ObjectOutputStream output;
+    private Thread thread;
 
     public ChessClient() throws IOException {
         InetAddress ip = InetAddress.getByName("localhost");
@@ -27,7 +29,7 @@ public class ChessClient {
             output = new ObjectOutputStream(socket.getOutputStream());
             input = new ObjectInputStream(socket.getInputStream());
 
-            new Thread(new Runnable() {
+            thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
 
@@ -42,18 +44,35 @@ public class ChessClient {
                             } else if (response instanceof MoveServerCommand) {
                                 MoveCommand move = ((MoveServerCommand) response).move();
                                 NetworkManager.instance().game().boardUI().makeMoveUI(move.startPosition(), move.endPosition(), move.promote(), false);
+                            } else if (response instanceof OpponentDisconnectedCommand) {
+                                NetworkManager.instance().game().actionOpponentDisconnected();
                             }
 
                             System.out.println(response);
                         } catch (IOException | ClassNotFoundException e) {
-                            e.printStackTrace();
+                            break;
+                        } finally {
                         }
                     }
                 }
-            }).start();
+            });
+            thread.start();
         } catch (IOException e) {
-            e.printStackTrace();
         }
+    }
+
+    public void stopConnection() {
+        try {
+            input.close();
+        } catch (IOException e) {
+        }
+        try {
+            output.close();
+        } catch (IOException e) {
+        }
+
+        thread.interrupt();
+        thread = null;
     }
 
     public void send(CommandClient command) {
@@ -64,7 +83,6 @@ public class ChessClient {
                     output.writeObject(command);
                     output.flush();
                 } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }).start();

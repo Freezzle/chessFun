@@ -3,12 +3,14 @@ package ch.claudedy.chess.ui.screen;
 import ch.claudedy.chess.model.MoveCommand;
 import ch.claudedy.chess.model.enumeration.Color;
 import ch.claudedy.chess.system.GameType;
+import ch.claudedy.chess.ui.listener.GameEndedListener;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import ch.claudedy.chess.ui.manager.AIManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
 import ch.claudedy.chess.ui.screen.component.BoardComponentUI;
+import ch.claudedy.chess.ui.screen.component.DialogInformation;
 import ch.claudedy.chess.ui.screen.component.InfoPlayerComponentUI;
 import ch.claudedy.chess.ui.screen.model.InfoPlayer;
 import lombok.Getter;
@@ -16,6 +18,8 @@ import lombok.experimental.Accessors;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Accessors(fluent = true)
 public class ChessScreen extends JPanel {
@@ -29,6 +33,8 @@ public class ChessScreen extends JPanel {
     private InfoPlayer playerWhite;
     @Getter
     private InfoPlayer playerBlack;
+
+    List<GameEndedListener> listeners = new ArrayList<>();
 
     public ChessScreen() {
         setName("CHESS");
@@ -134,7 +140,32 @@ public class ChessScreen extends JPanel {
         }
     }
 
+    public void actionOpponentDisconnected() {
+        final Long counter = 5l;
+        DialogInformation dialog = new DialogInformation("Opponent has disconnected", counter);
+        dialog.setVisible(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Long counterRunnable = counter;
+                    while (counterRunnable > 0) {
+                        Thread.sleep(1000);
+                        counterRunnable--;
+                        dialog.setCounter(counterRunnable);
+                    }
+                    dialog.setVisible(false);
+                } catch (InterruptedException e) {
+                } finally {
+                    listeners.forEach(listener -> listener.onGameEndedListener());
+                }
+            }
+        }).start();
+    }
 
+    public void addGameEndedListener(GameEndedListener listener) {
+        this.listeners.add(listener);
+    }
 
     public void reset() {
         informationWhiteArea.updateInfoPlayer();

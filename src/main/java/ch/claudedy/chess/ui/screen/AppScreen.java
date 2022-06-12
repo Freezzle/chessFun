@@ -3,10 +3,10 @@ package ch.claudedy.chess.ui.screen;
 import ch.claudedy.chess.network.command.client.SearchingGameCommand;
 import ch.claudedy.chess.system.GameType;
 import ch.claudedy.chess.ui.listener.GameChoosenListener;
+import ch.claudedy.chess.ui.listener.GameEndedListener;
 import ch.claudedy.chess.ui.manager.AIManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
-import ch.claudedy.chess.ui.screen.component.PromoteUI;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;
@@ -15,16 +15,19 @@ import java.awt.*;
 @Accessors(fluent = true)
 public class AppScreen extends JFrame {
 
+    private static AppScreen instance;
+
     // Main layer of the application
     private final JLayeredPane mainLayer;
 
     // UI Child
-    private final ChooseTypeGameScreen chooseTypeGameScreen;
+    private ChooseTypeGameScreen chooseTypeGameScreen;
     private LocalGameScreen localGameScreen;
     private OnlineWaitingScreen onlineWaitingScreen;
     private ChessScreen chessScreen;
 
     public AppScreen() {
+        instance = this;
         mainLayer = new JLayeredPane();
         mainLayer.setPreferredSize(new Dimension(600, 700));
         mainLayer.setBounds(new Rectangle(0, 0, 600, 700));
@@ -35,8 +38,6 @@ public class AppScreen extends JFrame {
         chooseTypeGameScreen.addOnGameChoosenListener(new GameChoosenListener(this));
 
         mainLayer.add(chooseTypeGameScreen, 0);
-
-        new PromoteUI();
     }
 
     public void startWaitingGameOnline() {
@@ -59,6 +60,7 @@ public class AppScreen extends JFrame {
                 }
 
                 chessScreen = new ChessScreen();
+                chessScreen.addGameEndedListener(new GameEndedListener(instance));
                 NetworkManager.instance().game(chessScreen);
                 mainLayer.add(chessScreen, 0);
             }
@@ -91,6 +93,16 @@ public class AppScreen extends JFrame {
 
         mainLayer.remove(chooseTypeGameScreen);
         chessScreen = new ChessScreen();
+        chessScreen.addGameEndedListener(new GameEndedListener(instance));
         mainLayer.add(chessScreen, 0);
+    }
+
+    public void comeBackMenu() {
+        mainLayer.removeAll();
+        // Make a choice between Online | Local Game
+        chooseTypeGameScreen = new ChooseTypeGameScreen();
+        chooseTypeGameScreen.addOnGameChoosenListener(new GameChoosenListener(this));
+
+        mainLayer.add(chooseTypeGameScreen, 0);
     }
 }

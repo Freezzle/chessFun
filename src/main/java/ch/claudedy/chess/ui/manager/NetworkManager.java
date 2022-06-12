@@ -1,6 +1,7 @@
 package ch.claudedy.chess.ui.manager;
 
 import ch.claudedy.chess.network.ChessClient;
+import ch.claudedy.chess.network.command.client.DisconnectClientCommand;
 import ch.claudedy.chess.ui.screen.ChessScreen;
 import ch.claudedy.chess.ui.screen.model.InfoPlayer;
 import lombok.Getter;
@@ -15,6 +16,7 @@ public class NetworkManager {
     private static NetworkManager instance;
 
     @Getter
+    @Setter
     private ChessClient client;
 
     @Setter
@@ -42,6 +44,12 @@ public class NetworkManager {
     public void startConnection() throws IOException {
         if (instance.client == null) {
             instance.client = new ChessClient();
+        }
+    }
+
+    public void stopConnection() {
+        if (instance.client != null) {
+            instance.client.send(new DisconnectClientCommand());
         }
     }
 }

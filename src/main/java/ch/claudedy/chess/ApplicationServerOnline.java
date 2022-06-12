@@ -5,6 +5,7 @@ import ch.claudedy.chess.network.command.client.DisconnectClientCommand;
 import ch.claudedy.chess.network.command.client.MoveClientCommand;
 import ch.claudedy.chess.network.command.client.SearchingGameCommand;
 import ch.claudedy.chess.network.command.server.MoveServerCommand;
+import ch.claudedy.chess.network.command.server.OpponentDisconnectedCommand;
 import ch.claudedy.chess.network.command.server.StartGameCommand;
 import ch.claudedy.chess.ui.screen.model.InfoPlayer;
 import lombok.Data;
@@ -89,17 +90,24 @@ public class ApplicationServerOnline {
                     Object command = is.readObject();
 
                     if (command instanceof MoveClientCommand) {
-                        LOG.log(Level.INFO, "Command MoveClientCommand from client -> " + uuidClient);
+                        LOG.log(Level.INFO, "Client move done -> " + uuidClient);
 
                         GameInfo gameInfo = gamesRunning.get(uuidGame());
-                        gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
-                        os.flush();
+                        if (gameInfo.gameRunning()) {
+                            gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new MoveServerCommand().move(((MoveClientCommand) command).move()));
+                            gameInfo.getOpponent(infoPlayerNetwork.color()).os.flush();
+                        }
                     } else if (command instanceof DisconnectClientCommand) {
                         LOG.log(Level.INFO, "Client disconnected -> " + uuidClient);
+
+                        GameInfo gameInfo = gamesRunning.get(uuidGame());
+                        gameInfo.getOpponent(infoPlayerNetwork.color()).os.writeObject(new OpponentDisconnectedCommand());
+                        gameInfo.gameRunning(false);
+
                         os.flush();
                         break;
                     } else if (command instanceof SearchingGameCommand) {
-                        LOG.log(Level.INFO, "Command SearhcingGameCommand from client -> " + uuidClient);
+                        LOG.log(Level.INFO, "Client searching game -> " + uuidClient);
                         infoPlayerNetwork = ((SearchingGameCommand) command).infoPlayer();
 
                         if (playersSearching.size() >= 1) {
@@ -111,7 +119,7 @@ public class ApplicationServerOnline {
                             opponent.infoPlayerNetwork().color(Color.BLACK);
                             opponent.uuidGame(uuidGame);
 
-                            gamesRunning.put(uuidGame, new GameInfo().whitePlayer(this).blackPlayer(opponent));
+                            gamesRunning.put(uuidGame, new GameInfo().gameRunning(true).whitePlayer(this).blackPlayer(opponent));
 
                             os.writeObject(new StartGameCommand().player(infoPlayerNetwork).playerOpponent(opponent.infoPlayerNetwork()));
                             opponent.os.writeObject(new StartGameCommand().player(opponent.infoPlayerNetwork).playerOpponent(infoPlayerNetwork()));
@@ -130,10 +138,7 @@ public class ApplicationServerOnline {
                 os.close();
                 socket.close();
             } catch (IOException e) {
-                System.out.println(e);
-                e.printStackTrace();
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -141,11 +146,16 @@ public class ApplicationServerOnline {
     @Accessors(fluent = true)
     @Data
     static class GameInfo {
+        private boolean gameRunning = false;
         private ApplicationServerOnline.ServiceThread whitePlayer;
         private ApplicationServerOnline.ServiceThread blackPlayer;
 
         public ApplicationServerOnline.ServiceThread getOpponent(Color colorPlayer) {
             return colorPlayer.isWhite() ? blackPlayer : whitePlayer;
+        }
+
+        public ApplicationServerOnline.ServiceThread getHimSelf(Color colorPlayer) {
+            return colorPlayer.isWhite() ? whitePlayer : blackPlayer;
         }
     }
 }

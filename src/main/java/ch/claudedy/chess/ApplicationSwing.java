@@ -1,5 +1,6 @@
 package ch.claudedy.chess;
 
+import ch.claudedy.chess.ui.manager.NetworkManager;
 import ch.claudedy.chess.ui.screen.AppScreen;
 import lombok.experimental.Accessors;
 
@@ -28,6 +29,7 @@ public class ApplicationSwing extends JFrame {
 
             @Override
             public void windowClosed(WindowEvent e) {
+                NetworkManager.instance().stopConnection();
                 System.exit(0);
             }
 
