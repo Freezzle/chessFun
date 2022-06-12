@@ -95,7 +95,7 @@ public class Piece implements Comparable<Piece>, Serializable {
 
         // ATTACK MOVE RIGHT
         int changerAttack = isWhitePiece() ? 1 : -1;
-        if (x + 1 <= 7) {
+        if (x + 1 <= 7 && y + changerAttack <= 7 && y + changerAttack >= 0) {
             Square square = board.squares()[x + 1][y + changerAttack];
 
             Piece piece = square.piece();
@@ -111,7 +111,7 @@ public class Piece implements Comparable<Piece>, Serializable {
         }
 
         // ATTACK MOVE LEFT
-        if (x - 1 >= 0) {
+        if (x - 1 >= 0 && y + changerAttack <= 7 && y + changerAttack >= 0) {
             Square square = board.squares()[x - 1][y + changerAttack];
             Piece piece = square.piece();
 

@@ -6,6 +6,7 @@ import ch.claudedy.chess.ui.listener.GameChoosenListener;
 import ch.claudedy.chess.ui.manager.AIManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
+import ch.claudedy.chess.ui.screen.component.PromoteUI;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;
@@ -34,6 +35,8 @@ public class AppScreen extends JFrame {
         chooseTypeGameScreen.addOnGameChoosenListener(new GameChoosenListener(this));
 
         mainLayer.add(chooseTypeGameScreen, 0);
+
+        new PromoteUI();
     }
 
     public void startWaitingGameOnline() {

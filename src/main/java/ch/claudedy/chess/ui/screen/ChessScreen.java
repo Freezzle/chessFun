@@ -56,7 +56,7 @@ public class ChessScreen extends JPanel {
         AIManager.instance().computerIsThinking(true);
         new Thread(() -> {
             MoveCommand move = AIManager.getMove();
-            boardUI.makeMoveUI(move.startPosition(), move.endPosition(), true);
+            boardUI.makeMoveUI(move.startPosition(), move.endPosition(), move.promote(), true);
             AIManager.instance().computerIsThinking(false);
         }).start();
     }

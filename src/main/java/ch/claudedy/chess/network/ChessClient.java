@@ -41,7 +41,7 @@ public class ChessClient {
                                 GameManager.instance().setGameStarted(true);
                             } else if (response instanceof MoveServerCommand) {
                                 MoveCommand move = ((MoveServerCommand) response).move();
-                                NetworkManager.instance().game().boardUI().makeMoveUI(move.startPosition(), move.endPosition(), false);
+                                NetworkManager.instance().game().boardUI().makeMoveUI(move.startPosition(), move.endPosition(), move.promote(), false);
                             }
 
                             System.out.println(response);

@@ -115,6 +115,7 @@ public class Board implements Serializable {
 
     private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove, Character promote) {
         if (PieceType.PAWN != pieceToMove.type()) {
+            this.enPassant = null;
             return;
         }
 
@@ -129,19 +130,23 @@ public class Board implements Serializable {
             } else {
                 this.enPassant = Tile.getEnum(end.x(), end.y() + 1);
             }
-        } else if (this.enPassant != null) {
-            // MOVE -> Pawn go to the enPassant tile
-            if (this.enPassant == end) {
-                if (pieceToMove.isWhitePiece()) {
-                    getSquare(Tile.getEnum(end.x(), end.y() - 1)).removePiece();
+        } else {
+            if (this.enPassant != null) {
+                // MOVE -> Pawn go to the enPassant tile
+                if (this.enPassant == end) {
+                    if (pieceToMove.isWhitePiece()) {
+                        getSquare(Tile.getEnum(end.x(), end.y() - 1)).removePiece();
+                    } else {
+                        getSquare(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
+                    }
                 } else {
-                    getSquare(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
+                    // Reset EnPassant
+                    this.enPassant = null;
                 }
-            } else {
-                // Reset EnPassant
-                this.enPassant = null;
             }
-        } else if (endSquare.tile().y() == 7 && pieceToMove.isWhitePiece()) {
+        }
+
+        if (endSquare.tile().y() == 7 && pieceToMove.isWhitePiece()) {
             // MOVE -> Promotion for WHITE to the top of the board
             pieceToMove.promote(Character.toUpperCase(promote));
         } else if (endSquare.tile().y() == 0 && !pieceToMove.isWhitePiece()) {

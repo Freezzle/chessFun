@@ -1,18 +1,15 @@
 package ch.claudedy.chess.ui.screen.component;
 
-import ch.claudedy.chess.model.Board;
-import ch.claudedy.chess.model.MoveCommand;
-import ch.claudedy.chess.model.PossibleMove;
-import ch.claudedy.chess.model.Square;
+import ch.claudedy.chess.model.*;
 import ch.claudedy.chess.model.enumeration.Color;
-import ch.claudedy.chess.model.enumeration.MoveStatus;
-import ch.claudedy.chess.model.enumeration.MoveType;
-import ch.claudedy.chess.model.enumeration.Tile;
+import ch.claudedy.chess.model.enumeration.*;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
+import ch.claudedy.chess.ui.listener.PromoteDoneListener;
 import ch.claudedy.chess.ui.manager.AIManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;
@@ -29,6 +26,9 @@ import static ch.claudedy.chess.ui.screen.util.ColorConstants.*;
 
 @Accessors(fluent = true)
 public class BoardComponentUI extends JPanel {
+
+    private final BoardComponentUI instance;
+
     private static final int LEFT_CLICK = 1;
     private static final int RIGHT_CLICK = 3;
 
@@ -37,9 +37,11 @@ public class BoardComponentUI extends JPanel {
     private final List<MoveFailedListener> moveFailedListeners = new ArrayList<>();
 
     private Tile selectedPieceTile;
+    @Setter
+    private Character promoteDone;
 
     public BoardComponentUI(boolean whiteView) {
-
+        this.instance = this;
         this.setName("BOARD");
         this.setLayout(new GridLayout(8, 8));
         this.setPreferredSize(new Dimension(600, 600));
@@ -83,7 +85,37 @@ public class BoardComponentUI extends JPanel {
                             destination = Tile.getEnum(tileClicked.getParent().getName());
                         }
 
-                        makeMoveUI(selectedPieceTile, destination, true);
+                        final Tile destinationFinal = destination;
+
+                        Piece piece = GameManager.instance().chess().currentBoard().getSquare(selectedPieceTile).piece();
+
+                        if (!piece.color().isSameColor(GameManager.instance().currentBoard().currentPlayer())) {
+                            return;
+                        }
+
+                        if (piece != null && piece.type() == PieceType.PAWN && (destinationFinal.y() == 7 || destinationFinal.y() == 0)) {
+                            PromoteUI promoteUI = new PromoteUI();
+                            promoteUI.addPromoteDoneListener(new PromoteDoneListener(instance));
+                            promoteUI.setVisible(true);
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    while (promoteDone == null) {
+                                        try {
+                                            Thread.sleep(300);
+                                        } catch (InterruptedException interruptedException) {
+                                        }
+                                    }
+
+                                    promoteUI.setVisible(false);
+                                    makeMoveUI(selectedPieceTile, destinationFinal, promoteDone, true);
+                                    promoteDone = null;
+                                }
+                            }).start();
+                        } else {
+                            makeMoveUI(selectedPieceTile, destinationFinal, null, true);
+                        }
                     } else if (e.getButton() == RIGHT_CLICK) { // There is no selected piece and we click right (print square to analyse board)
                         Tile tileSelected = Tile.getEnum(tileClicked.getName());
                         if (tileSelected == null) {
@@ -133,15 +165,15 @@ public class BoardComponentUI extends JPanel {
         }
     }
 
-    public void makeMoveUI(Tile start, Tile destination, boolean fromLocalCommand) {
+    public void makeMoveUI(Tile start, Tile destination, Character promote, boolean fromLocalCommand) {
         if (GameManager.instance().modeOnline() && fromLocalCommand && !GameManager.instance().currentBoard().currentPlayer().isSameColor(NetworkManager.instance().infoPlayer().color())) {
             moveFailedListeners.forEach(listener -> listener.onMoveFailedListener(MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE));
             return;
         }
 
         // Make the move
-        MoveCommand moveCommand = new MoveCommand(start, destination, null);
-        MoveStatus status = GameManager.instance().chess().makeMove(new MoveCommand(start, destination, null));
+        MoveCommand moveCommand = new MoveCommand(start, destination, promote);
+        MoveStatus status = GameManager.instance().chess().makeMove(moveCommand);
         if (status.isOk()) {
             moveDoneListeners.forEach(listener -> listener.onMoveDoneListener(moveCommand, fromLocalCommand));
         } else {
