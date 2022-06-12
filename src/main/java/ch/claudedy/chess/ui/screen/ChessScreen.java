@@ -6,7 +6,6 @@ import ch.claudedy.chess.system.GameType;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import ch.claudedy.chess.ui.manager.AIManager;
-import ch.claudedy.chess.ui.manager.ChessManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
 import ch.claudedy.chess.ui.screen.component.BoardComponentUI;
@@ -36,7 +35,7 @@ public class ChessScreen extends JPanel {
         setPreferredSize(new Dimension(600, 700));
         setBounds(new Rectangle(0, 0, 600, 700));
 
-        ChessManager.instance().startNewGame();
+        GameManager.instance().startNewGame();
 
         this.initPlayers();
         this.initLayers();
@@ -75,7 +74,7 @@ public class ChessScreen extends JPanel {
                 playerBlack = myInfo;
             }
         } else {
-            boolean whiteTurn = ChessManager.instance().isWhiteTurn();
+            boolean whiteTurn = GameManager.instance().isWhiteTurn();
 
             if (GameManager.instance().gameTypeLocal() == GameType.PLAYER_V_PLAYER) {
                 playerWhite = new InfoPlayer("Player 1", Color.WHITE, false);

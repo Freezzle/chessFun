@@ -1,7 +1,7 @@
 package ch.claudedy.chess.ui.screen.component;
 
 import ch.claudedy.chess.model.Board;
-import ch.claudedy.chess.ui.manager.ChessManager;
+import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.screen.model.InfoPlayer;
 import ch.claudedy.chess.util.Calculator;
 import lombok.experimental.Accessors;
@@ -27,7 +27,7 @@ public class InfoPlayerComponentUI extends JPanel {
             removeAll();
         }
 
-        Board currentBoard = ChessManager.instance().currentBoard();
+        Board currentBoard = GameManager.instance().currentBoard();
 
         JTextField textPlayer = new JTextField(player.name() + (player.color().isSameColor(currentBoard.currentPlayer()) ? " - your turn" : ""));
         textPlayer.setName("PLAYER" + player.color());

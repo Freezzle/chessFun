@@ -5,7 +5,6 @@ import ch.claudedy.chess.model.*;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import ch.claudedy.chess.ui.manager.AIManager;
-import ch.claudedy.chess.ui.manager.ChessManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
 import lombok.experimental.Accessors;
@@ -43,7 +42,7 @@ public class BoardComponentUI extends JPanel {
 
             // MOUSE CLICKED
             public void mouseClicked(MouseEvent e) {
-                if (ChessManager.instance().chess().gameStatus().isGameOver()) {
+                if (GameManager.instance().chess().gameStatus().isGameOver()) {
                     return;
                 }
 
@@ -70,7 +69,7 @@ public class BoardComponentUI extends JPanel {
                         getComponentUI(selectedPieceTile).changeBackground(getColorTileForSelectedPiece(selectedPieceTile.color()));
 
                         // Show the legal moves for the selected piece
-                        colorizeLegalMoves(ChessManager.instance().chess().getLegalMoves(selectedPieceTile));
+                        colorizeLegalMoves(GameManager.instance().chess().getLegalMoves(selectedPieceTile));
                     } else if (selectedPieceTile != null && buttonClicked == LEFT_CLICK && !AIManager.instance().isComputerThinking()) { // There is already a selected piece and we click left on board again (make move)
                         Tile destination = Tile.getEnum(tileClicked.getName());
 
@@ -108,12 +107,12 @@ public class BoardComponentUI extends JPanel {
             }
         });
 
-        Board currentBoard = ChessManager.instance().currentBoard();
+        Board currentBoard = GameManager.instance().currentBoard();
         if (whiteView) {
             int counter = 0;
             for (int y = 7; y >= 0; y--) {
                 for (int x = 0; x <= 7; x++) {
-                    createSquare(ChessManager.instance().currentBoard().squares()[x][y], counter);
+                    createSquare(GameManager.instance().currentBoard().squares()[x][y], counter);
                     counter++;
                 }
             }
@@ -129,14 +128,14 @@ public class BoardComponentUI extends JPanel {
     }
 
     public void makeMoveUI(Tile start, Tile destination, boolean fromLocalCommand) {
-        if (GameManager.instance().modeOnline() && fromLocalCommand && !ChessManager.instance().currentBoard().currentPlayer().isSameColor(NetworkManager.instance().infoPlayer().color())) {
+        if (GameManager.instance().modeOnline() && fromLocalCommand && !GameManager.instance().currentBoard().currentPlayer().isSameColor(NetworkManager.instance().infoPlayer().color())) {
             moveFailedListeners.forEach(listener -> listener.onMoveFailedListener(MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE));
             return;
         }
 
         // Make the move
         MoveCommand moveCommand = new MoveCommand(start, destination, null);
-        MoveStatus status = ChessManager.instance().chess().makeMove(new MoveCommand(start, destination, null));
+        MoveStatus status = GameManager.instance().chess().makeMove(new MoveCommand(start, destination, null));
         if (status.isOk()) {
             moveDoneListeners.forEach(listener -> listener.onMoveDoneListener(moveCommand, fromLocalCommand));
         } else {
@@ -155,15 +154,15 @@ public class BoardComponentUI extends JPanel {
 
     private void showKingChecked() {
         // Search the WHITE KING and if he is in check, we color his tile
-        Tile tileWhiteKing = ChessManager.instance().currentBoard().getTileKing(Color.WHITE);
-        if (ChessManager.instance().currentBoard().isTileChecked(Color.WHITE, tileWhiteKing)) {
+        Tile tileWhiteKing = GameManager.instance().currentBoard().getTileKing(Color.WHITE);
+        if (GameManager.instance().currentBoard().isTileChecked(Color.WHITE, tileWhiteKing)) {
             java.awt.Color color = tileWhiteKing.isWhiteTile() ? THREATED_KING_WHITE_SQUARE : THREATED_KING_BLACK_SQUARE;
             getComponentUI(tileWhiteKing).changeBackground(color);
         }
 
         // Search the BLACK KING and if he is in check, we color his tile
-        Tile tileBlackKing = ChessManager.instance().currentBoard().getTileKing(Color.BLACK);
-        if (ChessManager.instance().currentBoard().isTileChecked(Color.BLACK, tileBlackKing)) {
+        Tile tileBlackKing = GameManager.instance().currentBoard().getTileKing(Color.BLACK);
+        if (GameManager.instance().currentBoard().isTileChecked(Color.BLACK, tileBlackKing)) {
 
             java.awt.Color color = tileBlackKing.isWhiteTile() ? THREATED_KING_WHITE_SQUARE : THREATED_KING_BLACK_SQUARE;
             getComponentUI(tileBlackKing).changeBackground(color);
@@ -189,19 +188,19 @@ public class BoardComponentUI extends JPanel {
     private synchronized void resetBackgroundTiles() {
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {
-                getComponentUI(ChessManager.instance().currentBoard().squares()[x][y].tile()).resetColor();
+                getComponentUI(GameManager.instance().currentBoard().squares()[x][y].tile()).resetColor();
             }
         }
 
-        this.printPreviousMove(ChessManager.instance().chess().actualMove());
+        this.printPreviousMove(GameManager.instance().chess().actualMove());
     }
 
 
     private synchronized void printPreviousMove(MoveCommand move) {
 
         // Reset background previous move
-        if (ChessManager.instance().chess().actualMove() != null) {
-            MoveCommand actualMove = ChessManager.instance().chess().actualMove();
+        if (GameManager.instance().chess().actualMove() != null) {
+            MoveCommand actualMove = GameManager.instance().chess().actualMove();
 
             getComponentUI(actualMove.startPosition()).resetColor();
             getComponentUI(actualMove.endPosition()).resetColor();
@@ -218,7 +217,7 @@ public class BoardComponentUI extends JPanel {
     }
 
     private synchronized void printPieces() {
-        Square[][] squares = ChessManager.instance().currentBoard().squares();
+        Square[][] squares = GameManager.instance().currentBoard().squares();
 
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x <= 7; x++) {

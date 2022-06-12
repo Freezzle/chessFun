@@ -2,7 +2,6 @@ package ch.claudedy.chess.ui.listener;
 
 import ch.claudedy.chess.model.MoveCommand;
 import ch.claudedy.chess.network.command.client.MoveClientCommand;
-import ch.claudedy.chess.ui.manager.ChessManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
 import ch.claudedy.chess.ui.screen.ChessScreen;
@@ -22,11 +21,11 @@ public class MoveDoneListener {
             NetworkManager.instance().client().send(new MoveClientCommand().move(move));
         }
 
-        if (ChessManager.instance().chess().gameStatus().isGameOver()) {
+        if (GameManager.instance().chess().gameStatus().isGameOver()) {
             return;
         }
 
-        if (this.chessScreen.playerWhite().isComputer() && ChessManager.instance().isWhiteTurn() || this.chessScreen.playerBlack().isComputer() && !ChessManager.instance().isWhiteTurn()) {
+        if (this.chessScreen.playerWhite().isComputer() && GameManager.instance().isWhiteTurn() || this.chessScreen.playerBlack().isComputer() && !GameManager.instance().isWhiteTurn()) {
             this.chessScreen.launchComputerMove();
         }
     }

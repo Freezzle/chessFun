@@ -37,7 +37,7 @@ public class AIManager {
     }
 
     public static MoveCommand getMove() {
-        return MoveCommand.convert(instance.stockFish().getBestMove(FenConverter.boardToFen(ChessManager.instance().currentBoard()), SystemSettings.MOVETIME_STOCKFISH));
+        return MoveCommand.convert(instance.stockFish().getBestMove(FenConverter.boardToFen(GameManager.instance().currentBoard()), SystemSettings.MOVETIME_STOCKFISH));
     }
 
     public boolean isComputerThinking() {

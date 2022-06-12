@@ -1,6 +1,9 @@
 package ch.claudedy.chess.ui.manager;
 
+import ch.claudedy.chess.model.Board;
+import ch.claudedy.chess.model.Chess;
 import ch.claudedy.chess.system.GameType;
+import ch.claudedy.chess.system.LoaderFromFile;
 import ch.claudedy.chess.system.SystemSettings;
 import ch.claudedy.chess.ui.screen.model.InfoPlayer;
 import lombok.Getter;
@@ -30,9 +33,12 @@ public class GameManager {
 
     @Getter
     @Setter
-    private InfoPlayer player = new InfoPlayer().name("Name").isComputer(false);
+    private InfoPlayer player = new InfoPlayer().name("Dylan Claude").isComputer(false);
 
     private boolean gameStarted = false;
+
+    @Getter
+    private Chess chess;
 
     private GameManager() {
     }
@@ -51,5 +57,23 @@ public class GameManager {
 
     public boolean hasGameStarted() {
         return instance.gameStarted;
+    }
+
+    public Board currentBoard() {
+        if (chess == null) {
+            startNewGame();
+        }
+        return chess.currentBoard();
+    }
+
+    public boolean isWhiteTurn() {
+        if (chess == null) {
+            startNewGame();
+        }
+        return chess.currentBoard().isWhiteTurn();
+    }
+
+    public void startNewGame() {
+        chess = LoaderFromFile.readFile(SystemSettings.BOARD);
     }
 }

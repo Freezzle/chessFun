@@ -48,7 +48,7 @@ public class ChooseTypeGameScreen extends JPanel {
 
 
         // Button Local Game
-        onlinePlay = new JButton("Online Game");
+        onlinePlay = new JButton("Online Game (Server offline)");
         onlinePlay.setPreferredSize(new Dimension(600, 30));
         onlinePlay.setBackground(Color.DARK_GRAY);
         onlinePlay.setForeground(Color.WHITE);
@@ -75,6 +75,7 @@ public class ChooseTypeGameScreen extends JPanel {
                         Thread.sleep(500);
                         NetworkManager.instance().startConnection();
                         onlinePlay.setEnabled(true);
+                        onlinePlay.setText("Online Game");
                         break;
                     } catch (Exception e) {
                     }
