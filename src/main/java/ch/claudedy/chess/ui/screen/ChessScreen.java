@@ -1,6 +1,5 @@
 package ch.claudedy.chess.ui.screen;
 
-import ch.claudedy.chess.model.Board;
 import ch.claudedy.chess.model.Color;
 import ch.claudedy.chess.model.MoveCommand;
 import ch.claudedy.chess.system.GameType;
@@ -11,9 +10,8 @@ import ch.claudedy.chess.ui.manager.ChessManager;
 import ch.claudedy.chess.ui.manager.GameManager;
 import ch.claudedy.chess.ui.manager.NetworkManager;
 import ch.claudedy.chess.ui.screen.component.BoardComponentUI;
+import ch.claudedy.chess.ui.screen.component.InfoPlayerComponentUI;
 import ch.claudedy.chess.ui.screen.model.InfoPlayer;
-import ch.claudedy.chess.ui.screen.util.UIComponentFactory;
-import ch.claudedy.chess.util.Calculator;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
@@ -26,8 +24,8 @@ public class ChessScreen extends JPanel {
     // UI Child
     @Getter
     private BoardComponentUI boardUI;
-    private JPanel informationWhiteArea;
-    private JPanel informationBlackArea;
+    private InfoPlayerComponentUI informationWhiteArea;
+    private InfoPlayerComponentUI informationBlackArea;
     @Getter
     private InfoPlayer playerWhite;
     @Getter
@@ -112,7 +110,7 @@ public class ChessScreen extends JPanel {
 
         // View from white SIDE
         if ((!GameManager.instance().modeOnline() && !playerWhite.isComputer()) || (playerWhite.isComputer() && playerBlack.isComputer()) || (GameManager.instance().modeOnline() && NetworkManager.instance().infoPlayer().color().isWhite())) {
-            informationBlackArea = UIComponentFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
+            informationBlackArea = new InfoPlayerComponentUI(playerBlack);
             add(informationBlackArea);
 
             boardUI = new BoardComponentUI(true);
@@ -120,11 +118,11 @@ public class ChessScreen extends JPanel {
             boardUI.addMoveFailedListener(new MoveFailedListener(this));
             add(boardUI);
 
-            informationWhiteArea = UIComponentFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
+            informationWhiteArea = new InfoPlayerComponentUI(playerWhite);
             add(informationWhiteArea);
         } else {
             // View from black SIDE
-            informationWhiteArea = UIComponentFactory.createPanel("INFORMATION_WHITE", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 0, 600, 50));
+            informationWhiteArea = new InfoPlayerComponentUI(playerWhite);
             add(informationWhiteArea);
 
             boardUI = new BoardComponentUI(false);
@@ -132,32 +130,16 @@ public class ChessScreen extends JPanel {
             boardUI.addMoveFailedListener(new MoveFailedListener(this));
             add(boardUI);
 
-            informationBlackArea = UIComponentFactory.createPanel("INFORMATION_BLACK", new GridLayout(2, 1), new Dimension(600, 50), new Rectangle(0, 650, 600, 50));
+            informationBlackArea = new InfoPlayerComponentUI(playerBlack);
             add(informationBlackArea);
         }
     }
 
-    private void updateInformationArea() {
-        if (informationWhiteArea.getComponentCount() != 0) {
-            informationWhiteArea.removeAll();
-        }
-        if (informationBlackArea.getComponentCount() != 0) {
-            informationBlackArea.removeAll();
-        }
 
-        Board currentBoard = ChessManager.instance().currentBoard();
-
-        UIComponentFactory.createTextField(informationWhiteArea, "WHITE_PLAYER", playerWhite.name() + (currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.WHITE, java.awt.Color.BLACK);
-        UIComponentFactory.createTextField(informationWhiteArea, "ENNEMY_BLACK_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.BLACK), java.awt.Color.WHITE, java.awt.Color.BLACK);
-        informationWhiteArea.doLayout();
-
-        UIComponentFactory.createTextField(informationBlackArea, "BLACK_PLAYER", playerBlack.name() + (!currentBoard.isWhiteTurn() ? " - your turn" : ""), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
-        UIComponentFactory.createTextField(informationBlackArea, "ENNEMY_WHITE_PIECES_REMOVED", Calculator.giveRemovedPieces(currentBoard, Color.WHITE), java.awt.Color.DARK_GRAY, java.awt.Color.WHITE);
-        informationBlackArea.doLayout();
-    }
 
     public void reset() {
-        this.updateInformationArea();
+        informationWhiteArea.updateInfoPlayer();
+        informationBlackArea.updateInfoPlayer();
         boardUI.resetBoard();
     }
 }

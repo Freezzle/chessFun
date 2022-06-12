@@ -11,12 +11,16 @@ public class GameChoosenListener {
         this.main = main;
     }
 
-    public void onGameChoosenListener() {
+    public void onGameLocalChoosenListener() {
+        this.main.startChoosingLocalGame();
+    }
+
+    public void launchGameListener() {
         if (GameManager.instance().modeOnline()) {
-            this.main.printWaitingPlayer();
-            this.main.initGameOnline();
+            this.main.startWaitingGameOnline();
+            this.main.startGameOnline();
         } else {
-            this.main.initGameLocal();
+            this.main.startGameLocal();
         }
     }
 }

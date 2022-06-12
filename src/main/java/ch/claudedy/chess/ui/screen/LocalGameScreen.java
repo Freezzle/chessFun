@@ -2,7 +2,6 @@ package ch.claudedy.chess.ui.screen;
 
 import ch.claudedy.chess.ui.listener.GameChoosenListener;
 import ch.claudedy.chess.ui.manager.GameManager;
-import ch.claudedy.chess.ui.manager.NetworkManager;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;
@@ -15,22 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Accessors(fluent = true)
-public class ChooseGameScreen extends JPanel {
+public class LocalGameScreen extends JPanel {
 
     List<GameChoosenListener> listeners = new ArrayList<>();
 
-    JButton onlinePlay;
-
-    public ChooseGameScreen() {
+    public LocalGameScreen() {
         setName("CHOOSE");
         setPreferredSize(new Dimension(600, 700));
         setBounds(new Rectangle(0, 0, 600, 700));
 
-        JTextField name = new JTextField(GameManager.instance().player().name());
-        name.setName("NAME");
-        name.setPreferredSize(new Dimension(100, 25));
-        add(name);
-
+        // Player White
         JList<String> playerOneList = new JList<>(getListData(true));
         playerOneList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         playerOneList.setSelectedIndex(0);
@@ -42,6 +35,7 @@ public class ChooseGameScreen extends JPanel {
         });
         add(playerOneList);
 
+        // Player Black
         JList<String> playerTwoList = new JList<>(getListData(false));
         playerTwoList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         playerTwoList.setSelectedIndex(0);
@@ -53,47 +47,17 @@ public class ChooseGameScreen extends JPanel {
         });
         add(playerTwoList);
 
+
+        // Button to start the game
         JButton start = new JButton("Start the game");
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 GameManager.instance().modeOnline(false);
-                GameManager.instance().player().name(name.getText());
-                listeners.forEach(listener -> listener.onGameChoosenListener());
+                listeners.forEach(listener -> listener.launchGameListener());
             }
         });
         add(start);
-
-        onlinePlay = new JButton("Start online");
-        onlinePlay.setEnabled(false);
-        onlinePlay.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                GameManager.instance().modeOnline(true);
-                GameManager.instance().player().name(name.getText());
-                listeners.forEach(listener -> listener.onGameChoosenListener());
-            }
-        });
-        add(onlinePlay);
-
-        checkForServer();
-    }
-
-    private void checkForServer() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(500);
-                        NetworkManager.instance().startConnection();
-                        onlinePlay.setEnabled(true);
-                        break;
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        }).start();
     }
 
     private String[] getListData(boolean isPlayerOne) {
