@@ -1,4 +1,4 @@
-package ch.claudedy.chess.model;
+package ch.claudedy.chess.model.enumeration;
 
 import lombok.Getter;
 import lombok.experimental.Accessors;

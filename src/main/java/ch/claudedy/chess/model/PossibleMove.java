@@ -1,5 +1,7 @@
 package ch.claudedy.chess.model;
 
+import ch.claudedy.chess.model.enumeration.MoveType;
+import ch.claudedy.chess.model.enumeration.Tile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.Accessors;

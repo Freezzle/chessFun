@@ -2,7 +2,7 @@ package ch.claudedy.chess;
 
 import ch.claudedy.chess.model.Chess;
 import ch.claudedy.chess.model.MoveCommand;
-import ch.claudedy.chess.model.MoveStatus;
+import ch.claudedy.chess.model.enumeration.MoveStatus;
 import ch.claudedy.chess.system.ConsolePrint;
 
 import java.io.BufferedReader;

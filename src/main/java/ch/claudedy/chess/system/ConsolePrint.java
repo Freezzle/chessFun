@@ -1,6 +1,10 @@
 package ch.claudedy.chess.system;
 
-import ch.claudedy.chess.model.*;
+import ch.claudedy.chess.model.Chess;
+import ch.claudedy.chess.model.Piece;
+import ch.claudedy.chess.model.Square;
+import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.Tile;
 import ch.claudedy.chess.util.Calculator;
 import ch.claudedy.chess.util.FenConverter;
 

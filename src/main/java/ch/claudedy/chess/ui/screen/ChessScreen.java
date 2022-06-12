@@ -1,7 +1,7 @@
 package ch.claudedy.chess.ui.screen;
 
-import ch.claudedy.chess.model.Color;
 import ch.claudedy.chess.model.MoveCommand;
+import ch.claudedy.chess.model.enumeration.Color;
 import ch.claudedy.chess.system.GameType;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;

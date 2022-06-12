@@ -1,5 +1,6 @@
 package ch.claudedy.chess.model;
 
+import ch.claudedy.chess.model.enumeration.Tile;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 

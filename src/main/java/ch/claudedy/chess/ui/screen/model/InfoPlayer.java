@@ -1,6 +1,6 @@
 package ch.claudedy.chess.ui.screen.model;
 
-import ch.claudedy.chess.model.Color;
+import ch.claudedy.chess.model.enumeration.Color;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

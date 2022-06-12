@@ -1,9 +1,9 @@
 package ch.claudedy.chess.util;
 
 import ch.claudedy.chess.model.Board;
-import ch.claudedy.chess.model.Color;
 import ch.claudedy.chess.model.Square;
-import ch.claudedy.chess.model.Tile;
+import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.Tile;
 import lombok.Getter;
 import lombok.Setter;
 

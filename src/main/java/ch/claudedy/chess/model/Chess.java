@@ -1,5 +1,6 @@
 package ch.claudedy.chess.model;
 
+import ch.claudedy.chess.model.enumeration.*;
 import ch.claudedy.chess.system.ConsolePrint;
 import ch.claudedy.chess.system.SystemSettings;
 import ch.claudedy.chess.util.FenConverter;

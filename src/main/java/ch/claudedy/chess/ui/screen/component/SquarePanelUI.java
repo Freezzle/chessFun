@@ -1,8 +1,8 @@
 package ch.claudedy.chess.ui.screen.component;
 
-import ch.claudedy.chess.model.Color;
 import ch.claudedy.chess.model.Piece;
-import ch.claudedy.chess.model.Tile;
+import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.Tile;
 import lombok.experimental.Accessors;
 
 import javax.swing.*;

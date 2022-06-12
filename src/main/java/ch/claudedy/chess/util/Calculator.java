@@ -1,9 +1,9 @@
 package ch.claudedy.chess.util;
 
 import ch.claudedy.chess.model.Board;
-import ch.claudedy.chess.model.Color;
 import ch.claudedy.chess.model.Piece;
-import ch.claudedy.chess.model.PieceType;
+import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.PieceType;
 
 import java.util.ArrayList;
 import java.util.Arrays;

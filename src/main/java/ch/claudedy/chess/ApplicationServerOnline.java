@@ -1,6 +1,6 @@
 package ch.claudedy.chess;
 
-import ch.claudedy.chess.model.Color;
+import ch.claudedy.chess.model.enumeration.Color;
 import ch.claudedy.chess.network.command.client.DisconnectClientCommand;
 import ch.claudedy.chess.network.command.client.MoveClientCommand;
 import ch.claudedy.chess.network.command.client.SearchingGameCommand;

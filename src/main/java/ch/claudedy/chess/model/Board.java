@@ -1,5 +1,8 @@
 package ch.claudedy.chess.model;
 
+import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.PieceType;
+import ch.claudedy.chess.model.enumeration.Tile;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

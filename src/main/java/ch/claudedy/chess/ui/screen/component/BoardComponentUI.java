@@ -1,7 +1,13 @@
 package ch.claudedy.chess.ui.screen.component;
 
-import ch.claudedy.chess.model.Color;
-import ch.claudedy.chess.model.*;
+import ch.claudedy.chess.model.Board;
+import ch.claudedy.chess.model.MoveCommand;
+import ch.claudedy.chess.model.PossibleMove;
+import ch.claudedy.chess.model.Square;
+import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.MoveStatus;
+import ch.claudedy.chess.model.enumeration.MoveType;
+import ch.claudedy.chess.model.enumeration.Tile;
 import ch.claudedy.chess.ui.listener.MoveDoneListener;
 import ch.claudedy.chess.ui.listener.MoveFailedListener;
 import ch.claudedy.chess.ui.manager.AIManager;
