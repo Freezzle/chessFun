@@ -158,14 +158,14 @@ public class ChessScreen extends JPanel {
                     dialog.setVisible(false);
                 } catch (InterruptedException e) {
                 } finally {
-                    listeners.forEach(listener -> listener.onGameEndedListener());
+                    listeners.forEach(GameEndedListener::onGameEndedListener);
                 }
             }
         }).start();
     }
 
     public void actionOpponentDisconnected() {
-        final Long counter = 5l;
+        final Long counter = 5L;
         DialogInformation dialog = new DialogInformation("Opponent has disconnected", counter);
         dialog.setVisible(true);
         new Thread(new Runnable() {
@@ -181,7 +181,7 @@ public class ChessScreen extends JPanel {
                     dialog.setVisible(false);
                 } catch (InterruptedException e) {
                 } finally {
-                    listeners.forEach(listener -> listener.onGameEndedListener());
+                    listeners.forEach(GameEndedListener::onGameEndedListener);
                 }
             }
         }).start();

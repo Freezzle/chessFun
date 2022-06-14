@@ -82,13 +82,13 @@ public class Piece implements Comparable<Piece>, Serializable {
         // STANDARD
         int changer1StepMove = isWhitePiece() ? 1 : -1;
         if (y + (changer1StepMove) > 0 && y + (changer1StepMove) < 7 && board.getSquare(x, y + (changer1StepMove)).piece() == null) {
-            moves.add(new PossibleMove(Tile.getEnum(x, y + changer1StepMove), MoveType.MOVE));
+            moves.add(new PossibleMove(Tile.getEnum(x, y + changer1StepMove), MoveType.PAWN_MOVE));
 
             int changer2StepMove = isWhitePiece() ? 2 : -2;
             if (this.color == Color.WHITE && board.getSquare(x, 1) == board.getSquare(x, y) || this.color == Color.BLACK && board.getSquare(x, 6) == board.getSquare(x, y)) {
                 // BIG MOVE FOR FIRST TIME
                 if (board.getSquare(x, y + (changer2StepMove)).piece() == null) {
-                    moves.add(new PossibleMove(Tile.getEnum(x, y + changer2StepMove), MoveType.MOVE));
+                    moves.add(new PossibleMove(Tile.getEnum(x, y + changer2StepMove), MoveType.PAWN_MOVE));
                 }
             }
         }
@@ -99,13 +99,21 @@ public class Piece implements Comparable<Piece>, Serializable {
             Square square = board.getSquare(x + 1, y + changerAttack);
 
             Piece piece = square.piece();
-            if (piece == null && board.enPassant() == square.tile()) {
-                moves.add(new PossibleMove(square.tile(), MoveType.EN_PASSANT));
-            } else if (piece != null && piece.color != this.color) {
-                if (piece.type == PieceType.KING) {
-                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT_ENEMY_KING));
+            if (piece == null) {
+                if (board.enPassant() == square.tile()) {
+                    moves.add(new PossibleMove(square.tile(), MoveType.EN_PASSANT));
                 } else {
-                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT));
+                    moves.add(new PossibleMove(square.tile(), MoveType.ONLY_THREAT));
+                }
+            } else {
+                if (piece.color != this.color) {
+                    if (piece.type == PieceType.KING) {
+                        moves.add(new PossibleMove(square.tile(), MoveType.THREAT_ENEMY_KING));
+                    } else {
+                        moves.add(new PossibleMove(square.tile(), MoveType.MOVE_WITH_CAPTURING));
+                    }
+                } else {
+                    moves.add(new PossibleMove(square.tile(), MoveType.ALLY_PROTECTION));
                 }
             }
         }
@@ -115,13 +123,21 @@ public class Piece implements Comparable<Piece>, Serializable {
             Square square = board.getSquare(x - 1, y + changerAttack);
             Piece piece = square.piece();
 
-            if (piece == null && board.enPassant() == square.tile()) {
-                moves.add(new PossibleMove(square.tile(), MoveType.EN_PASSANT));
-            } else if (piece != null && piece.color != this.color) {
-                if (piece.type == PieceType.KING) {
-                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT_ENEMY_KING));
+            if (piece == null) {
+                if (board.enPassant() == square.tile()) {
+                    moves.add(new PossibleMove(square.tile(), MoveType.EN_PASSANT));
                 } else {
-                    moves.add(new PossibleMove(square.tile(), MoveType.THREAT));
+                    moves.add(new PossibleMove(square.tile(), MoveType.ONLY_THREAT));
+                }
+            } else {
+                if (piece.color != this.color) {
+                    if (piece.type == PieceType.KING) {
+                        moves.add(new PossibleMove(square.tile(), MoveType.THREAT_ENEMY_KING));
+                    } else {
+                        moves.add(new PossibleMove(square.tile(), MoveType.MOVE_WITH_CAPTURING));
+                    }
+                } else {
+                    moves.add(new PossibleMove(square.tile(), MoveType.ALLY_PROTECTION));
                 }
             }
         }
@@ -231,7 +247,7 @@ public class Piece implements Comparable<Piece>, Serializable {
             // RIGHT
             for (int i = x + 1; i <= 7; i++) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[i][y]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -241,7 +257,7 @@ public class Piece implements Comparable<Piece>, Serializable {
             // LEFT
             for (int i = x - 1; i >= 0; i--) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[i][y]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -251,7 +267,7 @@ public class Piece implements Comparable<Piece>, Serializable {
             // UP
             for (int i = y + 1; i <= 7; i++) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x][i]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -261,7 +277,7 @@ public class Piece implements Comparable<Piece>, Serializable {
             // DOWN
             for (int i = y - 1; i >= 0; i--) {
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x][i]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -279,7 +295,7 @@ public class Piece implements Comparable<Piece>, Serializable {
                 }
 
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y + i]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -293,7 +309,7 @@ public class Piece implements Comparable<Piece>, Serializable {
                 }
 
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y - i]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -307,7 +323,7 @@ public class Piece implements Comparable<Piece>, Serializable {
                 }
 
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x + i][y - i]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -321,7 +337,7 @@ public class Piece implements Comparable<Piece>, Serializable {
                 }
 
                 MoveType moveTypeAdded = addMoveIfNecessary(moves, sourceSquare, squares[x - i][y + i]);
-                if (mustStop(moveTypeAdded)) {
+                if (!mustContinueCycleMove(moveTypeAdded)) {
                     break;
                 }
             }
@@ -339,11 +355,13 @@ public class Piece implements Comparable<Piece>, Serializable {
         PossibleMove possibleMove;
 
         if (destPiece == null) {
-            possibleMove = new PossibleMove(to.tile(), MoveType.MOVE);
+            possibleMove = new PossibleMove(to.tile(), MoveType.MOVE_WITHOUT_CAPTURING);
         } else if (destPiece.color() != sourcePiece.color() && !(destPiece.type == PieceType.KING)) {
-            possibleMove = new PossibleMove(to.tile(), MoveType.THREAT);
+            possibleMove = new PossibleMove(to.tile(), MoveType.MOVE_WITH_CAPTURING);
         } else if (destPiece.color() != sourcePiece.color() && destPiece.type == PieceType.KING) {
             possibleMove = new PossibleMove(to.tile(), MoveType.THREAT_ENEMY_KING);
+        } else if (destPiece.color() == sourcePiece.color()) {
+            possibleMove = new PossibleMove(to.tile(), MoveType.ALLY_PROTECTION);
         } else {
             possibleMove = null;
         }
@@ -356,8 +374,8 @@ public class Piece implements Comparable<Piece>, Serializable {
         return null;
     }
 
-    public boolean mustStop(MoveType moveTypeAdded) {
-        return moveTypeAdded == null || moveTypeAdded == MoveType.THREAT || moveTypeAdded == MoveType.THREAT_ENEMY_KING;
+    public boolean mustContinueCycleMove(MoveType moveTypeAdded) {
+        return moveTypeAdded != null && moveTypeAdded == MoveType.MOVE_WITHOUT_CAPTURING;
     }
 
     @Override

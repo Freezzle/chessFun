@@ -1,6 +1,7 @@
 package ch.claudedy.chess.model;
 
 import ch.claudedy.chess.model.enumeration.Color;
+import ch.claudedy.chess.model.enumeration.MoveType;
 import ch.claudedy.chess.model.enumeration.PieceType;
 import ch.claudedy.chess.model.enumeration.Tile;
 import lombok.EqualsAndHashCode;
@@ -272,7 +273,11 @@ public class Board implements Serializable {
                 Piece piece = squares[x][y].piece();
                 if (piece != null && piece.color() != allyColor) {
                     List<PossibleMove> threatens = piece.getMoves(this, squares[x][y].tile());
-                    if (threatens.stream().anyMatch(threat -> threat.destination() == tileToCheck)) {
+                    if (threatens.stream().filter(threat -> threat.type() == MoveType.MOVE_WITHOUT_CAPTURING
+                            || threat.type() == MoveType.MOVE_WITH_CAPTURING
+                            || threat.type() == MoveType.ONLY_THREAT
+                            || threat.type() == MoveType.THREAT_ENEMY_KING)
+                            .anyMatch(threat -> threat.destination() == tileToCheck)) {
                         isTileChecked = true;
                         break;
                     }

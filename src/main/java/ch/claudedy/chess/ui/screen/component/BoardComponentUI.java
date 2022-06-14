@@ -63,6 +63,9 @@ public class BoardComponentUI extends JPanel {
                         // If the click was on a empty tile (cause piece is a JLabel)
                         if (tileClicked instanceof JPanel) {
                             resetBackgroundTiles();
+                            showKingChecked();
+                            colorizePieceWithoutProtection();
+                            printPreviousMove(GameManager.instance().chess().actualMove());
                             return;
                         }
 
@@ -128,6 +131,8 @@ public class BoardComponentUI extends JPanel {
                         selectedPieceTile = null;
                         resetBackgroundTiles();
                         showKingChecked();
+                        colorizePieceWithoutProtection();
+                        printPreviousMove(GameManager.instance().chess().actualMove());
                     }
                 }
             }
@@ -165,6 +170,19 @@ public class BoardComponentUI extends JPanel {
         }
     }
 
+    public void colorizePieceWithoutProtection() {
+//        List<Tile> whitePiecesWithoutProtection = GameManager.instance().chess().getPieceWithoutProtection(Color.WHITE);
+//        List<Tile> blackPiecesWithoutProtection = GameManager.instance().chess().getPieceWithoutProtection(Color.BLACK);
+//
+//        whitePiecesWithoutProtection.forEach(tile -> {
+//            getComponentUI(tile).changeBackground(new java.awt.Color(165, 245, 169, 191));
+//        });
+//
+//        blackPiecesWithoutProtection.forEach(tile -> {
+//            getComponentUI(tile).changeBackground(new java.awt.Color(187, 255, 175, 191));
+//        });
+    }
+
     public void makeMoveUI(Tile start, Tile destination, Character promote, boolean fromLocalCommand) {
         if (GameManager.instance().modeOnline() && fromLocalCommand && !GameManager.instance().currentBoard().currentPlayer().isSameColor(NetworkManager.instance().infoPlayer().color())) {
             moveFailedListeners.forEach(listener -> listener.onMoveFailedListener(MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE));
@@ -186,6 +204,8 @@ public class BoardComponentUI extends JPanel {
         resetBackgroundTiles();
         printPieces();
         showKingChecked();
+        colorizePieceWithoutProtection();
+        printPreviousMove(GameManager.instance().chess().actualMove());
 
         repaint();
     }
@@ -229,8 +249,6 @@ public class BoardComponentUI extends JPanel {
                 getComponentUI(GameManager.instance().currentBoard().getSquare(x, y).tile()).resetColor();
             }
         }
-
-        this.printPreviousMove(GameManager.instance().chess().actualMove());
     }
 
 
@@ -279,7 +297,7 @@ public class BoardComponentUI extends JPanel {
 
             java.awt.Color colorTile;
 
-            if (move.type() == MoveType.THREAT || move.type() == MoveType.EN_PASSANT) {
+            if (move.type() == MoveType.MOVE_WITH_CAPTURING || move.type() == MoveType.EN_PASSANT) {
                 colorTile = destination.isWhiteTile() ? THREATED_WHITE_SQUARE : THREATED_BLACK_SQUARE;
             } else {
                 colorTile = destination.isWhiteTile() ? LEGAL_MOVE_WHITE_SQUARE : LEGAL_MOVE_BLACK_SQUARE;

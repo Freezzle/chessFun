@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -157,6 +158,12 @@ public class Chess implements Serializable {
         // Remove all move to go on the enemy king (can't eat him)
         moves = moves.stream().filter(move -> move.type() != MoveType.THREAT_ENEMY_KING).collect(Collectors.toList());
 
+        // Remove all move that protect our ally pieces
+        moves = moves.stream().filter(move -> move.type() != MoveType.ALLY_PROTECTION).collect(Collectors.toList());
+
+        // Remove all only threat cause it's not a move, just a threat
+        moves = moves.stream().filter(move -> move.type() != MoveType.ONLY_THREAT).collect(Collectors.toList());
+
         // Remove all possibilites to castle when the piece is the king and is checked
         if (piece.type() == PieceType.KING && currentBoard.isKingChecked(piece.color())) {
             moves = moves.stream().filter(move -> move.type() != MoveType.CASTLE).collect(Collectors.toList());
@@ -174,6 +181,29 @@ public class Chess implements Serializable {
         }
 
         return legals;
+    }
+
+    public List<Tile> getPieceWithoutProtection(Color colorPiece) {
+
+        List<Square> squareAlivePieces = currentBoard.getSquaresAlivePieces(colorPiece);
+
+
+        List<Tile> allAllyProtectionPossiblesMoves = squareAlivePieces.stream()
+                .map(squareAllyPiece -> squareAllyPiece.piece().getMoves(this.currentBoard, squareAllyPiece.tile()))
+                .flatMap(Collection::stream)
+                .filter(possibleMove -> possibleMove.type() == MoveType.ALLY_PROTECTION)
+                .map(PossibleMove::destination)
+                .collect(Collectors.toList());
+
+        List<Tile> tileWithoutProtection = new ArrayList<>();
+        squareAlivePieces.forEach(square -> {
+
+            if (!allAllyProtectionPossiblesMoves.contains(square.tile())) {
+                tileWithoutProtection.add(square.tile());
+            }
+        });
+
+        return tileWithoutProtection;
     }
 
     private MoveStatus isThatMoveLegal(MoveCommand move) {
