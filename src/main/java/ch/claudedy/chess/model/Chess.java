@@ -31,111 +31,74 @@ public class Chess implements Serializable {
     }
 
     public MoveStatus makeMove(MoveCommand move) {
-        if (this.gameStatus.isGameExecuting()) {
-            return MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE;
+        if (this.gameStatus.isGameExecuting()) return MoveStatus.CANT_MOVE_DURING_ANOTHER_MOVE;
+        if (this.gameStatus.isGameOver()) return MoveStatus.GAME_ALREADY_OVER;
+
+        this.gameStatus = GameStatus.EXECUTING; // Change the status to notify we are executing the new move
+
+        var statusMove = this.isThatMoveLegal(move); // Check if the move is authorized
+
+        if (!statusMove.isOk()) {
+            this.setStatusWaitingNextMove();
+            return statusMove;
         }
 
-        if (this.gameStatus.isGameOver()) {
-            return MoveStatus.GAME_ALREADY_OVER;
-        }
+        this.addAHistoricBoard(); // Create a copy of the current board before to make action on it
 
-        // Change the status to notify we are executing the new move
-        this.gameStatus = GameStatus.EXECUTING;
+        this.actualMove = move;
 
-        // Check if the move is authorized
-        MoveStatus statusMoveDone = this.isThatMoveLegal(move);
+        this.currentBoard.movePiece(move.startPosition(), move.endPosition(), move.promote());
+        this.currentBoard.switchPlayer(); // Switch the player
 
-        if (statusMoveDone.isOk()) {
-            // Create a copy of the board before to make action
-            this.historicalBoards.add(new HistoricalBoardFen().fen(FenConverter.boardToFen(this.currentBoard)).previousMove(this.actualMove));
+        this.updateGameStatus();
 
-            // The move action become the actual move
-            this.actualMove = move;
+        if (!this.gameStatus.isGameOver()) this.setStatusWaitingNextMove();
 
-            // Move the piece
-            this.currentBoard.movePiece(move.startPosition(), move.endPosition(), move.promote());
+        if (SystemSettings.PRINT_CONSOLE) ConsolePrint.execute(this); // DEV MODE to see a board in the console
 
-            // Switch the player
-            this.currentBoard.switchPlayer();
-
-            // Check if the enemy king is checkmated, etc..
-            this.synchroGameStatus();
-
-            if (!this.gameStatus.isGameOver()) {
-                this.gameStatus = GameStatus.WAITING_MOVE;
-            }
-
-            if (SystemSettings.PRINT_CONSOLE) {
-                ConsolePrint.execute(this);
-            }
-        } else {
-            this.gameStatus = GameStatus.WAITING_MOVE;
-        }
-
-        return statusMoveDone;
+        return statusMove;
     }
 
-    private void synchroGameStatus() {
+    private void setStatusWaitingNextMove() {
+        this.gameStatus = GameStatus.WAITING_MOVE;
+    }
+
+    private void addAHistoricBoard() {
+        this.historicalBoards.add(new HistoricalBoardFen().fen(FenConverter.boardToFen(this.currentBoard)).previousMove(this.actualMove));
+    }
+
+    private void updateGameStatus() {
 
         if (this.currentBoard.fiftyRules() == 50) {
-            gameStatus = GameStatus.RULES_50;
+            this.gameStatus = GameStatus.RULES_50;
             return;
         }
 
         // Threefold repetition rule
-        HistoricalBoardFen fenCurrentBoard = new HistoricalBoardFen().fen(FenConverter.boardToFen(this.currentBoard)).previousMove(this.actualMove);
-        int nbTimes = Collections.frequency(this.historicalBoards.stream().map(HistoricalBoardFen::onlyBoardFen).collect(Collectors.toList()), fenCurrentBoard.onlyBoardFen());
-        if (nbTimes >= 3) {
-            gameStatus = GameStatus.REPETITION_RULE;
+        if (nbTimesFenCurrentBoardHasBeenDoneBefore() >= 3) {
+            this.gameStatus = GameStatus.REPETITION_RULE;
             return;
         }
 
-        // King is checked
-        Tile tileKing = currentBoard.getTileKing(this.currentBoard.currentPlayer());
+        var tileKing = this.currentBoard.getTileKing(this.currentBoard.currentPlayer());
+        boolean kingCantMove = getLegalMoves(tileKing).isEmpty();
 
-        boolean cannotMove = getLegalMoves(tileKing).isEmpty();
-
-        if (cannotMove) {
-            // King can't move !
+        if (kingCantMove) {
             boolean kingChecked = currentBoard.isTileChecked(currentBoard.currentPlayer(), tileKing);
+            boolean aPieceCanMove = isAAllyPieceCanMove();
 
-            boolean aPieceCanMove = false;
-            for (int x = 0; x <= 7; x++) {
-                for (int y = 0; y <= 7; y++) {
-                    Piece piece = currentBoard.getSquare(x, y).piece();
-                    if (piece != null && piece.color() == this.currentBoard.currentPlayer()) {
-                        List<PossibleMove> legalMoves = this.getLegalMoves(currentBoard.getSquare(x, y).tile());
-                        if (!legalMoves.isEmpty()) {
-                            aPieceCanMove = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (!aPieceCanMove && kingChecked) {
-                gameStatus = GameStatus.CHECKMATED;
-            } else if (!aPieceCanMove && !kingChecked) {
-                gameStatus = GameStatus.STALEMATED;
-            }
+            if (!aPieceCanMove && kingChecked) gameStatus = GameStatus.CHECKMATED;
+            if (!aPieceCanMove && !kingChecked) gameStatus = GameStatus.STALEMATED;
         } else {
-            // King can move !
+            // Check for all situations that we are sure, we can't do any checkmates with remaining pieces
+            var allAlivePieces = getAllAlivePieces();
 
-            // IMPOSSIBLE CHECKMATE
-            List<Piece> allPieces = new ArrayList<>();
-            allPieces.addAll(currentBoard.getAlivePieces(Color.WHITE));
-            allPieces.addAll(currentBoard.getAlivePieces(Color.BLACK));
+            if (allAlivePieces.size() == 2) gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE; // KING vs KING
+            if (allAlivePieces.size() == 3 && (this.existThisPiece(allAlivePieces, PieceType.BISHOP) || this.existThisPiece(allAlivePieces, PieceType.KNIGHT)))
+                gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE; // KING + (BISHOP | KNIGHT) vs KING
 
-            if (allPieces.size() == 2) {
-                // king vs king
-                gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE;
-            } else if (allPieces.size() == 3) {
-                if (allPieces.stream().anyMatch(p -> p.type() == PieceType.BISHOP) || allPieces.stream().anyMatch(p -> p.type() == PieceType.KNIGHT)) {
-                    // king + bishop vs king || king + knight vs king
-                    gameStatus = GameStatus.IMPOSSIBILITY_CHECKMATE;
-                }
-            } else if (allPieces.size() == 4) {
-                List<Square> bishopsSquares = currentBoard.getAllPiecesSquares().stream().filter(s -> s.piece().type() == PieceType.BISHOP).collect(Collectors.toList());
+            if (allAlivePieces.size() == 4) {
+                List<Square> bishopsSquares = this.currentBoard.getAllPiecesSquares().stream().filter(s -> s.piece().type() == PieceType.BISHOP).collect(Collectors.toList());
 
                 if (bishopsSquares.size() == 2 && bishopsSquares.get(0).tile().color().isSameColor(bishopsSquares.get(1).tile().color())) {
                     // king + bishop vs king + bishop (bishop same color)
@@ -145,50 +108,82 @@ public class Chess implements Serializable {
         }
     }
 
+    private boolean existThisPiece(List<Piece> allPieces, PieceType piece) {
+        return allPieces.stream().anyMatch(p -> p.type() == piece);
+    }
+
+    private List<Piece> getAllAlivePieces() {
+        List<Piece> allPieces = new ArrayList<>();
+        allPieces.addAll(currentBoard.getAlivePieces(Color.WHITE));
+        allPieces.addAll(currentBoard.getAlivePieces(Color.BLACK));
+        return allPieces;
+    }
+
+    private boolean isAAllyPieceCanMove() {
+        boolean aPieceCanMove = false;
+        for (int x = 0; x <= 7; x++) {
+            for (int y = 0; y <= 7; y++) {
+                Piece piece = currentBoard.getSquare(x, y).piece();
+                if (piece == null || piece.color() != this.currentBoard.currentPlayer()) continue;
+
+                aPieceCanMove = !this.getLegalMoves(currentBoard.getSquare(x, y).tile()).isEmpty();
+
+                if (aPieceCanMove) break;
+            }
+            if (aPieceCanMove) break;
+        }
+
+        return aPieceCanMove;
+    }
+
+    private int nbTimesFenCurrentBoardHasBeenDoneBefore() {
+        var fen = FenConverter.boardToFen(this.currentBoard);
+        var actualMove = this.actualMove;
+        var fenCurrentBoard = new HistoricalBoardFen().fen(fen).previousMove(actualMove);
+
+        return Collections.frequency(this.historicalBoards.stream().map(HistoricalBoardFen::onlyBoardFen).collect(Collectors.toList()), fenCurrentBoard.onlyBoardFen());
+    }
+
     public List<PossibleMove> getLegalMoves(Tile start) {
         // Check if the start position contains a piece
-        Piece piece = currentBoard.getSquare(start).piece();
+        var piece = currentBoard.getSquare(start).piece();
         if (piece == null) {
             return new ArrayList<>();
         }
 
         // Get all the moves from the piece
-        List<PossibleMove> moves = piece.getMoves(this.currentBoard, start);
+        var moves = piece.getMoves(this.currentBoard, start);
 
-        // Remove all move to go on the enemy king (can't eat him)
-        moves = moves.stream().filter(move -> move.type() != MoveType.THREAT_ENEMY_KING).collect(Collectors.toList());
+        moves = moves.stream()
+                .filter(move -> move.type() != MoveType.THREAT_ENEMY_KING) // Remove all move to go on the enemy king (can't eat him)
+                .filter(move -> move.type() != MoveType.ALLY_PROTECTION) // Remove all move that protect our ally pieces
+                .filter(move -> move.type() != MoveType.ONLY_THREAT)// Remove all only threat cause it's not a move, just a threat
+                .collect(Collectors.toList());
 
-        // Remove all move that protect our ally pieces
-        moves = moves.stream().filter(move -> move.type() != MoveType.ALLY_PROTECTION).collect(Collectors.toList());
-
-        // Remove all only threat cause it's not a move, just a threat
-        moves = moves.stream().filter(move -> move.type() != MoveType.ONLY_THREAT).collect(Collectors.toList());
-
-        // Remove all possibilites to castle when the piece is the king and is checked
+        // Remove possibilities to castle when the piece is the king and is checked
         if (piece.type() == PieceType.KING && currentBoard.isKingChecked(piece.color())) {
             moves = moves.stream().filter(move -> move.type() != MoveType.CASTLE).collect(Collectors.toList());
         }
 
-        List<PossibleMove> legals = new ArrayList<>();
-        String fenBoardClone = FenConverter.boardToFen(this.currentBoard);
+        List<PossibleMove> legalMoves = new ArrayList<>();
+        var fen = FenConverter.boardToFen(this.currentBoard);
+
+        // Filter the moves to get only those who always make our king in safe mode
         for (PossibleMove currentMove : moves) {
-            // Filter the moves to get only those who always make our king in safe mode
-            Chess chessFake = new Chess(fenBoardClone, actualMove);
+            Chess chessFake = new Chess(fen, this.actualMove);
             chessFake.currentBoard().movePiece(start, currentMove.destination(), null);
-            if (!chessFake.currentBoard().isKingChecked(piece.color())) {
-                legals.add(currentMove);
-            }
+
+            boolean isOurKingChecked = chessFake.currentBoard().isKingChecked(piece.color());
+            if (!isOurKingChecked) legalMoves.add(currentMove);
         }
 
-        return legals;
+        return legalMoves;
     }
 
     public List<Tile> getPieceWithoutProtection(Color colorPiece) {
+        var squareAlivePieces = currentBoard.getSquaresAlivePieces(colorPiece);
 
-        List<Square> squareAlivePieces = currentBoard.getSquaresAlivePieces(colorPiece);
-
-
-        List<Tile> allAllyProtectionPossiblesMoves = squareAlivePieces.stream()
+        var allTilesByProtection = squareAlivePieces.stream()
                 .map(squareAllyPiece -> squareAllyPiece.piece().getMoves(this.currentBoard, squareAllyPiece.tile()))
                 .flatMap(Collection::stream)
                 .filter(possibleMove -> possibleMove.type() == MoveType.ALLY_PROTECTION)
@@ -196,59 +191,40 @@ public class Chess implements Serializable {
                 .collect(Collectors.toList());
 
         List<Tile> tileWithoutProtection = new ArrayList<>();
-        squareAlivePieces.forEach(square -> {
 
-            if (!allAllyProtectionPossiblesMoves.contains(square.tile())) {
-                tileWithoutProtection.add(square.tile());
-            }
+        squareAlivePieces.forEach(square -> {
+            if (!allTilesByProtection.contains(square.tile())) tileWithoutProtection.add(square.tile());
         });
 
         return tileWithoutProtection;
     }
 
     private MoveStatus isThatMoveLegal(MoveCommand move) {
-        if (move == null || move.startPosition() == null || move.endPosition() == null) {
+        if (move == null || move.startPosition() == null || move.endPosition() == null)
             return MoveStatus.BAD_MOVE_COMMAND;
-        }
 
-        Square startSquare = this.currentBoard.getSquare(move.startPosition());
+        var startSquare = this.currentBoard.getSquare(move.startPosition());
 
-        // Check if the start position contains a piece
-        if (startSquare.piece() == null) {
-            return MoveStatus.NO_PIECE_SELECTED;
-        }
+        if (startSquare.piece() == null)
+            return MoveStatus.NO_PIECE_SELECTED; // Check if the start position contains a piece
+        if (!this.currentBoard.currentPlayer().isSameColor(startSquare.piece().color()))
+            return MoveStatus.ENNEMY_PIECE_SELECTED; // Is it an ally piece ?
 
-        // Is it an ally piece ?
-        if (startSquare.piece().color() != this.currentBoard.currentPlayer()) {
-            return MoveStatus.ENNEMY_PIECE_SELECTED;
-        }
+        var endSquare = this.currentBoard.getSquare(move.endPosition());
 
-        Square endSquare = this.currentBoard.getSquare(move.endPosition());
+        if (endSquare.piece() != null && endSquare.piece().color() == this.currentBoard.currentPlayer())
+            return MoveStatus.PIECE_CANT_EAT_ALLY_PIECE; // Is that piece want to go on an ally piece square ?
+        if (endSquare.piece() != null && PieceType.KING == endSquare.piece().type() && endSquare.piece().color() != this.currentBoard.currentPlayer())
+            return MoveStatus.CANT_EAT_ENEMY_KING; // Is that piece want to go on the enemy king square ?
 
-        // Is that piece want to go on an ally piece square ?
-        if (endSquare.piece() != null && endSquare.piece().color() == this.currentBoard.currentPlayer()) {
-            return MoveStatus.PIECE_CANT_EAT_ALLY_PIECE;
-        }
-
-        // Is that piece want to go on the enemy king square ?
-        if (endSquare.piece() != null && PieceType.KING == endSquare.piece().type() && endSquare.piece().color() != this.currentBoard.currentPlayer()) {
-            return MoveStatus.CANT_EAT_ENEMY_KING;
-        }
-
-        // The possible moves doesnt contains the given move
-        List<PossibleMove> allMoves = getLegalMoves(startSquare.tile());
-        if (allMoves.stream().noneMatch(m -> m.destination() == endSquare.tile())) {
-            return MoveStatus.PIECE_ILLEGAL_MOVE;
-        }
+        var allMoves = getLegalMoves(startSquare.tile());
+        if (allMoves.stream().noneMatch(m -> m.destination() == endSquare.tile()))
+            return MoveStatus.PIECE_ILLEGAL_MOVE; // The possible moves doesnt contains the given move
 
         // Is our king is not checked when we move that piece ?
-        Chess chessFake = new Chess(FenConverter.boardToFen(currentBoard), actualMove);
+        var chessFake = new Chess(FenConverter.boardToFen(currentBoard), actualMove);
         chessFake.currentBoard.movePiece(move.startPosition(), move.endPosition(), move.promote());
-        boolean kingChecked = chessFake.currentBoard().isKingChecked(startSquare.piece().color());
-
-        if (kingChecked) {
-            return MoveStatus.PIECE_BLOCKED;
-        }
+        if (chessFake.currentBoard().isKingChecked(startSquare.piece().color())) return MoveStatus.PIECE_BLOCKED;
 
         return MoveStatus.OK;
     }

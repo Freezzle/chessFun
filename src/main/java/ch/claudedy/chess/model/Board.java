@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Accessors(fluent = true)
 @Getter
@@ -58,44 +59,45 @@ public class Board implements Serializable {
     }
 
     public void movePiece(Tile start, Tile end, Character promote) {
-        Square startSquare = this.squares[start.x()][start.y()];
-        Square endSquare = this.squares[end.x()][end.y()];
+        var startSquare = this.squares[start.x()][start.y()];
+        var endSquare = this.squares[end.x()][end.y()];
 
-        Piece pieceToMove = startSquare.piece();
+        var pieceToMove = startSquare.piece();
 
-        // Special cases
-        manageKingMove(end, pieceToMove);
-        manageRookMove(startSquare, pieceToMove);
-        managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
+        // Manage special moves cases
+        this.manageKingMove(end, pieceToMove);
+        this.manageRookMove(startSquare, pieceToMove);
+        this.managePawnMove(end, startSquare, endSquare, pieceToMove, promote);
 
-        // Increment a full move
-        if (!isWhiteTurn()) {
-            this.moves++;
-        }
+        if (!isWhiteTurn()) this.moves++; // Increment a full move
+
+        this.fiftyRules++;
 
         // Reset fifty rules if capturing a enemy piece OR moving a pawn
         if (endSquare.piece() != null && this.currentPlayer != endSquare.piece().color() || PieceType.PAWN == pieceToMove.type()) {
             this.fiftyRules = 0;
-        } else {
-            this.fiftyRules++;
         }
 
-        // Move the piece to the destination square
-        endSquare.placePiece(pieceToMove.letter());
-        // Remove the piece from the source square
-        startSquare.removePiece();
+        endSquare.placePiece(pieceToMove.letter()); // Move the piece to the destination square
+        startSquare.removePiece(); // Remove the piece from the source square
     }
 
     public List<Square> getAllPiecesSquares() {
         List<Square> squares = new ArrayList<>();
+        squares.addAll(this.getSquaresAlivePieces(Color.WHITE));
+        squares.addAll(this.getSquaresAlivePieces(Color.BLACK));
+
+        return squares;
+    }
+
+    public List<Square> getSquaresAlivePieces(Color player) {
+        List<Square> squares = new ArrayList<>();
+
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                // Empty tiles
-                Piece piece = this.squares[x][y].piece();
 
-                if (piece != null) {
-                    squares.add(this.squares[x][y]);
-                }
+                Piece piece = this.squares[x][y].piece();
+                if (piece != null && piece.color() == player) squares.add(this.squares[x][y]);
             }
         }
 
@@ -103,35 +105,7 @@ public class Board implements Serializable {
     }
 
     public List<Piece> getAlivePieces(Color player) {
-        List<Piece> pieces = new ArrayList<>();
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                // Empty tiles
-                Piece piece = this.squares[x][y].piece();
-
-                if (piece != null && piece.color() == player) {
-                    pieces.add(piece);
-                }
-            }
-        }
-
-        return pieces;
-    }
-
-    public List<Square> getSquaresAlivePieces(Color player) {
-        List<Square> squares = new ArrayList<>();
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                // Empty tiles
-                Piece piece = this.squares[x][y].piece();
-
-                if (piece != null && piece.color() == player) {
-                    squares.add(this.squares[x][y]);
-                }
-            }
-        }
-
-        return squares;
+        return this.getSquaresAlivePieces(player).stream().map(Square::piece).collect(Collectors.toList());
     }
 
     private void managePawnMove(Tile end, Square startSquare, Square endSquare, Piece pieceToMove, Character promote) {
@@ -140,26 +114,18 @@ public class Board implements Serializable {
             return;
         }
 
-        if (promote == null) {
-            promote = 'q';
-        }
+        if (promote == null) promote = 'q';
 
         if (Math.abs(endSquare.tile().y() - startSquare.tile().y()) == 2) {
             // MOVE -> Pawn moved 2 cases
-            if (pieceToMove.isWhitePiece()) {
-                this.enPassant = Tile.getEnum(end.x(), end.y() - 1);
-            } else {
-                this.enPassant = Tile.getEnum(end.x(), end.y() + 1);
-            }
+            int offset = pieceToMove.isWhitePiece() ? -1 : 1;
+            this.enPassant = Tile.getEnum(end.x(), end.y() + offset);
         } else {
             if (this.enPassant != null) {
-                // MOVE -> Pawn go to the enPassant tile
-                if (this.enPassant == end) {
-                    if (pieceToMove.isWhitePiece()) {
-                        getSquare(Tile.getEnum(end.x(), end.y() - 1)).removePiece();
-                    } else {
-                        getSquare(Tile.getEnum(end.x(), end.y() + 1)).removePiece();
-                    }
+                if (this.enPassant == end) { // MOVE -> Pawn go to the enPassant tile
+
+                    int offset = pieceToMove.isWhitePiece() ? -1 : 1;
+                    getSquare(Tile.getEnum(end.x(), end.y() + offset)).removePiece();
                 } else {
                     // Reset EnPassant
                     this.enPassant = null;
@@ -167,54 +133,34 @@ public class Board implements Serializable {
             }
         }
 
-        if (endSquare.tile().y() == 7 && pieceToMove.isWhitePiece()) {
-            // MOVE -> Promotion for WHITE to the top of the board
-            pieceToMove.promote(Character.toUpperCase(promote));
-        } else if (endSquare.tile().y() == 0 && !pieceToMove.isWhitePiece()) {
-            // MOVE -> Promotion for BLACK to the bottom of the board
-            pieceToMove.promote(Character.toLowerCase(promote));
-        }
+        char charPromote = Character.toUpperCase(promote);
+        if (endSquare.tile().y() == 7 && pieceToMove.isWhitePiece()) pieceToMove.promote(charPromote);
+        if (endSquare.tile().y() == 0 && !pieceToMove.isWhitePiece()) pieceToMove.promote(charPromote);
     }
 
     private void manageRookMove(Square startSquare, Piece pieceToMove) {
-        if (PieceType.ROOK != pieceToMove.type()) {
-            return;
-        }
+        if (PieceType.ROOK != pieceToMove.type()) return;
 
-        if (pieceToMove.isWhitePiece()) {
-            if (startSquare.tile() == Tile.A1) {
-                // MOVE -> WHITE Rook Queen Side has moved from his starting position
-                this.canwQRoque = false;
-            } else if (startSquare.tile() == Tile.H1) {
-                // MOVE -> WHITE Rook King Side has moved from his starting position
-                this.canwKRoque = false;
-            }
-        } else {
-            if (startSquare.tile() == Tile.A8) {
-                // MOVE -> BLACK Rook Queen Side has moved from his starting position
-                this.canbqRoque = false;
-            } else if (startSquare.tile() == Tile.H8) {
-                // MOVE -> BLACK Rook King Side has moved from his starting position
-                this.canbkRoque = false;
-            }
-        }
+        if (pieceToMove.isWhitePiece() && startSquare.tile() == Tile.A1) this.canwQRoque = false;
+        if (pieceToMove.isWhitePiece() && startSquare.tile() == Tile.H1) this.canwKRoque = false;
+        if (!pieceToMove.isWhitePiece() && startSquare.tile() == Tile.A8) this.canbqRoque = false;
+        if (!pieceToMove.isWhitePiece() && startSquare.tile() == Tile.H8) this.canbkRoque = false;
     }
 
     private void manageKingMove(Tile end, Piece pieceToMove) {
-        if (PieceType.KING != pieceToMove.type()) {
-            return;
-        }
+        if (PieceType.KING != pieceToMove.type()) return;
+
         if (pieceToMove.isWhitePiece()) {
             if (end == Tile.C1 && this.canwQRoque) {
                 // MOVE -> Roque WHITE Queen side
-                Piece rookQSide = this.getSquare(Tile.A1).piece();
+                var rookQSide = this.getSquare(Tile.A1).piece();
                 if (rookQSide != null && rookQSide.type() == PieceType.ROOK) {
                     this.getSquare(Tile.A1).removePiece();
                     this.getSquare(Tile.D1).placePiece(rookQSide.letter());
                 }
             } else if (end == Tile.G1 && this.canwKRoque) {
                 // MOVE -> Roque WHITE King side
-                Piece rookKSide = this.getSquare(Tile.H1).piece();
+                var rookKSide = this.getSquare(Tile.H1).piece();
                 if (rookKSide != null && rookKSide.type() == PieceType.ROOK) {
                     this.getSquare(Tile.H1).removePiece();
                     this.getSquare(Tile.F1).placePiece(rookKSide.letter());
@@ -227,14 +173,14 @@ public class Board implements Serializable {
         } else {
             if (end == Tile.C8 && this.canbqRoque) {
                 // MOVE -> Roque BLACK Queen side
-                Piece rookQSide = this.getSquare(Tile.A8).piece();
+                var rookQSide = this.getSquare(Tile.A8).piece();
                 if (rookQSide != null && rookQSide.type() == PieceType.ROOK) {
                     this.getSquare(Tile.A8).removePiece();
                     this.getSquare(Tile.D8).placePiece(rookQSide.letter());
                 }
             } else if (end == Tile.G8 && this.canbkRoque) {
                 // MOVE -> Roque BLACK King side
-                Piece rookKSide = this.getSquare(Tile.H8).piece();
+                var rookKSide = this.getSquare(Tile.H8).piece();
                 if (rookKSide != null && rookKSide.type() == PieceType.ROOK) {
                     this.getSquare(Tile.H8).removePiece();
                     this.getSquare(Tile.F8).placePiece(rookKSide.letter());
@@ -248,20 +194,21 @@ public class Board implements Serializable {
     }
 
     public boolean isKingChecked(Color colorKing) {
-        // Search our king
         return isTileChecked(colorKing, getTileKing(colorKing));
     }
 
     public Tile getTileKing(Color colorKing) {
         Tile kingTile = null;
+
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
-                Piece piece = squares[x][y].piece();
-                if (piece != null && piece.type() == PieceType.KING && piece.color() == colorKing) {
+                var piece = squares[x][y].piece();
+                if (piece != null && piece.type() == PieceType.KING && piece.color().isSameColor(colorKing)) {
                     kingTile = squares[x][y].tile();
                 }
             }
         }
+
         return kingTile;
     }
 
@@ -270,9 +217,10 @@ public class Board implements Serializable {
         boolean isTileChecked = false;
         for (int x = 0; x <= 7; x++) {
             for (int y = 0; y <= 7; y++) {
-                Piece piece = squares[x][y].piece();
+                var piece = squares[x][y].piece();
+
                 if (piece != null && piece.color() != allyColor) {
-                    List<PossibleMove> threatens = piece.getMoves(this, squares[x][y].tile());
+                    var threatens = piece.getMoves(this, squares[x][y].tile());
                     if (threatens.stream().filter(threat -> threat.type() == MoveType.MOVE_WITHOUT_CAPTURING
                             || threat.type() == MoveType.MOVE_WITH_CAPTURING
                             || threat.type() == MoveType.ONLY_THREAT
@@ -283,6 +231,8 @@ public class Board implements Serializable {
                     }
                 }
             }
+
+            if (isTileChecked) break;
         }
 
         return isTileChecked;
