@@ -9,7 +9,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
 @Accessors(fluent = true)
-public class ApplicationSwing extends JFrame {
+public class StartGame extends JFrame {
 
     public static void main(String[] args) {
         AppScreen main = new AppScreen();

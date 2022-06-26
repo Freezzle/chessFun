@@ -24,10 +24,10 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ApplicationServerOnline {
+public class StartOnlineServer {
     private static final List<ServiceThread> playersSearching = new ArrayList<>();
     private static final Map<String, GameInfo> gamesRunning = new HashMap<>();
-    private static final Logger LOG = Logger.getLogger(ApplicationServerOnline.class.getName());
+    private static final Logger LOG = Logger.getLogger(StartOnlineServer.class.getName());
 
     public static void main(String[] args) throws IOException {
         LOG.log(Level.INFO, "Launching the server");
@@ -157,14 +157,14 @@ public class ApplicationServerOnline {
     @Data
     static class GameInfo {
         private boolean gameRunning = false;
-        private ApplicationServerOnline.ServiceThread whitePlayer;
-        private ApplicationServerOnline.ServiceThread blackPlayer;
+        private StartOnlineServer.ServiceThread whitePlayer;
+        private StartOnlineServer.ServiceThread blackPlayer;
 
-        public ApplicationServerOnline.ServiceThread getOpponent(Color colorPlayer) {
+        public StartOnlineServer.ServiceThread getOpponent(Color colorPlayer) {
             return colorPlayer.isWhite() ? blackPlayer : whitePlayer;
         }
 
-        public ApplicationServerOnline.ServiceThread getHimSelf(Color colorPlayer) {
+        public StartOnlineServer.ServiceThread getHimSelf(Color colorPlayer) {
             return colorPlayer.isWhite() ? whitePlayer : blackPlayer;
         }
     }
