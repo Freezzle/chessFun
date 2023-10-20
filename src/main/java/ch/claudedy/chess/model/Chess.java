@@ -39,7 +39,7 @@ public class Chess implements Serializable {
         var statusMove = this.isThatMoveLegal(move); // Check if the move is authorized
 
         if (!statusMove.isOk()) {
-            this.setStatusWaitingNextMove();
+            this.gameStatus = GameStatus.WAITING_MOVE;
             return statusMove;
         }
 
@@ -52,15 +52,9 @@ public class Chess implements Serializable {
 
         this.updateGameStatus();
 
-        if (!this.gameStatus.isGameOver()) this.setStatusWaitingNextMove();
-
         if (SystemSettings.PRINT_CONSOLE) ConsolePrint.execute(this); // DEV MODE to see a board in the console
 
         return statusMove;
-    }
-
-    private void setStatusWaitingNextMove() {
-        this.gameStatus = GameStatus.WAITING_MOVE;
     }
 
     private void addAHistoricBoard() {
@@ -106,6 +100,8 @@ public class Chess implements Serializable {
                 }
             }
         }
+
+        if (!this.gameStatus.isGameOver()) this.gameStatus = GameStatus.WAITING_MOVE;
     }
 
     private boolean existThisPiece(List<Piece> allPieces, PieceType piece) {
